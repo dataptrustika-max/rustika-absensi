@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rustika Consultant - Absensi</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- HTML5 QR Code -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+            /* Latar belakang titik-titik (Polka dot) */
+            background-image: radial-gradient(#cbd5e1 1.2px, transparent 1.2px);
+            background-size: 24px 24px;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Hack untuk menyembunyikan UI bawaan HTML5-QRCode */
+        #reader__dashboard, #reader__header, #reader__status_span, #reader__dashboard_section_csr {
+            display: none !important;
+        }
+        #reader {
+            border: none !important;
+            background: transparent;
+        }
+        #reader video {
+            object-fit: cover !important;
+            width: 100% !important;
+            height: 100% !important;
+            border-radius: 2.5rem;
+        }
+
+        /* Efek Kamera Depan Mirror */
+        #selfie-video {
+            transform: scaleX(-1);
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+            border-radius: 2.5rem;
+        }
+
+        /* Bingkai Scan Custom (Sudut) */
+        .qr-frame {
+            position: absolute;
+            inset: 2rem;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .qr-frame::before, .qr-frame::after, .qr-frame-inner::before, .qr-frame-inner::after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-color: white;
+            border-style: solid;
+        }
+        .qr-frame::before { top: 0; left: 0; border-width: 5px 0 0 5px; border-top-left-radius: 16px; }
+        .qr-frame::after { top: 0; right: 0; border-width: 5px 5px 0 0; border-top-right-radius: 16px; }
+        .qr-frame-inner { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
+        .qr-frame-inner::before { bottom: 0; left: 0; border-width: 0 0 5px 5px; border-bottom-left-radius: 16px; }
+        .qr-frame-inner::after { bottom: 0; right: 0; border-width: 0 5px 5px 0; border-bottom-right-radius: 16px; }
+
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- ========================================== -->
+        <!-- VIEW 1: DASHBOARD UTAMA -->
+        <!-- ========================================== -->
+        <div id="dashboard-view" class="flex flex-col items-center justify-center min-h-screen p-4 sm:p-6 w-full fade-in">
+            <div class="bg-white rounded-[2.5rem] w-full shadow-[0_20px_60px_-15px_rgba(15,23,42,0.12)] p-7 border border-slate-50 relative overflow-hidden">
+                
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-10 relative z-10">
+                    <div class="flex items-center gap-3">
+                        <img src="https://rustikaconsultant.com/wp-content/uploads/2026/03/logo-rustika.png" alt="Logo" class="h-8 w-auto object-contain">
+                        <span class="text-lg font-black text-slate-800 tracking-tight">Rustika Consultant</span>
+                    </div>
+                    <div class="bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100 flex items-center gap-1.5 shadow-sm">
+                        <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <span id="clock-dashboard" class="text-[10px] font-bold text-emerald-700 tracking-wider">00:00</span>
+                    </div>
+                </div>
+
+                <!-- Kartu Selamat Datang -->
+                <div class="bg-slate-50/80 rounded-[2rem] p-6 mb-8 border border-slate-100 shadow-sm relative overflow-hidden">
+                    <div class="inline-flex items-center gap-2 bg-indigo-50 px-3 py-1.5 rounded-xl mb-3 border border-indigo-100/50">
+                        <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <span id="date-display" class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">MEMUAT...</span>
+                    </div>
+                    <p class="text-slate-400 text-xs font-bold tracking-[0.1em] mb-1 uppercase">Selamat Datang</p>
+                    <h2 class="text-2xl font-black text-slate-800 tracking-tight leading-none">Tim Rustika</h2>
+                </div>
+
+                <p class="text-[10px] font-bold text-slate-300 uppercase tracking-[0.2em] mb-4 ml-1">MENU UTAMA</p>
+
+                <!-- Tombol Menu -->
+                <div class="grid grid-cols-2 gap-4 relative z-10">
+                    <!-- Tombol Absensi (Icon Scanner Senyum) -->
+                    <button onclick="openScanner()" class="bg-white border border-slate-100 hover:shadow-xl transition-all shadow-sm rounded-[2rem] p-6 flex flex-col items-center justify-center gap-3 active:scale-95">
+                        <div class="w-16 h-16 rounded-[1.5rem] bg-blue-50 text-blue-500 flex items-center justify-center">
+                            <!-- Icon Face ID -->
+                            <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 7V5a2 2 0 0 1 2-2h2" /><path d="M17 3h2a2 2 0 0 1 2 2v2" /><path d="M21 17v2a2 2 0 0 1-2 2h-2" /><path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+                                <path d="M8 14s1.5 2 4 2 4-2 4-2" /><circle cx="9" cy="10" r="1" fill="currentColor"/><circle cx="15" cy="10" r="1" fill="currentColor"/>
+                            </svg>
+                        </div>
+                        <span class="text-sm font-bold text-slate-700">Absensi</span>
+                    </button>
+
+                    <!-- Tombol Kelola Dashboard -->
+                    <button onclick="openDashboard()" class="bg-white border border-slate-100 hover:shadow-xl transition-all shadow-sm rounded-[2rem] p-6 flex flex-col items-center justify-center gap-3 active:scale-95">
+                        <div class="w-16 h-16 rounded-[1.5rem] bg-indigo-50 text-indigo-500 flex items-center justify-center">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                        </div>
+                        <span class="text-sm font-bold text-slate-700 text-center leading-tight">Kelola<br>Dashboard</span>
+                    </button>
+                </div>
+
+                <div class="flex items-center justify-center gap-1.5 mt-8 pt-4 border-t border-slate-50 relative z-10">
+                    <svg class="w-3 h-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <span class="text-[9px] text-slate-300 font-bold uppercase tracking-widest">Hubungi IT Support Jika Kendala</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 2: SCANNER (KAMERA BELAKANG) -->
+        <!-- ========================================== -->
+        <div id="scanner-view" class="hidden min-h-screen flex flex-col bg-white fade-in">
+            <!-- Header -->
+            <div class="px-6 pt-6 pb-4 flex items-center justify-between bg-white z-50">
+                <button onclick="returnToDashboard()" class="w-12 h-12 flex items-center justify-center border border-slate-100 rounded-2xl shadow-sm active:scale-90">
+                    <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <div class="flex flex-col items-center">
+                    <h3 class="font-black text-slate-800 text-lg">Pindai Identitas</h3>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Arahkan ID Card ke kamera</p>
+                </div>
+                <div class="w-12 h-12 flex items-center justify-center">
+                    <img src="https://rustikaconsultant.com/wp-content/uploads/2026/03/logo-rustika.png" alt="Logo" class="w-8 opacity-20">
+                </div>
+            </div>
+
+            <!-- Kamera Area -->
+            <div class="mx-6 my-4 flex-grow relative bg-slate-900 rounded-[2.5rem] shadow-[0_10px_40px_rgba(0,0,0,0.2)] overflow-hidden flex items-center justify-center">
+                <div id="reader" class="absolute inset-0"></div>
+                
+                <!-- Overlay Sudut Kamera -->
+                <div class="qr-frame">
+                    <div class="qr-frame-inner"></div>
+                </div>
+            </div>
+
+            <!-- Footer Tombol -->
+            <div class="p-6 bg-white">
+                <button class="w-full bg-blue-600 text-white font-bold py-4 rounded-[1.5rem] shadow-[0_10px_20px_-5px_rgba(37,99,235,0.4)] flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    Menyiapkan Kamera...
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 3: VERIFIKASI WAJAH (KAMERA DEPAN) -->
+        <!-- ========================================== -->
+        <div id="selfie-view" class="hidden min-h-screen flex flex-col bg-white fade-in">
+            <div class="px-6 pt-6 pb-4 flex items-center justify-between bg-white z-50">
+                <button onclick="returnToDashboard()" class="w-12 h-12 flex items-center justify-center border border-slate-100 rounded-2xl shadow-sm active:scale-90">
+                    <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <div class="flex flex-col items-center">
+                    <h3 class="font-black text-slate-800 text-lg">Verifikasi Wajah</h3>
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Karyawan: <span id="display-scanned-id" class="text-blue-600">...</span></p>
+                </div>
+                <div class="w-12 h-12"></div>
+            </div>
+
+            <!-- Area Kamera Depan -->
+            <div class="mx-6 my-4 flex-grow relative bg-slate-900 rounded-[2.5rem] shadow-[0_10px_40px_rgba(0,0,0,0.2)] overflow-hidden">
+                <video id="selfie-video" autoplay playsinline></video>
+                
+                <!-- Overlay Bingkai Putus-putus -->
+                <div class="absolute inset-8 border-[4px] border-white/50 border-dashed rounded-[3rem] pointer-events-none"></div>
+
+                <!-- Layar Loading Upload -->
+                <div id="loadingOverlay" class="absolute inset-0 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center hidden z-50">
+                    <div class="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mb-4"></div>
+                    <p class="text-white font-bold tracking-[0.2em] text-xs animate-pulse uppercase">Mengirim Data...</p>
+                </div>
+            </div>
+
+            <!-- Tombol Aksi -->
+            <div class="p-6 bg-white grid grid-cols-2 gap-4">
+                <button onclick="returnToDashboard()" class="w-full bg-white border-2 border-slate-100 text-slate-700 font-bold py-4 rounded-[1.5rem] shadow-sm active:scale-95 transition-transform">
+                    Batal
+                </button>
+                <button onclick="takeSelfieAndSubmit()" class="w-full bg-[#10b981] text-white font-bold py-4 rounded-[1.5rem] shadow-[0_10px_20px_-5px_rgba(16,185,129,0.4)] flex items-center justify-center gap-2 active:scale-95 transition-transform">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    Konfirmasi
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 4: BERHASIL -->
+        <!-- ========================================== -->
+        <div id="success-view" class="hidden min-h-screen flex flex-col bg-white fade-in relative">
+            <div class="px-6 pt-8 pb-4 flex items-center justify-between bg-white">
+                <div class="flex items-center gap-3">
+                    <img src="https://rustikaconsultant.com/wp-content/uploads/2026/03/logo-rustika.png" alt="Logo" class="h-6 w-auto">
+                    <span class="text-sm font-bold text-slate-800">Rustika Consultant</span>
+                </div>
+                <div class="bg-slate-50 px-3 py-1 rounded-full text-[10px] font-bold text-slate-500" id="clock-success">00:00</div>
+            </div>
+
+            <div class="flex-grow flex flex-col items-center justify-center p-8 text-center -mt-10">
+                <!-- Icon Centang Hijau Besar -->
+                <div class="w-28 h-28 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
+                    <div class="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-emerald-200">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                </div>
+                
+                <h2 class="text-3xl font-black text-slate-800 mb-3 tracking-tight">Berhasil!</h2>
+                <p id="success-message-text" class="text-slate-500 font-medium">Absensi Berhasil! Hati-hati di jalan.</p>
+            </div>
+
+            <div class="p-6 w-full max-w-sm mx-auto mb-4">
+                <button onclick="returnToDashboard()" class="w-full bg-slate-800 text-white font-bold py-4 rounded-[1.5rem] shadow-xl active:scale-95 transition-transform text-lg">
+                    Kembali ke Beranda
+                </button>
+            </div>
+        </div>
+
+        <!-- Canvas Tersembunyi -->
+        <canvas id="canvas" style="display:none;"></canvas>
+    </div>
+
+    <script>
+        // URL BARU ANDA TELAH DIMASUKKAN DI SINI
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw2N0zyGqj_cnis1PT1yRRC8-5fz623Op6v5hoBwtxXgBTnpdOMClbiY6LhZeX1AxpofA/exec';
+        
+        const API_KEY = "AIzaSyCXDTjmzqVxRaS2FAfp_2jpakA7S1330Js";
+        
+        let html5QrCode;
+        let isProcessing = false;
+        let scannedId = "";
+        let selfieStream = null;
+
+        // --- UPDATE WAKTU ---
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { timeZone: 'Asia/Makassar', hour12: false, hour: '2-digit', minute: '2-digit' });
+            document.getElementById('clock-dashboard').textContent = timeStr + " WITA";
+            document.getElementById('clock-success').textContent = timeStr;
+            
+            const days = ['MINGGU', 'SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU'];
+            const months = ['JANUARI', 'FEBRUARI', 'MARET', 'APRIL', 'MEI', 'JUNI', 'JULI', 'AGUSTUS', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DESEMBER'];
+            document.getElementById('date-display').textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // --- SWITCH TAMPILAN ---
+        function showView(viewId) {
+            ['dashboard-view', 'scanner-view', 'selfie-view', 'success-view'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(viewId).classList.remove('hidden');
+        }
+
+        // --- BUKA LINK ERP ---
+        function openDashboard() {
+            window.open('https://rustika-erp.vercel.app', '_blank');
+        }
+
+        // --- KEMBALI KE MENU AWAL ---
+        async function returnToDashboard() {
+            if (html5QrCode && html5QrCode.isScanning) { await html5QrCode.stop(); }
+            if (selfieStream) { selfieStream.getTracks().forEach(track => track.stop()); selfieStream = null; }
+            isProcessing = false;
+            showView('dashboard-view');
+        }
+
+        // --- LANGKAH 1: BUKA KAMERA BELAKANG (SCAN QR) ---
+        async function openScanner() {
+            showView('scanner-view');
+            html5QrCode = new Html5Qrcode("reader");
+            const config = { fps: 15, qrbox: { width: 250, height: 250 } };
+            
+            try {
+                await html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess);
+            } catch (err) {
+                Swal.fire('Kamera Gagal', 'Harap berikan izin akses kamera.', 'error');
+                returnToDashboard();
+            }
+        }
+
+        function onScanSuccess(decodedText) {
+            scannedId = decodedText.trim();
+            document.getElementById('display-scanned-id').textContent = scannedId;
+            startSelfieCamera();
+        }
+
+        // --- LANGKAH 2: BUKA KAMERA DEPAN (SELFIE) ---
+        async function startSelfieCamera() {
+            if (html5QrCode && html5QrCode.isScanning) { await html5QrCode.stop(); }
+            showView('selfie-view');
+
+            try {
+                selfieStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+                document.getElementById('selfie-video').srcObject = selfieStream;
+            } catch (err) {
+                Swal.fire('Gagal', 'Kamera depan tidak dapat diakses.', 'error');
+                returnToDashboard();
+            }
+        }
+
+        // --- LANGKAH 3: AMBIL FOTO & KIRIM DATA ---
+        async function takeSelfieAndSubmit() {
+            if (isProcessing) return;
+            isProcessing = true;
+            
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+
+            // Ambil gambar dari video
+            const video = document.getElementById('selfie-video');
+            const canvas = document.getElementById('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            
+            // Draw normal (tidak dibalik, agar foto tersimpan dengan orientasi asli)
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const photoData = canvas.toDataURL('image/jpeg', 0.6);
+            
+            const payload = { apiKey: API_KEY, id: scannedId, photo: photoData };
+
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                document.getElementById('loadingOverlay').classList.add('hidden');
+
+                if (result.status === "success") {
+                    // Tampilkan Halaman Sukses
+                    if (selfieStream) { selfieStream.getTracks().forEach(track => track.stop()); }
+                    document.getElementById('success-message-text').textContent = result.message;
+                    showView('success-view');
+                } else {
+                    Swal.fire('Peringatan', result.message, 'warning');
+                    isProcessing = false;
+                }
+            } catch (error) {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                Swal.fire('Koneksi Error', 'Pastikan internet lancar.', 'error');
+                isProcessing = false;
+            }
+        }
+    </script>
+</body>
+</html>
