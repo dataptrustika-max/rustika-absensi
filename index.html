@@ -198,25 +198,50 @@
                     <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                 </button>
                 <div class="flex flex-col items-center">
-                    <h3 class="font-black text-slate-800 text-lg">Pindai Identitas</h3>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Arahkan ID Card ke kamera</p>
+                    <h3 class="font-black text-slate-800 text-lg">Scan ID Card</h3>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ARAHKAN KE KAMERA</p>
                 </div>
                 <div class="w-12 h-12 flex items-center justify-center">
                     <img src="https://rustikaconsultant.com/wp-content/uploads/2026/03/logo-rustika.png" alt="Logo" class="w-8 opacity-20">
                 </div>
             </div>
 
-            <div class="mx-6 my-4 flex-grow relative bg-slate-900 rounded-[2.5rem] shadow-[0_10px_40px_rgba(0,0,0,0.2)] overflow-hidden flex items-center justify-center">
+            <!-- Kamera Area -->
+            <div class="mx-4 my-4 flex-grow relative bg-slate-900 rounded-3xl shadow-inner overflow-hidden flex items-center justify-center">
                 <div id="reader" class="absolute inset-0"></div>
                 <div class="qr-frame"><div class="qr-frame-inner"></div></div>
+                
+                <!-- Loading Overlay Camera -->
+                <div id="camera-loading" class="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center z-20">
+                    <svg class="w-8 h-8 text-amber-500 animate-spin mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    <span class="text-white text-xs font-bold tracking-widest uppercase">Menyiapkan Kamera...</span>
+                </div>
             </div>
 
-            <div class="p-6 bg-transparent">
-                <!-- Tombol disesuaikan warna amber -->
-                <button class="w-full bg-[#f59e0b] text-slate-900 font-bold py-4 rounded-[1.5rem] shadow-[0_10px_20px_-5px_rgba(245,158,11,0.4)] flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                    Menyiapkan Kamera...
-                </button>
+            <!-- Bottom Panel Sesuai Referensi Gambar -->
+            <div class="bg-white rounded-t-[2rem] shadow-[0_-10px_30px_rgba(0,0,0,0.08)] w-full flex flex-col border-t border-slate-100 overflow-hidden">
+                <div class="p-6 pb-5">
+                    <h4 class="font-bold text-slate-800 text-sm mb-1">Scan ID Card atau Gunakan ID</h4>
+                    <p class="text-[11px] text-slate-500 mb-4">Direkomendasikan melalui scan ID Card</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="manual-id-input" placeholder="Masukkan ID Manual" class="flex-grow px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#003366] focus:ring-1 focus:ring-[#003366] bg-slate-50 font-medium uppercase">
+                        <button onclick="submitManualId()" class="bg-[#003366] hover:bg-[#002244] text-white font-bold px-6 py-3 rounded-xl shadow-md active:scale-95 transition-all text-sm">
+                            Submit
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Indikator In / Out (Otomatis) -->
+                <div class="bg-[#003366] w-full py-4 px-10 flex justify-center gap-16 items-center">
+                    <div class="flex items-center gap-3">
+                        <div id="radio-in" class="w-5 h-5 rounded-full border-2 border-white flex items-center justify-center transition-all duration-300"></div>
+                        <span class="text-white font-semibold text-sm tracking-wide">In</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div id="radio-out" class="w-5 h-5 rounded-full border-2 border-white flex items-center justify-center transition-all duration-300"></div>
+                        <span class="text-white font-semibold text-sm tracking-wide">Out</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -299,10 +324,31 @@
         let scannedId = "";
         let selfieStream = null;
 
+        // --- UPDATE STATUS IN/OUT (OTOMATIS BERDASARKAN WAKTU) ---
+        function updateInOutStatus() {
+            const now = new Date();
+            const timeString = now.toLocaleString('en-US', { timeZone: 'Asia/Makassar', hour12: false, hour: '2-digit' });
+            const hour = parseInt(timeString, 10);
+
+            const radioIn = document.getElementById('radio-in');
+            const radioOut = document.getElementById('radio-out');
+
+            if (radioIn && radioOut) {
+                if (hour < 15) { // Absen Masuk (Di bawah jam 15:00)
+                    radioIn.className = "w-5 h-5 rounded-full bg-white flex items-center justify-center transition-all duration-300 shadow-[0_0_8px_rgba(255,255,255,0.6)]";
+                    radioOut.className = "w-5 h-5 rounded-full border-2 border-white/40 flex items-center justify-center transition-all duration-300";
+                } else { // Absen Pulang (Jam 15:00 ke atas)
+                    radioIn.className = "w-5 h-5 rounded-full border-2 border-white/40 flex items-center justify-center transition-all duration-300";
+                    radioOut.className = "w-5 h-5 rounded-full bg-white flex items-center justify-center transition-all duration-300 shadow-[0_0_8px_rgba(255,255,255,0.6)]";
+                }
+            }
+        }
+
         function updateTime() {
             const now = new Date();
             const timeStr = now.toLocaleTimeString('en-US', { timeZone: 'Asia/Makassar', hour12: false, hour: '2-digit', minute: '2-digit' });
             if(document.getElementById('clock-success')) document.getElementById('clock-success').textContent = timeStr;
+            updateInOutStatus(); // Perbarui indikator In/Out setiap detik
         }
         setInterval(updateTime, 1000);
         updateTime();
@@ -348,12 +394,17 @@
 
         async function openScanner() {
             showView('scanner-view');
+            document.getElementById('camera-loading').classList.remove('hidden');
+            document.getElementById('manual-id-input').value = ""; // Reset input
+            
             html5QrCode = new Html5Qrcode("reader");
             const config = { fps: 15, qrbox: { width: 250, height: 250 } };
             
             try {
                 await html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess);
+                document.getElementById('camera-loading').classList.add('hidden');
             } catch (err) {
+                document.getElementById('camera-loading').classList.add('hidden');
                 Swal.fire('Kamera Gagal', 'Harap berikan izin akses kamera.', 'error');
                 returnToDashboard();
             }
@@ -362,6 +413,24 @@
         function onScanSuccess(decodedText) {
             scannedId = decodedText.trim();
             document.getElementById('display-scanned-id').textContent = scannedId;
+            startSelfieCamera();
+        }
+
+        // --- SUBMIT ID MANUAL (PENGGANTI SCAN) ---
+        function submitManualId() {
+            const inputId = document.getElementById('manual-id-input').value.trim().toUpperCase();
+            if(!inputId) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Perhatian',
+                    text: 'Harap masukkan ID Karyawan terlebih dahulu!',
+                    confirmButtonColor: '#003366'
+                });
+                return;
+            }
+            scannedId = inputId;
+            document.getElementById('display-scanned-id').textContent = scannedId;
+            document.getElementById('manual-id-input').value = "";
             startSelfieCamera();
         }
 
