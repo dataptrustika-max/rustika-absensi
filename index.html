@@ -1,416 +1,585 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rustika Consultant - Absensi</title>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- HTML5 QR Code -->
-    <script src="https://unpkg.com/html5-qrcode"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Core Project Management Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+  
+  :root {
+    --bg: #f4f7f9;        
+    --bg2: #ffffff;       
+    --bg3: #f8fafc;       
+    --border: #e2e8f0;    
+    --border2: #cbd5e1;   
+    --text: #1e293b;      
+    --text2: #64748b;     
+    --text3: #94a3b8;     
+    --accent: #2563eb;    
+  }
+  
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body { 
+    background: var(--bg); 
+    color: var(--text); 
+    font-family: 'DM Sans', sans-serif; 
+    min-height: 100vh; 
+    -webkit-font-smoothing: antialiased;
+  }
+  
+  .topbar {
+    background: var(--bg2); 
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px; 
+    display: flex; 
+    align-items: center;
+    justify-content: space-between; 
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
+  
+  .topbar-left { display: flex; align-items: center; gap: 14px; }
+  
+  .logo { 
+    width: 38px; height: 38px; border-radius: 10px;
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700; color: #fff; 
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+  }
+  
+  .topbar h1 { font-size: 16px; font-weight: 600; color: var(--text); letter-spacing: -0.01em;}
+  .topbar p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  
+  .btn-refresh {
+    font-size: 13px; font-weight: 500; padding: 8px 18px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--bg2);
+    color: var(--text2); cursor: pointer; font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+  .btn-refresh:hover { 
+    background: var(--bg3); color: var(--text); border-color: var(--border2); 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  
+  .main { padding: 32px; max-width: 1400px; margin: 0 auto; }
+  
+  .kpi-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 16px; margin-bottom: 24px; }
+  @media(max-width:900px){ .kpi-grid { grid-template-columns: repeat(3,1fr); } }
+  @media(max-width:500px){ .kpi-grid { grid-template-columns: repeat(2,1fr); } }
+  
+  .kpi {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px; position: relative; overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .kpi:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 12px rgba(0,0,0,0.04);
+  }
+  .kpi::after {
+    content:''; position: absolute; bottom:0; left:0; right:0;
+    height: 3px; background: var(--kc, var(--text3));
+  }
+  .kpi-label { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .kpi-value { font-size: 32px; font-weight: 700; color: var(--text); letter-spacing: -0.03em; }
+  
+  .charts-grid { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 20px; margin-bottom: 24px; }
+  @media(max-width:800px){ .charts-grid { grid-template-columns: 1fr; } }
+  
+  .card, .table-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    display: flex; flex-direction: column;
+  }
+  
+  .card-title { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 20px; }
+  
+  .chart-wrap { position: relative; flex-grow: 1; }
+  
+  .legend { 
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; 
+    justify-content: center; 
+  }
+  .li { 
+    display: flex; align-items: center; justify-content: center; gap: 6px; 
+    font-size: 11px; font-weight: 600; color: var(--text2); 
+    background: var(--bg3); border: 1px solid var(--border); 
+    padding: 6px 8px; border-radius: 20px; 
+    transition: all 0.2s;
+    width: calc(33.333% - 6px);
+    text-align: center;
+  }
+  .li:hover { border-color: var(--border2); color: var(--text); background: var(--bg2); }
+  .ld { 
+    width: 10px; height: 10px; border-radius: 50%; 
+    flex-shrink: 0; 
+  }
+  
+  .table-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 16px; }
+  
+  .search-input {
+    padding: 8px 16px 8px 36px; border-radius: 20px;
+    border: 1px solid var(--border); 
+    background: var(--bg3) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>') no-repeat 14px center;
+    color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 12px;
+    width: 220px; transition: all 0.2s;
+  }
+  .search-input:focus {
+    outline: none; border-color: var(--accent); background-color: var(--bg2);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1); width: 280px;
+  }
+  .search-input::placeholder { color: var(--text3); }
 
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+  .fb {
+    font-size: 12px; font-weight: 500; padding: 6px 14px; border-radius: 24px;
+    border: 1px solid var(--border); background: var(--bg2);
+    color: var(--text2); cursor: pointer; font-family: 'DM Sans', sans-serif; 
+    transition: all 0.2s ease;
+  }
+  .fb:hover { border-color: var(--border2); color: var(--text); background: var(--bg3); }
+  .fb.on { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 2px 6px rgba(37,99,235,0.2); }
+  
+  /* --- DESAIN BARU: GRID KARTU (CARD GRID) --- */
+  .grid-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 Kolom seperti permintaan Anda */
+    gap: 16px;
+    padding: 10px 0;
+    min-height: 250px;
+  }
+  @media(max-width:1100px) { .grid-cards { grid-template-columns: repeat(3, 1fr); } }
+  @media(max-width:800px) { .grid-cards { grid-template-columns: repeat(2, 1fr); } }
+  @media(max-width:550px) { .grid-cards { grid-template-columns: 1fr; } }
 
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #f8fafc;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
-        }
+  .project-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 30px 16px 16px 16px; /* Spasi atas dilebarkan sedikit agar teks tidak nabrak tombol file */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    position: relative;
+  }
+  .project-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 20px rgba(0,0,0,0.05);
+    border-color: var(--border2);
+  }
+  
+  .card-top-right {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 28px; height: 28px;
+    background: #eff6ff; color: #2563eb;
+    border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    text-decoration: none; font-size: 13px; font-weight: bold;
+    transition: all 0.2s;
+  }
+  .card-top-right:hover { background: #2563eb; color: #fff; }
+  
+  .card-proj-name {
+    font-size: 13px; font-weight: 700; color: var(--text);
+    margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;
+  }
+  
+  .card-client {
+    font-size: 10px; font-weight: 600; color: var(--text2);
+    background: var(--bg3); padding: 4px 10px; border-radius: 12px;
+    margin-bottom: 12px; letter-spacing: 0.5px;
+  }
+  
+  .card-notes {
+    font-size: 11px; color: var(--text2); margin-bottom: 20px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden; flex-grow: 1; line-height: 1.5;
+  }
+  
+  .card-stats { display: flex; width: 100%; gap: 10px; }
+  .stat-box {
+    flex: 1; border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 4px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; background: var(--bg3);
+  }
+  .stat-val { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+  .stat-label { font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  /* ------------------------------------------- */
 
-        .bg-polka {
-            background-image: radial-gradient(#cbd5e1 1.2px, transparent 1.2px);
-            background-size: 24px 24px;
-        }
+  /* Desain Paginasi */
+  .pagination-container {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 10px; padding-top: 16px; border-top: 1px solid var(--border);
+    flex-wrap: wrap; gap: 12px;
+  }
+  .page-info { font-size: 12px; color: var(--text2); }
+  .page-info b { color: var(--text); }
+  .pagination { display: flex; gap: 6px; }
+  .page-btn {
+    width: 32px; height: 32px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--bg2);
+    color: var(--text2); cursor: pointer; font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500; display:flex; align-items:center; justify-content:center;
+    transition: all 0.2s;
+  }
+  .page-btn:hover:not(:disabled) { background: var(--bg3); border-color: var(--border2); color: var(--text); }
+  .page-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 2px 4px rgba(37,99,235,0.2); }
+  .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .app-container {
-            width: 100%;
-            max-width: 480px;
-            margin: 0 auto;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        /* Hack untuk menyembunyikan UI bawaan HTML5-QRCode */
-        #reader__dashboard, #reader__header, #reader__status_span, #reader__dashboard_section_csr {
-            display: none !important;
-        }
-        #reader {
-            border: none !important;
-            background: transparent;
-        }
-        #reader video {
-            object-fit: cover !important;
-            width: 100% !important;
-            height: 100% !important;
-            border-radius: 2.5rem;
-        }
-
-        /* Kesan Cermin Kamera Depan */
-        #selfie-video {
-            transform: scaleX(-1);
-            object-fit: cover;
-            width: 100%;
-            height: 100%;
-            border-radius: 2.5rem;
-            background-color: #000;
-        }
-
-        /* Bingkai Imbas Tersuai */
-        .qr-frame {
-            position: absolute;
-            inset: 2rem;
-            pointer-events: none;
-            z-index: 10;
-        }
-        .qr-frame::before, .qr-frame::after, .qr-frame-inner::before, .qr-frame-inner::after {
-            content: '';
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            border-color: white;
-            border-style: solid;
-        }
-        .qr-frame::before { top: 0; left: 0; border-width: 5px 0 0 5px; border-top-left-radius: 16px; }
-        .qr-frame::after { top: 0; right: 0; border-width: 5px 5px 0 0; border-top-right-radius: 16px; }
-        .qr-frame-inner { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
-        .qr-frame-inner::before { bottom: 0; left: 0; border-width: 0 0 5px 5px; border-bottom-left-radius: 16px; }
-        .qr-frame-inner::after { bottom: 0; right: 0; border-width: 0 5px 5px 0; border-bottom-right-radius: 16px; }
-
-        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
+  .msg { text-align: center; padding: 40px; color: var(--text2); font-size: 14px; font-weight: 500; grid-column: 1 / -1;}
+  .spinner { 
+    width: 24px; height: 24px; border: 3px solid var(--border); 
+    border-top-color: var(--accent); border-radius: 50%; 
+    animation: spin .8s linear infinite; margin: 0 auto 16px; 
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
 </head>
 <body>
 
-    <div class="app-container">
-
-        <!-- ========================================== -->
-        <!-- PAPARAN 1: PENGIMBAS QR (SCANNER LANGSUNG) -->
-        <!-- ========================================== -->
-        <div id="scanner-view" class="min-h-screen flex flex-col bg-white fade-in bg-polka">
-            <div class="px-6 pt-6 pb-4 flex items-center justify-between bg-white z-50 shadow-sm border-b border-slate-100">
-                <div class="w-12 h-12"></div>
-                <div class="flex flex-col items-center">
-                    <h3 class="font-black text-slate-800 text-lg">Scan ID Card</h3>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Arahkan ke Kamera</p>
-                </div>
-                <div class="w-12 h-12 flex items-center justify-center">
-                    <img src="https://rustikaconsultant.com/wp-content/uploads/2026/03/logo-rustika.png" alt="Logo" class="w-8 opacity-20">
-                </div>
-            </div>
-
-            <!-- Kamera Area -->
-            <div class="mx-4 my-4 flex-grow relative bg-slate-900 rounded-[2rem] shadow-inner overflow-hidden flex items-center justify-center border-[6px] border-slate-100">
-                <div id="reader" class="absolute inset-0"></div>
-                <div class="qr-frame"><div class="qr-frame-inner"></div></div>
-                
-                <!-- Loading Overlay Camera -->
-                <div id="camera-loading" class="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center z-20">
-                    <svg class="w-8 h-8 text-blue-500 animate-spin mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                    <span class="text-white text-xs font-bold tracking-widest uppercase">Menyiapkan Kamera...</span>
-                </div>
-            </div>
-
-            <!-- Bottom Panel Sesuai Referensi Gambar -->
-            <div class="bg-white rounded-t-[2rem] shadow-[0_-10px_30px_rgba(0,0,0,0.08)] w-full flex flex-col border-t border-slate-100 overflow-hidden">
-                <div class="p-6 pb-5">
-                    <h4 class="font-bold text-slate-800 text-sm mb-1">Scan ID Card atau Gunakan ID</h4>
-                    <p class="text-[11px] text-slate-500 mb-4">Direkomendasikan melalui scan ID Card</p>
-                    <div class="flex gap-2">
-                        <input type="text" id="manual-id-input" placeholder="Masukkan ID Manual" class="flex-grow px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#0052cc] focus:ring-1 focus:ring-[#0052cc] bg-slate-50 font-medium uppercase">
-                        <button onclick="submitManualId()" class="bg-[#0052cc] hover:bg-[#003366] text-white font-bold px-6 py-3 rounded-xl shadow-md active:scale-95 transition-all text-sm">
-                            Submit
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Indikator In / Out (Otomatis) -->
-                <div class="bg-[#0052cc] w-full py-4 px-10 flex justify-center gap-16 items-center">
-                    <div class="flex items-center gap-3">
-                        <div id="radio-in" class="w-5 h-5 rounded-full border-2 border-white flex items-center justify-center transition-all duration-300"></div>
-                        <span class="text-white font-semibold text-sm tracking-wide">In</span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div id="radio-out" class="w-5 h-5 rounded-full border-2 border-white flex items-center justify-center transition-all duration-300"></div>
-                        <span class="text-white font-semibold text-sm tracking-wide">Out</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- PAPARAN 2: KAMERA SWAFOTO (SELFIE) -->
-        <!-- ========================================== -->
-        <div id="selfie-view" class="hidden min-h-screen flex flex-col bg-white fade-in bg-polka">
-            <div class="px-6 pt-6 pb-4 flex items-center justify-between bg-white z-50 shadow-sm border-b border-slate-100">
-                <button onclick="resetToScanner()" class="w-12 h-12 flex items-center justify-center bg-slate-50 border border-slate-100 rounded-2xl shadow-sm active:scale-90">
-                    <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                </button>
-                <div class="flex flex-col items-center">
-                    <h3 class="font-black text-slate-800 text-lg">Verifikasi Wajah</h3>
-                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Karyawan: <span id="display-scanned-id" class="text-[#0052cc]">...</span></p>
-                </div>
-                <div class="w-12 h-12"></div>
-            </div>
-
-            <div class="mx-6 my-4 flex-grow relative bg-slate-900 rounded-[2.5rem] shadow-[0_10px_40px_rgba(0,0,0,0.2)] overflow-hidden">
-                <video id="selfie-video" autoplay playsinline></video>
-                <div class="absolute inset-8 border-[4px] border-white/50 border-dashed rounded-[3rem] pointer-events-none"></div>
-
-                <div id="loadingOverlay" class="absolute inset-0 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center hidden z-50">
-                    <div class="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mb-4"></div>
-                    <p class="text-white font-bold tracking-[0.2em] text-xs animate-pulse uppercase">Mengirim Data...</p>
-                </div>
-            </div>
-
-            <div class="p-6 bg-transparent grid grid-cols-2 gap-4">
-                <button onclick="resetToScanner()" class="w-full bg-white border-2 border-slate-200 text-slate-600 font-bold py-4 rounded-[1.5rem] shadow-sm active:scale-95 transition-transform hover:bg-slate-50">
-                    Batal
-                </button>
-                <button onclick="takeSelfieAndSubmit()" class="w-full bg-[#10b981] text-white font-bold py-4 rounded-[1.5rem] shadow-[0_10px_20px_-5px_rgba(16,185,129,0.4)] flex items-center justify-center gap-2 active:scale-95 transition-transform">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    Konfirmasi
-                </button>
-            </div>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- PAPARAN 3: BERJAYA (SUCCESS) -->
-        <!-- ========================================== -->
-        <div id="success-view" class="hidden min-h-screen flex flex-col bg-white fade-in relative bg-polka">
-            <div class="px-6 pt-8 pb-4 flex items-center justify-between bg-transparent">
-                <div class="flex items-center gap-3">
-                    <img src="https://rustikaconsultant.com/wp-content/uploads/2026/03/logo-rustika.png" alt="Logo" class="h-6 w-auto">
-                    <span class="text-sm font-bold text-slate-800">Rustika Consultant</span>
-                </div>
-                <div class="bg-white px-3 py-1 rounded-full text-[10px] font-bold text-slate-500 shadow-sm border border-slate-100" id="clock-success">00:00</div>
-            </div>
-
-            <div class="flex-grow flex flex-col items-center justify-center p-8 text-center -mt-10">
-                <div class="w-28 h-28 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
-                    <div class="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-emerald-200">
-                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                    </div>
-                </div>
-                <h2 class="text-3xl font-black text-slate-800 mb-3 tracking-tight">Berhasil!</h2>
-                <p id="success-message-text" class="text-slate-500 font-medium">Absensi Berhasil! Hati-hati di jalan.</p>
-            </div>
-
-            <div class="p-6 w-full max-w-sm mx-auto mb-4">
-                <button onclick="resetToScanner()" class="w-full bg-[#0052cc] text-white font-bold py-4 rounded-[1.5rem] shadow-xl active:scale-95 transition-transform text-lg hover:bg-[#003366]">
-                    Kembali Ke Awal
-                </button>
-            </div>
-        </div>
-
-        <!-- Kanvas Tersembunyi -->
-        <canvas id="canvas" style="display:none;"></canvas>
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">CP</div>
+    <div>
+      <h1>Core Project Management</h1>
+      <p id="sub">Memuat data...</p>
     </div>
+  </div>
+  <button class="btn-refresh" onclick="init()">↻ Refresh</button>
+</div>
 
-    <script>
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw2N0zyGqj_cnis1PT1yRRC8-5fz623Op6v5hoBwtxXgBTnpdOMClbiY6LhZeX1AxpofA/exec';
-        const API_KEY = "AIzaSyCXDTjmzqVxRaS2FAfp_2jpakA7S1330Js";
+<div class="main">
+  <div class="kpi-grid">
+    <div class="kpi" style="--kc:#3b82f6"><div class="kpi-label">Total Proyek</div><div class="kpi-value" id="k0">—</div></div>
+    <div class="kpi" style="--kc:#0ea5e9"><div class="kpi-label">Active</div><div class="kpi-value" id="k1">—</div></div>
+    <div class="kpi" style="--kc:#8b5cf6"><div class="kpi-label">New</div><div class="kpi-value" id="k2">—</div></div>
+    <div class="kpi" style="--kc:#22c55e"><div class="kpi-label">Complete</div><div class="kpi-value" id="k3">—</div></div>
+    <div class="kpi" style="--kc:#eab308"><div class="kpi-label">On Hold</div><div class="kpi-value" id="k4">—</div></div>
+    <div class="kpi" style="--kc:#64748b"><div class="kpi-label">Closed</div><div class="kpi-value" id="k5">—</div></div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="card">
+      <div class="card-title">Status Proyek</div>
+      <div class="chart-wrap" style="height:190px"><canvas id="cStatus"></canvas></div>
+      <div class="legend" id="lStatus"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Prioritas</div>
+      <div class="chart-wrap" style="height:190px"><canvas id="cPriority"></canvas></div>
+      <div class="legend" id="lPriority"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Proyek per Klien</div>
+      <div class="chart-wrap" id="cWrap" style="height:240px"><canvas id="cClient"></canvas></div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-top">
+      <div style="display:flex; align-items:center; gap: 20px; flex-wrap: wrap;">
+        <div class="card-title" style="margin:0">Daftar Proyek</div>
+        <input type="text" class="search-input" id="searchInput" placeholder="Cari nama, ID, klien..." oninput="handleSearch(this.value)">
+      </div>
+      <div class="filters">
+        <button class="fb on" onclick="setF('all',this)">Semua</button>
+        <button class="fb" onclick="setF('Active',this)">Active</button>
+        <button class="fb" onclick="setF('New',this)">New</button>
+        <button class="fb" onclick="setF('Complete',this)">Complete</button>
+        <button class="fb" onclick="setF('On Hold',this)">On Hold</button>
+        <button class="fb" onclick="setF('Closed',this)">Closed</button>
+      </div>
+    </div>
+    <div id="tbl"><div class="msg"><div class="spinner"></div>Memuat data...</div></div>
+    <!-- Tempat Paginasi Render Otomatis -->
+    <div id="paginationWrap"></div>
+  </div>
+</div>
+
+<script>
+Chart.register(ChartDataLabels);
+
+const SC = {'Active':'#0ea5e9','Closed':'#94a3b8','New':'#8b5cf6','Complete':'#22c55e','On Hold':'#eab308', 'Belum Diset':'#cbd5e1'};
+const PC = {'Hight':'#ef4444','High':'#ef4444','Medium':'#f97316','Low':'#22c55e', 'Belum Diset':'#cbd5e1'};
+let allData=[], charts={}, curF='all';
+
+// Variabel Paginasi & Pencarian
+let currentPage = 1;
+const rowsPerPage = 12; // Ditampilkan kelipatan 4 supaya gridnya pas
+let searchQuery = '';
+
+const API_URL = 'https://script.google.com/macros/s/AKfycbwsrw3LWLuHK8e5X1ABtOqbVaMfGwHFiFoG9kJ3lcNUPte3Ssf88hEwrkJoMBnt1zysTw/exec';
+
+function cnt(d,k){ 
+  return d.reduce((a,r)=>{ 
+    let v=(r[k]||'').trim(); 
+    if(v === '') v = 'Belum Diset'; 
+    a[v]=(a[v]||0)+1; 
+    return a; 
+  },{}); 
+}
+
+function killChart(id){ if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
+
+function makePie(id,labels,data,colors){
+  killChart(id);
+  charts[id] = new Chart(document.getElementById(id),{
+    type: 'pie',
+    data: {
+      labels: labels,
+      datasets: [{ data: data, backgroundColor: colors, borderWidth: 2, borderColor: '#ffffff', hoverOffset: 6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(15, 23, 42, 0.95)', padding: 10,
+          titleFont: { family: "'DM Sans', sans-serif", size: 12 }, bodyFont: { family: "'DM Sans', sans-serif", size: 12 },
+          callbacks: { label: c => ` ${c.label}: ${c.raw} proyek` }
+        },
+        datalabels: {
+          color: '#ffffff', font: { family: "'DM Sans', sans-serif", weight: 'bold', size: 11 },
+          formatter: (value, context) => {
+            let total = context.dataset.data.reduce((a, b) => a + b, 0);
+            return (value / total) * 100 > 5 ? value : '';
+          }
+        }
+      }
+    }
+  });
+}
+
+function makeBar(id,labels,data){
+  killChart(id);
+  const h=Math.max(190,labels.length*38+40);
+  document.getElementById('cWrap').style.height=h+'px';
+  charts[id]=new Chart(document.getElementById(id),{
+    type:'bar',
+    data:{labels,datasets:[{data,backgroundColor:'#3b82f6',borderRadius:6,borderSkipped:false,barThickness:20}]},
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{backgroundColor:'rgba(15, 23, 42, 0.9)',padding:10}, datalabels: { display: false } },
+      scales:{
+        x:{ticks:{font:{size:11},color:'#64748b'},grid:{color:'#f1f5f9', drawBorder: false}},
+        y:{ticks:{font:{size:12, weight:'500'},color:'#475569'},grid:{display:false, drawBorder: false}}
+      }
+    }
+  });
+}
+
+function makeLegend(elId,labels,colors,counts){
+  document.getElementById(elId).innerHTML=labels.map((l,i)=>
+    `<span class="li" title="${l}"><span class="ld" style="background:${colors[i]}"></span><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${l}</span> <strong style="color:#1e293b">${counts[i]}</strong></span>`
+  ).join('');
+}
+
+// Fungsi helper warna untuk label kartu grid
+function getStatusColor(s){ return SC[s] || '#64748b'; }
+function getPriorityColor(p){ return PC[p] || '#64748b'; }
+
+function getVal(obj, possibleKeys) {
+  for(let pk of possibleKeys) {
+    let found = Object.keys(obj).find(k => k.toLowerCase().trim() === pk.toLowerCase());
+    if(found && obj[found] !== '') return obj[found];
+  }
+  return null;
+}
+
+function handleSearch(val) {
+  searchQuery = val.toLowerCase().trim();
+  currentPage = 1; 
+  renderTable();
+}
+
+function goToPage(page) {
+  currentPage = page;
+  renderTable();
+}
+
+function renderTable(){
+  let d = curF==='all' ? allData : allData.filter(r=>(r['Active By Project']||'').trim()===curF);
+  
+  if(searchQuery !== '') {
+    d = d.filter(r => {
+      const keys = Object.keys(r);
+      const id = (r['ID'] || r['Id'] || keys[0] || '').toLowerCase();
+      const projName = (getVal(r, ['Project Name', 'Nama Projek', 'Nama Proyek', 'Project']) || '').toLowerCase();
+      const client = (getVal(r, ['Client', 'Klien']) || '').toLowerCase();
+      return id.includes(searchQuery) || projName.includes(searchQuery) || client.includes(searchQuery);
+    });
+  }
+
+  if(!d.length){ 
+    document.getElementById('tbl').innerHTML='<div class="grid-cards"><div class="msg">Tidak ada data yang cocok dengan pencarian Anda.</div></div>'; 
+    document.getElementById('paginationWrap').innerHTML = '';
+    return; 
+  }
+  
+  const totalPages = Math.ceil(d.length / rowsPerPage);
+  if(currentPage > totalPages) currentPage = totalPages;
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const paginatedData = d.slice(startIndex, startIndex + rowsPerPage);
+
+  // Render Grid Kartu (Card Grid)
+  document.getElementById('tbl').innerHTML=`<div class="grid-cards">
+    ${paginatedData.map(r=>{
+      const keys = Object.keys(r);
+      const id = r['ID'] || r['Id'] || keys[0] || '—';
+      const projName = getVal(r, ['Project Name', 'Nama Projek', 'Nama Proyek', 'Project']) || 'Tidak Ada Nama Proyek';
+      const client = getVal(r, ['Client', 'Klien']) || '—';
+      const status = getVal(r, ['Active By Project', 'Status']) || 'Belum Diset';
+      const priority = getVal(r, ['Active By Status/Priority', 'Prioritas', 'Priority', 'Keutamaan']) || 'Belum Diset';
+      const notes = getVal(r, ['Notes', 'Catatan']) || '—';
+      const url = getVal(r, ['URL File', 'File', 'Link']) || '';
+      
+      const stColor = getStatusColor(status);
+      const prColor = getPriorityColor(priority);
+      const displayPriority = priority === 'Hight' ? 'High' : priority;
+
+      return `
+      <div class="project-card">
+        ${url ? `<a href="${url}" target="_blank" class="card-top-right" title="Buka File">↗</a>` : ''}
+        <div class="card-proj-name" title="${projName}">${projName}</div>
+        <div class="card-client" title="${id}">${client === '—' ? id : client}</div>
+        <div class="card-notes" title="${notes}">${notes}</div>
         
-        let html5QrCode = null;
-        let isProcessing = false;
-        let scannedId = "";
-        let selfieStream = null;
+        <div class="card-stats">
+          <div class="stat-box">
+            <div class="stat-val" style="color: ${stColor}">${status === 'Belum Diset' ? '—' : status}</div>
+            <div class="stat-label">Status</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" style="color: ${prColor}">${displayPriority === 'Belum Diset' ? '—' : displayPriority}</div>
+            <div class="stat-label">Prioritas</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
 
-        // --- UPDATE STATUS IN/OUT (OTOMATIS BERDASARKAN WAKTU) ---
-        function updateInOutStatus() {
-            const now = new Date();
-            const timeString = now.toLocaleString('en-US', { timeZone: 'Asia/Makassar', hour12: false, hour: '2-digit' });
-            const hour = parseInt(timeString, 10);
+  renderPagination(totalPages, d.length, startIndex + 1, Math.min(startIndex + rowsPerPage, d.length));
+}
 
-            const radioIn = document.getElementById('radio-in');
-            const radioOut = document.getElementById('radio-out');
+function renderPagination(totalPages, totalItems, startItem, endItem) {
+  if(totalPages <= 1) {
+    document.getElementById('paginationWrap').innerHTML = '';
+    return;
+  }
 
-            if (radioIn && radioOut) {
-                if (hour < 15) { // Absen Masuk (Di bawah jam 15:00)
-                    radioIn.className = "w-5 h-5 rounded-full bg-white flex items-center justify-center transition-all duration-300 shadow-[0_0_8px_rgba(255,255,255,0.6)]";
-                    radioOut.className = "w-5 h-5 rounded-full border-2 border-white/40 flex items-center justify-center transition-all duration-300";
-                } else { // Absen Pulang (Jam 15:00 ke atas)
-                    radioIn.className = "w-5 h-5 rounded-full border-2 border-white/40 flex items-center justify-center transition-all duration-300";
-                    radioOut.className = "w-5 h-5 rounded-full bg-white flex items-center justify-center transition-all duration-300 shadow-[0_0_8px_rgba(255,255,255,0.6)]";
-                }
-            }
-        }
+  let html = `<div class="pagination-container">
+    <div class="page-info">Menampilkan <b>${startItem}-${endItem}</b> dari <b>${totalItems}</b> proyek</div>
+    <div class="pagination">
+      <button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">❮</button>`;
+  
+  let startPage = Math.max(1, currentPage - 2);
+  let endPage = Math.min(totalPages, currentPage + 2);
+  
+  if(startPage > 1) html += `<button class="page-btn" onclick="goToPage(1)">1</button>${startPage > 2 ? '<span style="color:var(--text3); display:flex; align-items:center;">...</span>' : ''}`;
+  
+  for(let i = startPage; i <= endPage; i++) {
+    html += `<button class="page-btn ${currentPage === i ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+  }
 
-        // --- UPDATE WAKTU UI ---
-        function updateTime() {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('en-US', { timeZone: 'Asia/Makassar', hour12: false, hour: '2-digit', minute: '2-digit' });
-            if(document.getElementById('clock-success')) document.getElementById('clock-success').textContent = timeStr;
-            updateInOutStatus(); // Perbarui indikator In/Out setiap detik
-        }
-        setInterval(updateTime, 1000);
+  if(endPage < totalPages) html += `${endPage < totalPages - 1 ? '<span style="color:var(--text3); display:flex; align-items:center;">...</span>' : ''}<button class="page-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
+  
+  html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">❯</button>
+    </div>
+  </div>`;
 
-        function showView(viewId) {
-            ['scanner-view', 'selfie-view', 'success-view'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
-            document.getElementById(viewId).classList.remove('hidden');
-        }
+  document.getElementById('paginationWrap').innerHTML = html;
+}
 
-        // --- KEMBALI / RESET KE SCANNER UTAMA ---
-        async function resetToScanner() {
-            if (html5QrCode && html5QrCode.isScanning) { 
-                await html5QrCode.stop(); 
-                html5QrCode.clear(); 
-            }
-            if (selfieStream) { 
-                selfieStream.getTracks().forEach(track => track.stop()); 
-                selfieStream = null; 
-            }
-            isProcessing = false;
-            document.getElementById('manual-id-input').value = ""; // Kosongkan input manual
-            openScanner(); // Nyalakan ulang kamera scan
-        }
+function setF(val,btn){
+  curF=val;
+  currentPage=1; 
+  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderTable();
+}
 
-        // --- BUKA KAMERA BELAKANG UNTUK SCAN QR ---
-        async function openScanner() {
-            showView('scanner-view');
-            document.getElementById('camera-loading').classList.remove('hidden');
+function renderAll(data){
+  allData=data;
+  const sc=cnt(allData,'Active By Project');
+  document.getElementById('k0').textContent=allData.length;
+  document.getElementById('k1').textContent=sc['Active']||0;
+  document.getElementById('k2').textContent=sc['New']||0;
+  document.getElementById('k3').textContent=sc['Complete']||0;
+  document.getElementById('k4').textContent=sc['On Hold']||0;
+  document.getElementById('k5').textContent=sc['Closed']||0;
 
-            if (!html5QrCode) {
-                html5QrCode = new Html5Qrcode("reader");
-            }
-            
-            const config = { fps: 15, qrbox: { width: 250, height: 250 } };
-            
-            try {
-                if (html5QrCode.isScanning) {
-                    await html5QrCode.stop();
-                }
-                await html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess);
-                document.getElementById('camera-loading').classList.add('hidden');
-            } catch (err) {
-                document.getElementById('camera-loading').classList.add('hidden');
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Izin Kamera Dibutuhkan',
-                    text: 'Sistem membutuhkan akses kamera untuk scan QR. Pastikan Anda telah memberikan izin pada browser Anda.',
-                    confirmButtonText: 'Coba Lagi'
-                });
-            }
-        }
+  const scKeys = Object.keys(sc).sort((a,b) => sc[b] - sc[a]);
+  const sC = scKeys.map(l => SC[l] || '#cbd5e1');
+  const scVals = scKeys.map(l => sc[l]);
+  makePie('cStatus', scKeys, scVals, sC);
+  makeLegend('lStatus', scKeys, sC, scVals);
 
-        function onScanSuccess(decodedText) {
-            scannedId = decodedText.trim();
-            document.getElementById('display-scanned-id').textContent = scannedId;
-            startSelfieCamera();
-        }
+  const pc=cnt(allData,'Active By Status/Priority');
+  const pcKeys = Object.keys(pc).sort((a,b) => pc[b] - pc[a]).map(l=>l==='Hight'?'High':l);
+  const pC = pcKeys.map(l => PC[l] || '#cbd5e1');
+  const pcVals = Object.keys(pc).sort((a,b) => pc[b] - pc[a]).map(l => pc[l]);
+  makePie('cPriority', pcKeys, pcVals, pC);
+  makeLegend('lPriority', pcKeys, pC, pcVals);
 
-        // --- SUBMIT ID MANUAL (PENGGANTI SCAN) ---
-        function submitManualId() {
-            const inputId = document.getElementById('manual-id-input').value.trim().toUpperCase();
-            if(!inputId) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Perhatian',
-                    text: 'Harap masukkan ID Karyawan terlebih dahulu!',
-                    confirmButtonColor: '#0052cc'
-                });
-                return;
-            }
-            scannedId = inputId;
-            document.getElementById('display-scanned-id').textContent = scannedId;
-            document.getElementById('manual-id-input').value = "";
-            startSelfieCamera();
-        }
+  const cc=cnt(allData,'Client'); delete cc['Belum Diset']; delete cc[''];
+  const cL=Object.keys(cc).sort((a,b)=>cc[b]-cc[a]).slice(0,8);
+  makeBar('cClient',cL,cL.map(l=>cc[l]));
 
-        // --- BUKA KAMERA DEPAN (SELFIE) ---
-        async function startSelfieCamera() {
-            showView('selfie-view');
+  renderTable();
+  const now=new Date();
+  
+  if(API_URL === '') {
+    document.getElementById('sub').textContent=`[Pratinjau] ${allData.length} proyek — diperbarui ${now.toLocaleTimeString('id-ID')}`;
+  } else {
+    document.getElementById('sub').textContent=`${allData.length} proyek — diperbarui ${now.toLocaleTimeString('id-ID')}`;
+  }
+}
 
-            try {
-                if (html5QrCode && html5QrCode.isScanning) { 
-                    await html5QrCode.stop(); 
-                    html5QrCode.clear();
-                }
-            } catch(e) {
-                console.log("Ralat menghentikan QR:", e);
-            }
+async function init(){
+  document.getElementById('sub').textContent='Memuat data...';
+  document.getElementById('tbl').innerHTML='<div class="msg"><div class="spinner"></div>Memuat data...</div>';
+  
+  if (API_URL === '') {
+    setTimeout(() => {
+      let mockData = [];
+      for(let i=1; i<=12; i++){
+        mockData.push({
+          'ID': 'PRJ-00' + i, 'Project Name': 'Proyek Perluasan Pabrik ' + i, 'Client': i%2==0 ? 'Acme Corp' : 'Globex',
+          'Active By Project': i%3==0 ? 'Closed' : 'Active', 'Active By Status/Priority': i%4==0 ? 'High' : 'Medium',
+          'Notes': 'Ini adalah catatan untuk proyek ini, mencakup tahap operasional dan arsitektur.', 'URL File': 'https://google.com'
+        });
+      }
+      renderAll(mockData);
+    }, 800);
+  } else {
+    try {
+      const response = await fetch(API_URL);
+      if (!response.ok) throw new Error('Gagal menghubungi server data');
+      const data = await response.json();
+      if (data.error) throw new Error(data.error);
+      renderAll(data);
+    } catch (err) {
+      document.getElementById('tbl').innerHTML=`<div class="msg" style="color:#ef4444">Error: ${err.message}</div>`;
+      document.getElementById('sub').textContent='Gagal memuat data';
+    }
+  }
+}
 
-            // Jeda 0.5 detik agar OS melepas kunci kamera belakang
-            setTimeout(async () => {
-                try {
-                    selfieStream = await navigator.mediaDevices.getUserMedia({ 
-                        video: { facingMode: "user" }, 
-                        audio: false 
-                    });
-                    const videoElement = document.getElementById('selfie-video');
-                    videoElement.srcObject = selfieStream;
-                    videoElement.play();
-                } catch (err) {
-                    console.error("Ralat Kamera Depan:", err);
-                    Swal.fire('Gagal', 'Kamera depan tidak dapat diakses.', 'error');
-                    resetToScanner();
-                }
-            }, 500); 
-        }
-
-        // --- AMBIL FOTO & HANTAR DATA ---
-        async function takeSelfieAndSubmit() {
-            if (isProcessing) return;
-            isProcessing = true;
-            
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-
-            const video = document.getElementById('selfie-video');
-            const canvas = document.getElementById('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            
-            // Mirror image sebelum digambar di canvas agar tersimpan dengan orientasi benar
-            ctx.translate(canvas.width, 0); 
-            ctx.scale(-1, 1); 
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const photoData = canvas.toDataURL('image/jpeg', 0.6);
-            
-            const payload = { apiKey: API_KEY, id: scannedId, photo: photoData };
-
-            try {
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-                document.getElementById('loadingOverlay').classList.add('hidden');
-
-                if (result.status === "success") {
-                    if (selfieStream) { selfieStream.getTracks().forEach(track => track.stop()); }
-                    document.getElementById('success-message-text').textContent = result.message;
-                    showView('success-view');
-                } else {
-                    Swal.fire('Peringatan', result.message, 'warning');
-                    isProcessing = false;
-                }
-            } catch (error) {
-                document.getElementById('loadingOverlay').classList.add('hidden');
-                Swal.fire('Koneksi Error', 'Pastikan internet lancar.', 'error');
-                isProcessing = false;
-            }
-        }
-
-        // INIT: Mulai jam & Nyalakan scanner secara otomatis saat web dimuat
-        window.onload = () => {
-            updateTime();
-            openScanner();
-        };
-
-    </script>
+init();
+</script>
 </body>
 </html>
