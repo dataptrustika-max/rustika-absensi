@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ms">
+<html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Papan Pemuka Pengurusan Projek</title>
-<!-- Menggunakan Chart.js untuk grafik 2D yang bersih dan DataLabels untuk nombor di dalam -->
+<title>RUSTIKA MANAGEMENT PROJECT</title>
+<!-- Menggunakan Chart.js untuk grafik 2D yang bersih dan DataLabels untuk angka di dalam -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 <style>
@@ -35,7 +35,7 @@
   .topbar {
     background: var(--bg2); 
     border-bottom: 1px solid var(--border);
-    padding: 16px 32px; 
+    padding: 12px 32px; 
     display: flex; 
     align-items: center;
     justify-content: space-between; 
@@ -43,18 +43,22 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.02);
   }
   
-  .topbar-left { display: flex; align-items: center; gap: 14px; }
+  .topbar-left { display: flex; align-items: center; gap: 16px; }
   
-  .logo { 
-    width: 38px; height: 38px; border-radius: 10px;
-    background: linear-gradient(135deg, #2563eb, #3b82f6);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 15px; font-weight: 700; color: #fff; 
-    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+  /* Gaya untuk Logo Baru */
+  .logo-container {
+    height: 42px;
+    display: flex;
+    align-items: center;
+  }
+  .logo-img {
+    max-height: 100%;
+    width: auto;
+    object-fit: contain;
   }
   
-  .topbar h1 { font-size: 16px; font-weight: 600; color: var(--text); letter-spacing: -0.01em;}
-  .topbar p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .topbar h1 { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: -0.01em; text-transform: uppercase;}
+  .topbar p { font-size: 11px; color: var(--text2); margin-top: 1px; }
   
   .btn-refresh {
     font-size: 13px; font-weight: 500; padding: 8px 18px; border-radius: 8px;
@@ -105,7 +109,6 @@
   
   .chart-wrap { position: relative; flex-grow: 1; }
   
-  /* PENGATURAN KETERANGAN (LEGEND): Maksimum 3 kotak sebaris, rata tengah */
   .legend { 
     display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; 
     justify-content: center; 
@@ -116,7 +119,6 @@
     background: var(--bg3); border: 1px solid var(--border); 
     padding: 6px 8px; border-radius: 20px; 
     transition: all 0.2s;
-    /* Kiraan kelebaran 3 lajur (100% bahagi 3 tolak ruang gap) */
     width: calc(33.333% - 6px);
     text-align: center;
   }
@@ -126,8 +128,21 @@
     flex-shrink: 0; 
   }
   
-  .table-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+  .table-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 16px; }
   
+  .search-input {
+    padding: 8px 16px 8px 36px; border-radius: 20px;
+    border: 1px solid var(--border); 
+    background: var(--bg3) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>') no-repeat 14px center;
+    color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 12px;
+    width: 220px; transition: all 0.2s;
+  }
+  .search-input:focus {
+    outline: none; border-color: var(--accent); background-color: var(--bg2);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1); width: 280px;
+  }
+  .search-input::placeholder { color: var(--text3); }
+
   .filters { display: flex; gap: 8px; flex-wrap: wrap; }
   .fb {
     font-size: 12px; font-weight: 500; padding: 6px 14px; border-radius: 24px;
@@ -138,66 +153,96 @@
   .fb:hover { border-color: var(--border2); color: var(--text); background: var(--bg3); }
   .fb.on { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 2px 6px rgba(37,99,235,0.2); }
   
-  /* REKA BENTUK JADUAL MODEN - GAYA KAD TERAPUNG (FLOATING CARDS) */
-  .tw { overflow-x: auto; padding-bottom: 10px; }
-  table { width: 100%; border-collapse: separate; border-spacing: 0 10px; font-size: 13px; min-width: 800px; background: transparent; }
-  
-  th { 
-    text-align: left; color: var(--text3); font-weight: 600; font-size: 10px; 
-    text-transform: uppercase; letter-spacing: 0.1em; padding: 0 16px 4px 16px; 
-    border-bottom: none; background: transparent; 
+  .grid-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    padding: 10px 0;
+    min-height: 250px;
   }
-  
-  /* Baris direka sebagai kad yang terapung */
-  tr.row-card { 
-    background: var(--bg2); 
-    box-shadow: 0 1px 3px rgba(0,0,0,0.03); 
-    border: 1px solid var(--border);
-    transition: all 0.2s ease; 
-  }
-  tr.row-card:hover { 
-    transform: translateY(-3px); 
-    box-shadow: 0 8px 15px rgba(0,0,0,0.05); 
+  @media(max-width:1100px) { .grid-cards { grid-template-columns: repeat(3, 1fr); } }
+  @media(max-width:800px) { .grid-cards { grid-template-columns: repeat(2, 1fr); } }
+  @media(max-width:550px) { .grid-cards { grid-template-columns: 1fr; } }
+
+  .project-card {
     background: var(--bg2);
-    z-index: 10;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 30px 16px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
     position: relative;
   }
-  
-  td { 
-    padding: 16px; color: var(--text); 
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    vertical-align: middle;
+  .project-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 20px rgba(0,0,0,0.05);
+    border-color: var(--border2);
   }
-  td:first-child { border-left: 1px solid var(--border); border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
-  td:last-child { border-right: 1px solid var(--border); border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
   
-  /* Tipografi Elegan untuk ID dan Nama Projek */
-  .proj-title { font-weight: 600; font-size: 13px; color: var(--text); margin-bottom: 4px; }
-  .proj-id { font-size: 11px; color: var(--text2); font-family: 'DM Mono', monospace; font-weight: 500;}
-  
-  .badge { display: inline-block; font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 600; }
-  .b-active   { background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; } 
-  .b-closed   { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; } 
-  .b-new      { background: #ede9fe; color: #5b21b6; border: 1px solid #ddd6fe; } 
-  .b-complete { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; } 
-  .b-onhold   { background: #fef9c3; color: #854d0e; border: 1px solid #fef08a; } 
-  .b-high     { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; } 
-  .b-medium   { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; } 
-  .b-low      { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; } 
-  .b-empty    { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; } 
-  
-  /* Butang Pautan Fail Moden */
-  a.btn-link { 
-    display: inline-flex; align-items: center; justify-content: center;
-    background: #eff6ff; color: #2563eb; font-weight: 600; font-size: 11px; 
-    text-decoration: none; font-family: 'DM Sans', sans-serif; 
-    padding: 6px 14px; border-radius: 6px; transition: all 0.15s;
-    border: 1px solid #bfdbfe;
+  .card-top-right {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 28px; height: 28px;
+    background: #eff6ff; color: #2563eb;
+    border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    text-decoration: none; font-size: 13px; font-weight: bold;
+    transition: all 0.2s;
   }
-  a.btn-link:hover { background: #2563eb; color: #fff; border-color: #2563eb; }
+  .card-top-right:hover { background: #2563eb; color: #fff; }
   
-  .msg { text-align: center; padding: 40px; color: var(--text2); font-size: 14px; font-weight: 500; }
+  .card-proj-name {
+    font-size: 13px; font-weight: 700; color: var(--text);
+    margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;
+  }
+  
+  .card-client {
+    font-size: 10px; font-weight: 600; color: var(--text2);
+    background: var(--bg3); padding: 4px 10px; border-radius: 12px;
+    margin-bottom: 12px; letter-spacing: 0.5px;
+  }
+  
+  .card-notes {
+    font-size: 11px; color: var(--text2); margin-bottom: 20px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden; flex-grow: 1; line-height: 1.5;
+  }
+  
+  .card-stats { display: flex; width: 100%; gap: 10px; }
+  .stat-box {
+    flex: 1; border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 4px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; background: var(--bg3);
+  }
+  .stat-val { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
+  .stat-label { font-size: 8px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+
+  .pagination-container {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 10px; padding-top: 16px; border-top: 1px solid var(--border);
+    flex-wrap: wrap; gap: 12px;
+  }
+  .page-info { font-size: 12px; color: var(--text2); }
+  .page-info b { color: var(--text); }
+  .pagination { display: flex; gap: 6px; }
+  .page-btn {
+    width: 32px; height: 32px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--bg2);
+    color: var(--text2); cursor: pointer; font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500; display:flex; align-items:center; justify-content:center;
+    transition: all 0.2s;
+  }
+  .page-btn:hover:not(:disabled) { background: var(--bg3); border-color: var(--border2); color: var(--text); }
+  .page-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 2px 4px rgba(37,99,235,0.2); }
+  .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .msg { text-align: center; padding: 40px; color: var(--text2); font-size: 14px; font-weight: 500; grid-column: 1 / -1;}
   .spinner { 
     width: 24px; height: 24px; border: 3px solid var(--border); 
     border-top-color: var(--accent); border-radius: 50%; 
@@ -210,68 +255,78 @@
 
 <div class="topbar">
   <div class="topbar-left">
-    <div class="logo">CP</div>
+    <div class="logo-container">
+      <!-- Image of Rustika Logo -->
+      <img src="https://rustikaconsultant.com/wp-content/uploads/2026/03/logo-rustika.png" alt="RUSTIKA" class="logo-img" onerror="this.src='https://via.placeholder.com/150x50?text=RUSTIKA'">
+    </div>
     <div>
-      <h1>Pengurusan Projek Teras</h1>
-      <p id="sub">Memuatkan data...</p>
+      <h1>RUSTIKA MANAGEMENT PROJECT</h1>
+      <p id="sub">Memuat data...</p>
     </div>
   </div>
-  <button class="btn-refresh" onclick="init()">↻ Muat Semula</button>
+  <button class="btn-refresh" onclick="init()">↻ Refresh</button>
 </div>
 
 <div class="main">
   <div class="kpi-grid">
-    <div class="kpi" style="--kc:#3b82f6"><div class="kpi-label">Jumlah Projek</div><div class="kpi-value" id="k0">—</div></div>
-    <div class="kpi" style="--kc:#0ea5e9"><div class="kpi-label">Aktif</div><div class="kpi-value" id="k1">—</div></div>
-    <div class="kpi" style="--kc:#8b5cf6"><div class="kpi-label">Baru</div><div class="kpi-value" id="k2">—</div></div>
-    <div class="kpi" style="--kc:#22c55e"><div class="kpi-label">Selesai</div><div class="kpi-value" id="k3">—</div></div>
-    <div class="kpi" style="--kc:#eab308"><div class="kpi-label">Ditahan</div><div class="kpi-value" id="k4">—</div></div>
-    <div class="kpi" style="--kc:#64748b"><div class="kpi-label">Ditutup</div><div class="kpi-value" id="k5">—</div></div>
+    <div class="kpi" style="--kc:#3b82f6"><div class="kpi-label">Total Proyek</div><div class="kpi-value" id="k0">—</div></div>
+    <div class="kpi" style="--kc:#0ea5e9"><div class="kpi-label">Active</div><div class="kpi-value" id="k1">—</div></div>
+    <div class="kpi" style="--kc:#8b5cf6"><div class="kpi-label">New</div><div class="kpi-value" id="k2">—</div></div>
+    <div class="kpi" style="--kc:#22c55e"><div class="kpi-label">Complete</div><div class="kpi-value" id="k3">—</div></div>
+    <div class="kpi" style="--kc:#eab308"><div class="kpi-label">On Hold</div><div class="kpi-value" id="k4">—</div></div>
+    <div class="kpi" style="--kc:#64748b"><div class="kpi-label">Closed</div><div class="kpi-value" id="k5">—</div></div>
   </div>
 
   <div class="charts-grid">
     <div class="card">
-      <div class="card-title">Status Projek</div>
-      <!-- Kanvas untuk menyokong Chart.js 2D yang bersih -->
+      <div class="card-title">Status Proyek</div>
       <div class="chart-wrap" style="height:190px"><canvas id="cStatus"></canvas></div>
       <div class="legend" id="lStatus"></div>
     </div>
     <div class="card">
-      <div class="card-title">Keutamaan</div>
+      <div class="card-title">Prioritas</div>
       <div class="chart-wrap" style="height:190px"><canvas id="cPriority"></canvas></div>
       <div class="legend" id="lPriority"></div>
     </div>
     <div class="card">
-      <div class="card-title">Projek Mengikut Klien</div>
+      <div class="card-title">Proyek per Klien</div>
       <div class="chart-wrap" id="cWrap" style="height:240px"><canvas id="cClient"></canvas></div>
     </div>
   </div>
 
   <div class="table-card">
     <div class="table-top">
-      <div class="card-title" style="margin:0">Senarai Projek</div>
+      <div style="display:flex; align-items:center; gap: 20px; flex-wrap: wrap;">
+        <div class="card-title" style="margin:0">Daftar Proyek</div>
+        <input type="text" class="search-input" id="searchInput" placeholder="Cari nama, ID, klien..." oninput="handleSearch(this.value)">
+      </div>
       <div class="filters">
         <button class="fb on" onclick="setF('all',this)">Semua</button>
-        <button class="fb" onclick="setF('Active',this)">Aktif</button>
-        <button class="fb" onclick="setF('New',this)">Baru</button>
-        <button class="fb" onclick="setF('Complete',this)">Selesai</button>
-        <button class="fb" onclick="setF('On Hold',this)">Ditahan</button>
-        <button class="fb" onclick="setF('Closed',this)">Ditutup</button>
+        <button class="fb" onclick="setF('Active',this)">Active</button>
+        <button class="fb" onclick="setF('New',this)">New</button>
+        <button class="fb" onclick="setF('Complete',this)">Complete</button>
+        <button class="fb" onclick="setF('On Hold',this)">On Hold</button>
+        <button class="fb" onclick="setF('Closed',this)">Closed</button>
       </div>
     </div>
-    <div class="tw"><div id="tbl"><div class="msg"><div class="spinner"></div>Memuatkan data...</div></div></div>
+    <div id="tbl"><div class="msg"><div class="spinner"></div>Memuat data...</div></div>
+    <!-- Tempat Paginasi Render Otomatis -->
+    <div id="paginationWrap"></div>
   </div>
 </div>
 
 <script>
-// Daftarkan Plugin DataLabels agar angka muncul di dalam pie chart
 Chart.register(ChartDataLabels);
 
 const SC = {'Active':'#0ea5e9','Closed':'#94a3b8','New':'#8b5cf6','Complete':'#22c55e','On Hold':'#eab308', 'Belum Diset':'#cbd5e1'};
 const PC = {'Hight':'#ef4444','High':'#ef4444','Medium':'#f97316','Low':'#22c55e', 'Belum Diset':'#cbd5e1'};
 let allData=[], charts={}, curF='all';
 
-// === PAUTAN API GOOGLE APPS SCRIPT ANDA ===
+// Variabel Paginasi & Pencarian
+let currentPage = 1;
+const rowsPerPage = 12; // Ditampilkan kelipatan 4 supaya gridnya pas
+let searchQuery = '';
+
 const API_URL = 'https://script.google.com/macros/s/AKfycbwsrw3LWLuHK8e5X1ABtOqbVaMfGwHFiFoG9kJ3lcNUPte3Ssf88hEwrkJoMBnt1zysTw/exec';
 
 function cnt(d,k){ 
@@ -285,43 +340,28 @@ function cnt(d,k){
 
 function killChart(id){ if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
 
-// Paparan Pie Chart 2D yang kemas dengan nombor pintar
 function makePie(id,labels,data,colors){
   killChart(id);
-  
   charts[id] = new Chart(document.getElementById(id),{
     type: 'pie',
     data: {
       labels: labels,
-      datasets: [{
-        data: data,
-        backgroundColor: colors,
-        borderWidth: 2,
-        borderColor: '#ffffff',
-        hoverOffset: 6
-      }]
+      datasets: [{ data: data, backgroundColor: colors, borderWidth: 2, borderColor: '#ffffff', hoverOffset: 6 }]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: 'rgba(15, 23, 42, 0.95)',
-          padding: 10,
-          titleFont: { family: "'DM Sans', sans-serif", size: 12 },
-          bodyFont: { family: "'DM Sans', sans-serif", size: 12 },
-          callbacks: { label: c => ` ${c.label}: ${c.raw} projek` }
+          backgroundColor: 'rgba(15, 23, 42, 0.95)', padding: 10,
+          titleFont: { family: "'DM Sans', sans-serif", size: 12 }, bodyFont: { family: "'DM Sans', sans-serif", size: 12 },
+          callbacks: { label: c => ` ${c.label}: ${c.raw} proyek` }
         },
-        // Konfigurasi nombor di dalam potongan carta
         datalabels: {
-          color: '#ffffff',
-          font: { family: "'DM Sans', sans-serif", weight: 'bold', size: 11 },
+          color: '#ffffff', font: { family: "'DM Sans', sans-serif", weight: 'bold', size: 11 },
           formatter: (value, context) => {
-            // Sembunyikan jika saiz potongan terlalu kecil (< 5%) supaya tidak berserabut
             let total = context.dataset.data.reduce((a, b) => a + b, 0);
-            let percentage = (value / total) * 100;
-            return percentage > 5 ? value : '';
+            return (value / total) * 100 > 5 ? value : '';
           }
         }
       }
@@ -337,14 +377,8 @@ function makeBar(id,labels,data){
     type:'bar',
     data:{labels,datasets:[{data,backgroundColor:'#3b82f6',borderRadius:6,borderSkipped:false,barThickness:20}]},
     options:{
-      indexAxis:'y',
-      responsive:true,
-      maintainAspectRatio:false,
-      plugins:{
-        legend:{display:false},
-        tooltip:{backgroundColor:'rgba(15, 23, 42, 0.9)',padding:10},
-        datalabels: { display: false } // Sembunyikan teks label pada graf bar
-      },
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{backgroundColor:'rgba(15, 23, 42, 0.9)',padding:10}, datalabels: { display: false } },
       scales:{
         x:{ticks:{font:{size:11},color:'#64748b'},grid:{color:'#f1f5f9', drawBorder: false}},
         y:{ticks:{font:{size:12, weight:'500'},color:'#475569'},grid:{display:false, drawBorder: false}}
@@ -355,22 +389,13 @@ function makeBar(id,labels,data){
 
 function makeLegend(elId,labels,colors,counts){
   document.getElementById(elId).innerHTML=labels.map((l,i)=>
-    // Ruang teks dipotong kemas jika terlalu panjang dengan ellipsis
     `<span class="li" title="${l}"><span class="ld" style="background:${colors[i]}"></span><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${l}</span> <strong style="color:#1e293b">${counts[i]}</strong></span>`
   ).join('');
 }
 
-function bS(s){ 
-  const m={'Active':'b-active','Closed':'b-closed','New':'b-new','Complete':'b-complete','On Hold':'b-onhold'}; 
-  return `<span class="badge ${m[s]||'b-empty'}">${s||'Belum Diset'}</span>`; 
-}
-function bP(p){ 
-  const n=p==='Hight'?'High':p; 
-  const m={'High':'b-high','Medium':'b-medium','Low':'b-low'}; 
-  return `<span class="badge ${m[n]||'b-empty'}">${n||'Belum Diset'}</span>`; 
-}
+function getStatusColor(s){ return SC[s] || '#64748b'; }
+function getPriorityColor(p){ return PC[p] || '#64748b'; }
 
-// Fungsi carian bijak untuk mencari lajur tanpa mempedulikan huruf besar/kecil
 function getVal(obj, possibleKeys) {
   for(let pk of possibleKeys) {
     let found = Object.keys(obj).find(k => k.toLowerCase().trim() === pk.toLowerCase());
@@ -379,48 +404,112 @@ function getVal(obj, possibleKeys) {
   return null;
 }
 
+function handleSearch(val) {
+  searchQuery = val.toLowerCase().trim();
+  currentPage = 1; 
+  renderTable();
+}
+
+function goToPage(page) {
+  currentPage = page;
+  renderTable();
+}
+
 function renderTable(){
-  const d=curF==='all'?allData:allData.filter(r=>(r['Active By Project']||'').trim()===curF);
-  if(!d.length){ document.getElementById('tbl').innerHTML='<div class="msg">Tiada data dijumpai.</div>'; return; }
+  let d = curF==='all' ? allData : allData.filter(r=>(r['Active By Project']||'').trim()===curF);
   
-  document.getElementById('tbl').innerHTML=`<table>
-    <thead><tr>
-      <th style="width:35%">Maklumat Projek</th>
-      <th style="width:15%">Klien</th>
-      <th style="width:10%">Status</th>
-      <th style="width:10%">Keutamaan</th>
-      <th style="width:20%">Catatan</th>
-      <th style="width:10%; text-align:center;">Fail</th>
-    </tr></thead>
-    <tbody>${d.map(r=>{
+  if(searchQuery !== '') {
+    d = d.filter(r => {
       const keys = Object.keys(r);
-      
-      // Pembacaan Data Super Pintar - Kalis Perubahan Tajuk Sheet!
+      const id = (r['ID'] || r['Id'] || keys[0] || '').toLowerCase();
+      const projName = (getVal(r, ['Project Name', 'Nama Projek', 'Nama Proyek', 'Project']) || '').toLowerCase();
+      const client = (getVal(r, ['Client', 'Klien']) || '').toLowerCase();
+      return id.includes(searchQuery) || projName.includes(searchQuery) || client.includes(searchQuery);
+    });
+  }
+
+  if(!d.length){ 
+    document.getElementById('tbl').innerHTML='<div class="grid-cards"><div class="msg">Tidak ada data yang cocok dengan pencarian Anda.</div></div>'; 
+    document.getElementById('paginationWrap').innerHTML = '';
+    return; 
+  }
+  
+  const totalPages = Math.ceil(d.length / rowsPerPage);
+  if(currentPage > totalPages) currentPage = totalPages;
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const paginatedData = d.slice(startIndex, startIndex + rowsPerPage);
+
+  document.getElementById('tbl').innerHTML=`<div class="grid-cards">
+    ${paginatedData.map(r=>{
+      const keys = Object.keys(r);
       const id = r['ID'] || r['Id'] || keys[0] || '—';
-      const projName = getVal(r, ['Project Name', 'Nama Projek', 'Nama Proyek', 'Project']) || 'Tiada Nama Projek (Sila periksa tajuk pada Sheet)';
+      const projName = getVal(r, ['Project Name', 'Nama Projek', 'Nama Proyek', 'Project']) || 'Tidak Ada Nama Proyek';
       const client = getVal(r, ['Client', 'Klien']) || '—';
       const status = getVal(r, ['Active By Project', 'Status']) || 'Belum Diset';
       const priority = getVal(r, ['Active By Status/Priority', 'Prioritas', 'Priority', 'Keutamaan']) || 'Belum Diset';
       const notes = getVal(r, ['Notes', 'Catatan']) || '—';
       const url = getVal(r, ['URL File', 'File', 'Link']) || '';
+      
+      const stColor = getStatusColor(status);
+      const prColor = getPriorityColor(priority);
+      const displayPriority = priority === 'Hight' ? 'High' : priority;
 
-      return `<tr class="row-card">
-        <td>
-          <div class="proj-title" title="${projName}">${projName}</div>
-          <div class="proj-id">ID: ${id}</div>
-        </td>
-        <td style="font-weight:500; color:#475569;">${client}</td>
-        <td>${bS(status)}</td>
-        <td>${bP(priority)}</td>
-        <td style="color:#64748b; font-size:12px; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${notes}">${notes}</td>
-        <td style="text-align:center;">${url ? `<a href="${url}" target="_blank" class="btn-link">Buka ↗</a>` : '<span style="color:#cbd5e1; font-size:12px;">—</span>'}</td>
-      </tr>`;
-    }).join('')}</tbody>
-  </table>`;
+      return `
+      <div class="project-card">
+        ${url ? `<a href="${url}" target="_blank" class="card-top-right" title="Buka File">↗</a>` : ''}
+        <div class="card-proj-name" title="${projName}">${projName}</div>
+        <div class="card-client" title="${id}">${client === '—' ? id : client}</div>
+        <div class="card-notes" title="${notes}">${notes}</div>
+        
+        <div class="card-stats">
+          <div class="stat-box">
+            <div class="stat-val" style="color: ${stColor}">${status === 'Belum Diset' ? '—' : status}</div>
+            <div class="stat-label">Status</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" style="color: ${prColor}">${displayPriority === 'Belum Diset' ? '—' : displayPriority}</div>
+            <div class="stat-label">Prioritas</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+
+  renderPagination(totalPages, d.length, startIndex + 1, Math.min(startIndex + rowsPerPage, d.length));
+}
+
+function renderPagination(totalPages, totalItems, startItem, endItem) {
+  if(totalPages <= 1) {
+    document.getElementById('paginationWrap').innerHTML = '';
+    return;
+  }
+
+  let html = `<div class="pagination-container">
+    <div class="page-info">Menampilkan <b>${startItem}-${endItem}</b> dari <b>${totalItems}</b> proyek</div>
+    <div class="pagination">
+      <button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">❮</button>`;
+  
+  let startPage = Math.max(1, currentPage - 2);
+  let endPage = Math.min(totalPages, currentPage + 2);
+  
+  if(startPage > 1) html += `<button class="page-btn" onclick="goToPage(1)">1</button>${startPage > 2 ? '<span style="color:var(--text3); display:flex; align-items:center;">...</span>' : ''}`;
+  
+  for(let i = startPage; i <= endPage; i++) {
+    html += `<button class="page-btn ${currentPage === i ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+  }
+
+  if(endPage < totalPages) html += `${endPage < totalPages - 1 ? '<span style="color:var(--text3); display:flex; align-items:center;">...</span>' : ''}<button class="page-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
+  
+  html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">❯</button>
+    </div>
+  </div>`;
+
+  document.getElementById('paginationWrap').innerHTML = html;
 }
 
 function setF(val,btn){
   curF=val;
+  currentPage=1; 
   document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   renderTable();
@@ -436,7 +525,6 @@ function renderAll(data){
   document.getElementById('k4').textContent=sc['On Hold']||0;
   document.getElementById('k5').textContent=sc['Closed']||0;
 
-  // Menyusun kepingan pie supaya bahagian terbesar diletakkan dengan teratur
   const scKeys = Object.keys(sc).sort((a,b) => sc[b] - sc[a]);
   const sC = scKeys.map(l => SC[l] || '#cbd5e1');
   const scVals = scKeys.map(l => sc[l]);
@@ -458,34 +546,38 @@ function renderAll(data){
   const now=new Date();
   
   if(API_URL === '') {
-    document.getElementById('sub').textContent=`[Pratonton] ${allData.length} projek — dikemas kini ${now.toLocaleTimeString('ms-MY')}`;
+    document.getElementById('sub').textContent=`[Pratinjau] ${allData.length} proyek — diperbarui ${now.toLocaleTimeString('id-ID')}`;
   } else {
-    document.getElementById('sub').textContent=`${allData.length} projek — dikemas kini ${now.toLocaleTimeString('ms-MY')}`;
+    document.getElementById('sub').textContent=`${allData.length} proyek — diperbarui ${now.toLocaleTimeString('id-ID')}`;
   }
 }
 
 async function init(){
-  document.getElementById('sub').textContent='Memuatkan data...';
-  document.getElementById('tbl').innerHTML='<div class="msg"><div class="spinner"></div>Memuatkan data...</div>';
+  document.getElementById('sub').textContent='Memuat data...';
+  document.getElementById('tbl').innerHTML='<div class="msg"><div class="spinner"></div>Memuat data...</div>';
   
   if (API_URL === '') {
     setTimeout(() => {
-      // Data Pratonton
-      const mockData = [
-        {'ID': 'PRJ-001', 'Project Name': 'Reka Semula Laman Web', 'Client': 'Acme Corp', 'Active By Project': 'Active', 'Active By Status/Priority': 'High', 'Notes': 'Fasa reka bentuk UI/UX', 'URL File': 'https://example.com'}
-      ];
+      let mockData = [];
+      for(let i=1; i<=12; i++){
+        mockData.push({
+          'ID': 'PRJ-00' + i, 'Project Name': 'Rustika Project ' + i, 'Client': i%2==0 ? 'Acme Corp' : 'Globex',
+          'Active By Project': i%3==0 ? 'Closed' : 'Active', 'Active By Status/Priority': i%4==0 ? 'High' : 'Medium',
+          'Notes': 'Catatan operasional untuk proyek Rustika.', 'URL File': 'https://google.com'
+        });
+      }
       renderAll(mockData);
     }, 800);
   } else {
     try {
       const response = await fetch(API_URL);
-      if (!response.ok) throw new Error('Gagal menghubungi pelayan (server) data');
+      if (!response.ok) throw new Error('Gagal menghubungi server data');
       const data = await response.json();
       if (data.error) throw new Error(data.error);
       renderAll(data);
     } catch (err) {
-      document.getElementById('tbl').innerHTML=`<div class="msg" style="color:#ef4444">Ralat: ${err.message}</div>`;
-      document.getElementById('sub').textContent='Gagal memuatkan data';
+      document.getElementById('tbl').innerHTML=`<div class="msg" style="color:#ef4444">Error: ${err.message}</div>`;
+      document.getElementById('sub').textContent='Gagal memuat data';
     }
   }
 }
