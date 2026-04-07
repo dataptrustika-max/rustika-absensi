@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RUSTIKA MANAGEMENT PROJECT</title>
-<!-- Menggunakan Chart.js untuk grafik 2D yang bersih dan DataLabels untuk angka di dalam -->
+<title>EXECUTIVE DASHBOARD - RUSTIKA</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 <style>
@@ -25,229 +24,134 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   
   body { 
-    background: var(--bg); 
-    color: var(--text); 
-    font-family: 'DM Sans', sans-serif; 
-    min-height: 100vh; 
+    background: var(--bg); color: var(--text); 
+    font-family: 'DM Sans', sans-serif; min-height: 100vh; 
     -webkit-font-smoothing: antialiased;
   }
   
   .topbar {
-    background: var(--bg2); 
-    border-bottom: 1px solid var(--border);
-    padding: 12px 32px; 
-    display: flex; 
-    align-items: center;
-    justify-content: space-between; 
-    position: sticky; top: 0; z-index: 100;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    background: var(--bg2); border-bottom: 1px solid var(--border);
+    padding: 12px 32px; display: flex; align-items: center;
+    justify-content: space-between; position: sticky; top: 0; z-index: 100;
   }
   
   .topbar-left { display: flex; align-items: center; gap: 16px; }
-  
-  /* Gaya untuk Logo Baru */
-  .logo-container {
-    height: 42px;
-    display: flex;
-    align-items: center;
-  }
-  .logo-img {
-    max-height: 100%;
-    width: auto;
-    object-fit: contain;
-  }
-  
-  .topbar h1 { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: -0.01em; text-transform: uppercase;}
-  .topbar p { font-size: 11px; color: var(--text2); margin-top: 1px; }
+  .logo-container { height: 40px; display: flex; align-items: center; }
+  .logo-img { max-height: 100%; width: auto; }
+  .topbar h1 { font-size: 16px; font-weight: 800; color: var(--text); letter-spacing: 0.02em; text-transform: uppercase;}
   
   .btn-refresh {
-    font-size: 13px; font-weight: 500; padding: 8px 18px; border-radius: 8px;
+    font-size: 12px; font-weight: 600; padding: 8px 16px; border-radius: 8px;
     border: 1px solid var(--border); background: var(--bg2);
-    color: var(--text2); cursor: pointer; font-family: 'DM Sans', sans-serif;
-    transition: all 0.2s ease;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    color: var(--text2); cursor: pointer; transition: all 0.2s;
   }
-  .btn-refresh:hover { 
-    background: var(--bg3); color: var(--text); border-color: var(--border2); 
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  }
+  .btn-refresh:hover { background: var(--bg3); border-color: var(--border2); color: var(--text); }
   
-  .main { padding: 32px; max-width: 1400px; margin: 0 auto; }
+  .main { padding: 24px 32px; max-width: 1440px; margin: 0 auto; }
   
-  .kpi-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 16px; margin-bottom: 24px; }
-  @media(max-width:900px){ .kpi-grid { grid-template-columns: repeat(3,1fr); } }
-  @media(max-width:500px){ .kpi-grid { grid-template-columns: repeat(2,1fr); } }
+  /* KPI Style */
+  .kpi-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-bottom: 24px; }
+  @media(max-width:1024px){ .kpi-grid { grid-template-columns: repeat(3,1fr); } }
   
   .kpi {
     background: var(--bg2); border: 1px solid var(--border);
-    border-radius: 12px; padding: 20px; position: relative; overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 12px; padding: 16px; position: relative; overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
   }
-  .kpi:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 12px rgba(0,0,0,0.04);
-  }
-  .kpi::after {
-    content:''; position: absolute; bottom:0; left:0; right:0;
-    height: 3px; background: var(--kc, var(--text3));
-  }
-  .kpi-label { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
-  .kpi-value { font-size: 32px; font-weight: 700; color: var(--text); letter-spacing: -0.03em; }
+  .kpi::after { content:''; position: absolute; bottom:0; left:0; right:0; height: 3px; background: var(--kc, var(--text3)); }
+  .kpi-label { font-size: 10px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .kpi-value { font-size: 28px; font-weight: 700; color: var(--text); }
   
-  .charts-grid { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 20px; margin-bottom: 24px; }
-  @media(max-width:800px){ .charts-grid { grid-template-columns: 1fr; } }
+  /* Layout Charts - Ukuran diperkecil agar elegan */
+  .charts-grid { display: grid; grid-template-columns: 0.75fr 0.75fr 1.5fr; gap: 20px; margin-bottom: 24px; align-items: stretch; }
+  @media(max-width:1150px){ .charts-grid { grid-template-columns: 1fr 1fr; } .charts-grid > div:last-child { grid-column: span 2; } }
   
-  .card, .table-card {
+  .card {
     background: var(--bg2); border: 1px solid var(--border);
-    border-radius: 16px; padding: 24px;
+    border-radius: 16px; padding: 20px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.02);
     display: flex; flex-direction: column;
   }
   
-  .card-title { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 20px; }
+  .card-title { font-size: 11px; font-weight: 800; color: var(--text2); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; border-bottom: 1px solid var(--bg); padding-bottom: 8px; }
   
-  .chart-wrap { position: relative; flex-grow: 1; }
+  .chart-wrap { position: relative; height: 200px; display: flex; align-items: center; justify-content: center; }
   
-  .legend { 
-    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; 
-    justify-content: center; 
-  }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; justify-content: center; }
   .li { 
-    display: flex; align-items: center; justify-content: center; gap: 6px; 
-    font-size: 11px; font-weight: 600; color: var(--text2); 
+    display: flex; align-items: center; justify-content: center; gap: 4px; 
+    font-size: 10px; font-weight: 600; color: var(--text2); 
     background: var(--bg3); border: 1px solid var(--border); 
-    padding: 6px 8px; border-radius: 20px; 
-    transition: all 0.2s;
-    width: calc(33.333% - 6px);
-    text-align: center;
+    padding: 3px 10px; border-radius: 20px; 
+    width: calc(50% - 6px);
   }
-  .li:hover { border-color: var(--border2); color: var(--text); background: var(--bg2); }
-  .ld { 
-    width: 10px; height: 10px; border-radius: 50%; 
-    flex-shrink: 0; 
-  }
+  .ld { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   
-  .table-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 16px; }
+  /* Scrollable Detail Panel */
+  .detail-panel { display: flex; flex-direction: column; gap: 8px; height: 300px; overflow-y: auto; padding-right: 8px; }
+  .detail-panel::-webkit-scrollbar { width: 4px; }
+  .detail-panel::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 10px; }
+
+  .compact-item {
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 14px; transition: all 0.2s; cursor: pointer;
+  }
+  .compact-item:hover { border-color: var(--accent); background: #fff; transform: translateX(2px); }
+  
+  .compact-no { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text3); margin-right: 6px; font-weight: 500; }
+  .compact-name { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; line-height: 1.4; display: flex; align-items: flex-start; }
+  .compact-meta { display: flex; gap: 6px; margin-bottom: 4px; padding-left: 20px; }
+  .compact-badge { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; color: #fff; text-transform: uppercase; }
+  .compact-notes { font-size: 10px; color: var(--text2); line-height: 1.4; padding-left: 20px; }
+
+  .placeholder-msg { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text3); text-align: center; font-size: 11px; opacity: 0.7; padding: 20px; }
+
+  /* Grid Kartu Utama */
+  .table-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+  .table-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 16px; }
   
   .search-input {
-    padding: 8px 16px 8px 36px; border-radius: 20px;
-    border: 1px solid var(--border); 
+    padding: 8px 16px 8px 36px; border-radius: 20px; border: 1px solid var(--border); 
     background: var(--bg3) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>') no-repeat 14px center;
-    color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 12px;
-    width: 220px; transition: all 0.2s;
+    color: var(--text); font-size: 12px; width: 240px; transition: all 0.2s;
   }
-  .search-input:focus {
-    outline: none; border-color: var(--accent); background-color: var(--bg2);
-    box-shadow: 0 0 0 3px rgba(37,99,235,0.1); width: 280px;
-  }
-  .search-input::placeholder { color: var(--text3); }
+  .search-input:focus { outline: none; border-color: var(--accent); background: #fff; width: 300px; }
 
-  .filters { display: flex; gap: 8px; flex-wrap: wrap; }
-  .fb {
-    font-size: 12px; font-weight: 500; padding: 6px 14px; border-radius: 24px;
-    border: 1px solid var(--border); background: var(--bg2);
-    color: var(--text2); cursor: pointer; font-family: 'DM Sans', sans-serif; 
-    transition: all 0.2s ease;
-  }
-  .fb:hover { border-color: var(--border2); color: var(--text); background: var(--bg3); }
-  .fb.on { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 2px 6px rgba(37,99,235,0.2); }
+  .fb { font-size: 11px; font-weight: 600; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg2); color: var(--text2); cursor: pointer; }
+  .fb.on { background: var(--accent); color: #fff; border-color: var(--accent); }
   
-  .grid-cards {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    padding: 10px 0;
-    min-height: 250px;
-  }
+  .grid-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; min-height: 300px; }
   @media(max-width:1100px) { .grid-cards { grid-template-columns: repeat(3, 1fr); } }
-  @media(max-width:800px) { .grid-cards { grid-template-columns: repeat(2, 1fr); } }
+  @media(max-width:850px) { .grid-cards { grid-template-columns: repeat(2, 1fr); } }
   @media(max-width:550px) { .grid-cards { grid-template-columns: 1fr; } }
 
   .project-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 30px 16px 16px 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-    position: relative;
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 12px;
+    padding: 24px 16px 16px; display: flex; flex-direction: column;
+    align-items: center; text-align: center; transition: all 0.2s;
+    position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.02);
   }
-  .project-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 20px rgba(0,0,0,0.05);
-    border-color: var(--border2);
-  }
+  .project-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px rgba(0,0,0,0.04); }
   
-  .card-top-right {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    width: 28px; height: 28px;
-    background: #eff6ff; color: #2563eb;
-    border-radius: 50%;
-    display: flex; justify-content: center; align-items: center;
-    text-decoration: none; font-size: 13px; font-weight: bold;
-    transition: all 0.2s;
-  }
-  .card-top-right:hover { background: #2563eb; color: #fff; }
+  .card-top-right { position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; background: #eff6ff; color: #2563eb; border-radius: 50%; display: flex; justify-content: center; align-items: center; text-decoration: none; font-size: 10px; font-weight: bold; }
   
-  .card-proj-name {
-    font-size: 13px; font-weight: 700; color: var(--text);
-    margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;
-  }
+  .card-proj-name { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 34px;}
+  .card-client { font-size: 9px; font-weight: 700; color: var(--text3); text-transform: uppercase; margin-bottom: 10px; }
+  .card-notes { font-size: 10px; color: var(--text2); margin-bottom: 16px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; height: 28px; }
   
-  .card-client {
-    font-size: 10px; font-weight: 600; color: var(--text2);
-    background: var(--bg3); padding: 4px 10px; border-radius: 12px;
-    margin-bottom: 12px; letter-spacing: 0.5px;
-  }
-  
-  .card-notes {
-    font-size: 11px; color: var(--text2); margin-bottom: 20px;
-    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-    overflow: hidden; flex-grow: 1; line-height: 1.5;
-  }
-  
-  .card-stats { display: flex; width: 100%; gap: 10px; }
-  .stat-box {
-    flex: 1; border: 1px solid var(--border); border-radius: 10px;
-    padding: 10px 4px; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; background: var(--bg3);
-  }
-  .stat-val { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
-  .stat-label { font-size: 8px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  .card-stats { display: flex; width: 100%; gap: 8px; }
+  .stat-box { flex: 1; border: 1px solid var(--border); border-radius: 8px; padding: 8px 4px; display: flex; flex-direction: column; align-items: center; background: var(--bg3); }
+  .stat-val { font-size: 10px; font-weight: 700; margin-bottom: 1px; }
+  .stat-label { font-size: 8px; color: var(--text3); text-transform: uppercase; font-weight: 600; }
 
-  .pagination-container {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-top: 10px; padding-top: 16px; border-top: 1px solid var(--border);
-    flex-wrap: wrap; gap: 12px;
-  }
-  .page-info { font-size: 12px; color: var(--text2); }
-  .page-info b { color: var(--text); }
-  .pagination { display: flex; gap: 6px; }
-  .page-btn {
-    width: 32px; height: 32px; border-radius: 8px;
-    border: 1px solid var(--border); background: var(--bg2);
-    color: var(--text2); cursor: pointer; font-family: 'DM Sans', sans-serif;
-    font-size: 13px; font-weight: 500; display:flex; align-items:center; justify-content:center;
-    transition: all 0.2s;
-  }
-  .page-btn:hover:not(:disabled) { background: var(--bg3); border-color: var(--border2); color: var(--text); }
-  .page-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 2px 4px rgba(37,99,235,0.2); }
-  .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .pg-container { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .pg-info { font-size: 11px; color: var(--text2); }
+  .pg-btns { display: flex; gap: 4px; }
+  .pg-btn { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-size: 11px; font-weight: 600; }
+  .pg-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
-  .msg { text-align: center; padding: 40px; color: var(--text2); font-size: 14px; font-weight: 500; grid-column: 1 / -1;}
-  .spinner { 
-    width: 24px; height: 24px; border: 3px solid var(--border); 
-    border-top-color: var(--accent); border-radius: 50%; 
-    animation: spin .8s linear infinite; margin: 0 auto 16px; 
-  }
+  .msg { text-align: center; padding: 40px; color: var(--text2); font-size: 13px; grid-column: 1 / -1;}
+  .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 12px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
@@ -256,20 +160,16 @@
 <div class="topbar">
   <div class="topbar-left">
     <div class="logo-container">
-      <!-- Image of Rustika Logo -->
-      <img src="https://rustikaconsultant.com/wp-content/uploads/2026/03/logo-rustika.png" alt="RUSTIKA" class="logo-img" onerror="this.src='https://via.placeholder.com/150x50?text=RUSTIKA'">
+      <img src="https://rustikaconsultant.com/wp-content/uploads/2026/03/logo-rustika.png" alt="RUSTIKA" class="logo-img" onerror="this.src='https://via.placeholder.com/150x40?text=RUSTIKA'">
     </div>
-    <div>
-      <h1>RUSTIKA MANAGEMENT PROJECT</h1>
-      <p id="sub">Memuat data...</p>
-    </div>
+    <h1>EXECUTIVE DASHBOARD</h1>
   </div>
   <button class="btn-refresh" onclick="init()">↻ Refresh</button>
 </div>
 
 <div class="main">
   <div class="kpi-grid">
-    <div class="kpi" style="--kc:#3b82f6"><div class="kpi-label">Total Proyek</div><div class="kpi-value" id="k0">—</div></div>
+    <div class="kpi" style="--kc:#3b82f6"><div class="kpi-label">Total</div><div class="kpi-value" id="k0">—</div></div>
     <div class="kpi" style="--kc:#0ea5e9"><div class="kpi-label">Active</div><div class="kpi-value" id="k1">—</div></div>
     <div class="kpi" style="--kc:#8b5cf6"><div class="kpi-label">New</div><div class="kpi-value" id="k2">—</div></div>
     <div class="kpi" style="--kc:#22c55e"><div class="kpi-label">Complete</div><div class="kpi-value" id="k3">—</div></div>
@@ -279,28 +179,32 @@
 
   <div class="charts-grid">
     <div class="card">
-      <div class="card-title">Status Proyek</div>
-      <div class="chart-wrap" style="height:190px"><canvas id="cStatus"></canvas></div>
+      <div class="card-title">ACTIVE BY PROJECT</div>
+      <div class="chart-wrap"><canvas id="cStatus"></canvas></div>
       <div class="legend" id="lStatus"></div>
     </div>
     <div class="card">
-      <div class="card-title">Prioritas</div>
-      <div class="chart-wrap" style="height:190px"><canvas id="cPriority"></canvas></div>
+      <div class="card-title">ACTIVE BY STATUS/PRIORITY</div>
+      <div class="chart-wrap"><canvas id="cPriority"></canvas></div>
       <div class="legend" id="lPriority"></div>
     </div>
     <div class="card">
-      <div class="card-title">Proyek per Klien</div>
-      <div class="chart-wrap" id="cWrap" style="height:240px"><canvas id="cClient"></canvas></div>
+      <div class="card-title" id="panelTitle">Detail Terpilih</div>
+      <div id="detailContent" style="flex-grow:1;">
+          <div id="filteredListWrap" class="detail-panel">
+            <div class="placeholder-msg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:10px; opacity:0.5"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 12h6"/><path d="M9 16h6"/><path d="M9 8h6"/></svg>
+                <p>Klik pada potongan grafik untuk melihat<br>daftar lengkap proyek di sini.</p>
+            </div>
+          </div>
+      </div>
     </div>
   </div>
 
   <div class="table-card">
     <div class="table-top">
-      <div style="display:flex; align-items:center; gap: 20px; flex-wrap: wrap;">
-        <div class="card-title" style="margin:0">Daftar Proyek</div>
-        <input type="text" class="search-input" id="searchInput" placeholder="Cari nama, ID, klien..." oninput="handleSearch(this.value)">
-      </div>
-      <div class="filters">
+      <input type="text" class="search-input" id="searchInput" placeholder="Cari proyek atau klien..." oninput="handleSearch(this.value)">
+      <div class="filters" id="statusFilters">
         <button class="fb on" onclick="setF('all',this)">Semua</button>
         <button class="fb" onclick="setF('Active',this)">Active</button>
         <button class="fb" onclick="setF('New',this)">New</button>
@@ -309,8 +213,7 @@
         <button class="fb" onclick="setF('Closed',this)">Closed</button>
       </div>
     </div>
-    <div id="tbl"><div class="msg"><div class="spinner"></div>Memuat data...</div></div>
-    <!-- Tempat Paginasi Render Otomatis -->
+    <div id="tbl"><div class="msg"><div class="spinner"></div>Menghubungkan...</div></div>
     <div id="paginationWrap"></div>
   </div>
 </div>
@@ -319,49 +222,101 @@
 Chart.register(ChartDataLabels);
 
 const SC = {'Active':'#0ea5e9','Closed':'#94a3b8','New':'#8b5cf6','Complete':'#22c55e','On Hold':'#eab308', 'Belum Diset':'#cbd5e1'};
-const PC = {'Hight':'#ef4444','High':'#ef4444','Medium':'#f97316','Low':'#22c55e', 'Belum Diset':'#cbd5e1'};
+const PC = {'High':'#ef4444','Medium':'#f97316','Low':'#22c55e', 'Belum Diset':'#cbd5e1'};
 let allData=[], charts={}, curF='all';
-
-// Variabel Paginasi & Pencarian
-let currentPage = 1;
-const rowsPerPage = 12; // Ditampilkan kelipatan 4 supaya gridnya pas
-let searchQuery = '';
+let currentPage = 1, rowsPerPage = 12, searchQuery = '';
 
 const API_URL = 'https://script.google.com/macros/s/AKfycbwsrw3LWLuHK8e5X1ABtOqbVaMfGwHFiFoG9kJ3lcNUPte3Ssf88hEwrkJoMBnt1zysTw/exec';
 
-function cnt(d,k){ 
-  return d.reduce((a,r)=>{ 
-    let v=(r[k]||'').trim(); 
-    if(v === '') v = 'Belum Diset'; 
-    a[v]=(a[v]||0)+1; 
-    return a; 
-  },{}); 
+// Peta Kunci Kolom yang Lebih Pintar & Luas
+const KEY_MAP = {
+    id: ['id'],
+    name: ['project name', 'project', 'nama projek', 'nama proyek'],
+    client: ['client', 'klien'],
+    status: ['active by project', 'status', 'active', 'status proyek'],
+    priority: ['active by status/priority', 'priority', 'prioritas', 'keutamaan', 'status/priority']
+};
+
+// Fungsi getVal yang sudah diperbaiki agar lebih toleran terhadap karakter khusus
+function getVal(obj, keys) {
+  const objKeys = Object.keys(obj);
+  for(let targetKey of keys) {
+    // 1. Coba cari yang persis (setelah lowercase & trim)
+    let foundExact = objKeys.find(k => k.toLowerCase().trim() === targetKey.toLowerCase());
+    if(foundExact && obj[foundExact] !== undefined) return obj[foundExact].toString().trim();
+    
+    // 2. Coba cari yang mengandung kata kunci (jika targetKey pendek seperti 'priority')
+    let foundPartial = objKeys.find(k => k.toLowerCase().includes(targetKey.toLowerCase()));
+    if(foundPartial && obj[foundPartial] !== undefined) return obj[foundPartial].toString().trim();
+  }
+  return "";
 }
 
-function killChart(id){ if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
+function smartCount(d, keys) {
+  return d.reduce((a, r) => {
+    let v = getVal(r, keys);
+    if (v === "") v = 'Belum Diset';
+    if (v === 'Hight' || v.toLowerCase() === 'high') v = 'High';
+    a[v] = (a[v] || 0) + 1;
+    return a;
+  }, {});
+}
 
-function makePie(id,labels,data,colors){
-  killChart(id);
+function renderFilteredList(filterType, filterValue) {
+    const wrap = document.getElementById('filteredListWrap');
+    document.getElementById('panelTitle').textContent = `Daftar: ${filterValue}`;
+    const keys = filterType === 'status' ? KEY_MAP.status : KEY_MAP.priority;
+    
+    const filtered = allData.filter(r => {
+        let v = getVal(r, keys);
+        if (v === "" && filterValue === 'Belum Diset') return true;
+        if ((v === 'Hight' || v === 'High') && filterValue === 'High') return true;
+        return v === filterValue;
+    });
+
+    if (filtered.length === 0) {
+        wrap.innerHTML = `<div class="placeholder-msg"><p>Tidak ada data.</p></div>`;
+        return;
+    }
+
+    wrap.innerHTML = filtered.map((r, i) => {
+        const name = getVal(r, KEY_MAP.name) || 'Tanpa Nama';
+        const st = getVal(r, KEY_MAP.status) || 'Belum Diset';
+        const pr = getVal(r, KEY_MAP.priority) || 'Belum Diset';
+        const prD = (pr === 'Hight' || pr === 'High') ? 'High' : pr;
+        const notes = getVal(r, ['notes', 'catatan']) || '...';
+        const url = getVal(r, ['url file', 'link', 'file']);
+        return `
+        <div class="compact-item" onclick="${url ? `window.open('${url}','_blank')` : ''}">
+            <div class="compact-name"><span class="compact-no">${i + 1}.</span> ${name}</div>
+            <div class="compact-meta">
+                <span class="compact-badge" style="background:${SC[st] || '#94a3b8'}">${st}</span>
+                <span class="compact-badge" style="background:${PC[prD] || '#94a3b8'}">${prD}</span>
+            </div>
+            <div class="compact-notes">${notes}</div>
+        </div>`;
+    }).join('');
+    wrap.scrollTop = 0;
+}
+
+function makePie(id, labels, data, colors, type){
+  if(charts[id]) charts[id].destroy();
   charts[id] = new Chart(document.getElementById(id),{
     type: 'pie',
     data: {
       labels: labels,
-      datasets: [{ data: data, backgroundColor: colors, borderWidth: 2, borderColor: '#ffffff', hoverOffset: 6 }]
+      datasets: [{ data: data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff', hoverOffset: 12 }]
     },
     options: {
-      responsive: true, maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false, aspectRatio: 1,
+      onClick: (e, el) => { if(el.length) renderFilteredList(type, labels[el[0].index]); },
       plugins: {
         legend: { display: false },
-        tooltip: {
-          backgroundColor: 'rgba(15, 23, 42, 0.95)', padding: 10,
-          titleFont: { family: "'DM Sans', sans-serif", size: 12 }, bodyFont: { family: "'DM Sans', sans-serif", size: 12 },
-          callbacks: { label: c => ` ${c.label}: ${c.raw} proyek` }
-        },
         datalabels: {
-          color: '#ffffff', font: { family: "'DM Sans', sans-serif", weight: 'bold', size: 11 },
-          formatter: (value, context) => {
-            let total = context.dataset.data.reduce((a, b) => a + b, 0);
-            return (value / total) * 100 > 5 ? value : '';
+          color: '#fff', font: { weight: 'bold', size: 10 },
+          formatter: (v, ctx) => {
+            let sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
+            return (v / sum) * 100 > 7 ? v : '';
           }
         }
       }
@@ -369,216 +324,89 @@ function makePie(id,labels,data,colors){
   });
 }
 
-function makeBar(id,labels,data){
-  killChart(id);
-  const h=Math.max(190,labels.length*38+40);
-  document.getElementById('cWrap').style.height=h+'px';
-  charts[id]=new Chart(document.getElementById(id),{
-    type:'bar',
-    data:{labels,datasets:[{data,backgroundColor:'#3b82f6',borderRadius:6,borderSkipped:false,barThickness:20}]},
-    options:{
-      indexAxis:'y', responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:false}, tooltip:{backgroundColor:'rgba(15, 23, 42, 0.9)',padding:10}, datalabels: { display: false } },
-      scales:{
-        x:{ticks:{font:{size:11},color:'#64748b'},grid:{color:'#f1f5f9', drawBorder: false}},
-        y:{ticks:{font:{size:12, weight:'500'},color:'#475569'},grid:{display:false, drawBorder: false}}
-      }
-    }
-  });
-}
-
-function makeLegend(elId,labels,colors,counts){
-  document.getElementById(elId).innerHTML=labels.map((l,i)=>
-    `<span class="li" title="${l}"><span class="ld" style="background:${colors[i]}"></span><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${l}</span> <strong style="color:#1e293b">${counts[i]}</strong></span>`
-  ).join('');
-}
-
-function getStatusColor(s){ return SC[s] || '#64748b'; }
-function getPriorityColor(p){ return PC[p] || '#64748b'; }
-
-function getVal(obj, possibleKeys) {
-  for(let pk of possibleKeys) {
-    let found = Object.keys(obj).find(k => k.toLowerCase().trim() === pk.toLowerCase());
-    if(found && obj[found] !== '') return obj[found];
-  }
-  return null;
-}
-
-function handleSearch(val) {
-  searchQuery = val.toLowerCase().trim();
-  currentPage = 1; 
-  renderTable();
-}
-
-function goToPage(page) {
-  currentPage = page;
-  renderTable();
-}
+function handleSearch(v) { searchQuery = v.toLowerCase(); currentPage = 1; renderTable(); }
+function goToPage(p) { currentPage = p; renderTable(); }
 
 function renderTable(){
-  let d = curF==='all' ? allData : allData.filter(r=>(r['Active By Project']||'').trim()===curF);
-  
-  if(searchQuery !== '') {
-    d = d.filter(r => {
-      const keys = Object.keys(r);
-      const id = (r['ID'] || r['Id'] || keys[0] || '').toLowerCase();
-      const projName = (getVal(r, ['Project Name', 'Nama Projek', 'Nama Proyek', 'Project']) || '').toLowerCase();
-      const client = (getVal(r, ['Client', 'Klien']) || '').toLowerCase();
-      return id.includes(searchQuery) || projName.includes(searchQuery) || client.includes(searchQuery);
-    });
+  let d = curF==='all' ? allData : allData.filter(r=> getVal(r, KEY_MAP.status) === curF);
+  if(searchQuery) {
+    d = d.filter(r => (getVal(r,KEY_MAP.id)+getVal(r,KEY_MAP.name)+getVal(r,KEY_MAP.client)).toLowerCase().includes(searchQuery));
   }
 
-  if(!d.length){ 
-    document.getElementById('tbl').innerHTML='<div class="grid-cards"><div class="msg">Tidak ada data yang cocok dengan pencarian Anda.</div></div>'; 
-    document.getElementById('paginationWrap').innerHTML = '';
-    return; 
-  }
+  const wrap = document.getElementById('tbl');
+  if(!d.length){ wrap.innerHTML='<div class="grid-cards"><div class="msg">Data tidak ditemukan.</div></div>'; return; }
   
   const totalPages = Math.ceil(d.length / rowsPerPage);
-  if(currentPage > totalPages) currentPage = totalPages;
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const paginatedData = d.slice(startIndex, startIndex + rowsPerPage);
+  const paged = d.slice((currentPage-1)*rowsPerPage, currentPage*rowsPerPage);
 
-  document.getElementById('tbl').innerHTML=`<div class="grid-cards">
-    ${paginatedData.map(r=>{
-      const keys = Object.keys(r);
-      const id = r['ID'] || r['Id'] || keys[0] || '—';
-      const projName = getVal(r, ['Project Name', 'Nama Projek', 'Nama Proyek', 'Project']) || 'Tidak Ada Nama Proyek';
-      const client = getVal(r, ['Client', 'Klien']) || '—';
-      const status = getVal(r, ['Active By Project', 'Status']) || 'Belum Diset';
-      const priority = getVal(r, ['Active By Status/Priority', 'Prioritas', 'Priority', 'Keutamaan']) || 'Belum Diset';
-      const notes = getVal(r, ['Notes', 'Catatan']) || '—';
-      const url = getVal(r, ['URL File', 'File', 'Link']) || '';
-      
-      const stColor = getStatusColor(status);
-      const prColor = getPriorityColor(priority);
-      const displayPriority = priority === 'Hight' ? 'High' : priority;
-
+  wrap.innerHTML = `<div class="grid-cards">
+    ${paged.map(r=>{
+      const id = getVal(r, KEY_MAP.id) || '—';
+      const name = getVal(r, KEY_MAP.name) || 'Tanpa Nama';
+      const cli = getVal(r, KEY_MAP.client) || '—';
+      const st = getVal(r, KEY_MAP.status) || 'Belum Diset';
+      const pr = getVal(r, KEY_MAP.priority) || 'Belum Diset';
+      const prD = (pr === 'Hight' || pr === 'High') ? 'High' : pr;
+      const url = getVal(r, ['url file', 'link', 'file']);
       return `
       <div class="project-card">
-        ${url ? `<a href="${url}" target="_blank" class="card-top-right" title="Buka File">↗</a>` : ''}
-        <div class="card-proj-name" title="${projName}">${projName}</div>
-        <div class="card-client" title="${id}">${client === '—' ? id : client}</div>
-        <div class="card-notes" title="${notes}">${notes}</div>
-        
+        ${url ? `<a href="${url}" target="_blank" class="card-top-right">↗</a>` : ''}
+        <div class="card-proj-name">${name}</div>
+        <div class="card-client">${cli === '—' ? id : cli}</div>
+        <div class="card-notes">${getVal(r,['notes', 'catatan'])}</div>
         <div class="card-stats">
-          <div class="stat-box">
-            <div class="stat-val" style="color: ${stColor}">${status === 'Belum Diset' ? '—' : status}</div>
-            <div class="stat-label">Status</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-val" style="color: ${prColor}">${displayPriority === 'Belum Diset' ? '—' : displayPriority}</div>
-            <div class="stat-label">Prioritas</div>
-          </div>
+          <div class="stat-box"><div class="stat-val" style="color:${SC[st]||'#64748b'}">${st}</div><div class="stat-label">Status</div></div>
+          <div class="stat-box"><div class="stat-val" style="color:${PC[prD]||'#64748b'}">${prD}</div><div class="stat-label">Prioritas</div></div>
         </div>
       </div>`;
     }).join('')}
   </div>`;
 
-  renderPagination(totalPages, d.length, startIndex + 1, Math.min(startIndex + rowsPerPage, d.length));
+  const pgWrap = document.getElementById('paginationWrap');
+  if(totalPages <= 1) { pgWrap.innerHTML = ''; return; }
+  let pgH = `<div class="pg-container"><div class="pg-info">Halaman <b>${currentPage}</b> dari ${totalPages}</div><div class="pg-btns">`;
+  for(let i=1; i<=totalPages; i++) { if(i<3 || i>totalPages-2 || Math.abs(i-currentPage)<2) pgH += `<button class="pg-btn ${i===currentPage?'active':''}" onclick="goToPage(${i})">${i}</button>`; }
+  pgWrap.innerHTML = pgH + `</div></div>`;
 }
 
-function renderPagination(totalPages, totalItems, startItem, endItem) {
-  if(totalPages <= 1) {
-    document.getElementById('paginationWrap').innerHTML = '';
-    return;
-  }
-
-  let html = `<div class="pagination-container">
-    <div class="page-info">Menampilkan <b>${startItem}-${endItem}</b> dari <b>${totalItems}</b> proyek</div>
-    <div class="pagination">
-      <button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">❮</button>`;
-  
-  let startPage = Math.max(1, currentPage - 2);
-  let endPage = Math.min(totalPages, currentPage + 2);
-  
-  if(startPage > 1) html += `<button class="page-btn" onclick="goToPage(1)">1</button>${startPage > 2 ? '<span style="color:var(--text3); display:flex; align-items:center;">...</span>' : ''}`;
-  
-  for(let i = startPage; i <= endPage; i++) {
-    html += `<button class="page-btn ${currentPage === i ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
-  }
-
-  if(endPage < totalPages) html += `${endPage < totalPages - 1 ? '<span style="color:var(--text3); display:flex; align-items:center;">...</span>' : ''}<button class="page-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
-  
-  html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">❯</button>
-    </div>
-  </div>`;
-
-  document.getElementById('paginationWrap').innerHTML = html;
-}
-
-function setF(val,btn){
-  curF=val;
-  currentPage=1; 
+function setF(v, btn){
+  curF=v; currentPage=1; 
   document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   renderTable();
 }
 
 function renderAll(data){
-  allData=data;
-  const sc=cnt(allData,'Active By Project');
-  document.getElementById('k0').textContent=allData.length;
-  document.getElementById('k1').textContent=sc['Active']||0;
-  document.getElementById('k2').textContent=sc['New']||0;
-  document.getElementById('k3').textContent=sc['Complete']||0;
-  document.getElementById('k4').textContent=sc['On Hold']||0;
-  document.getElementById('k5').textContent=sc['Closed']||0;
+  allData = data;
+  const sc = smartCount(allData, KEY_MAP.status);
+  const pc = smartCount(allData, KEY_MAP.priority);
+  
+  document.getElementById('k0').textContent = allData.length;
+  document.getElementById('k1').textContent = sc['Active'] || 0;
+  document.getElementById('k2').textContent = sc['New'] || 0;
+  document.getElementById('k3').textContent = sc['Complete'] || 0;
+  document.getElementById('k4').textContent = sc['On Hold'] || 0;
+  document.getElementById('k5').textContent = sc['Closed'] || 0;
 
-  const scKeys = Object.keys(sc).sort((a,b) => sc[b] - sc[a]);
-  const sC = scKeys.map(l => SC[l] || '#cbd5e1');
-  const scVals = scKeys.map(l => sc[l]);
-  makePie('cStatus', scKeys, scVals, sC);
-  makeLegend('lStatus', scKeys, sC, scVals);
+  const sKeys = Object.keys(sc).sort((a,b)=>sc[b]-sc[a]);
+  makePie('cStatus', sKeys, sKeys.map(k=>sc[k]), sKeys.map(k=>SC[k]||'#ccc'), 'status');
+  document.getElementById('lStatus').innerHTML = sKeys.map(k=>`<span class="li"><span class="ld" style="background:${SC[k]||'#ccc'}"></span>${k} <strong>${sc[k]}</strong></span>`).join('');
 
-  const pc=cnt(allData,'Active By Status/Priority');
-  const pcKeys = Object.keys(pc).sort((a,b) => pc[b] - pc[a]).map(l=>l==='Hight'?'High':l);
-  const pC = pcKeys.map(l => PC[l] || '#cbd5e1');
-  const pcVals = Object.keys(pc).sort((a,b) => pc[b] - pc[a]).map(l => pc[l]);
-  makePie('cPriority', pcKeys, pcVals, pC);
-  makeLegend('lPriority', pcKeys, pC, pcVals);
-
-  const cc=cnt(allData,'Client'); delete cc['Belum Diset']; delete cc[''];
-  const cL=Object.keys(cc).sort((a,b)=>cc[b]-cc[a]).slice(0,8);
-  makeBar('cClient',cL,cL.map(l=>cc[l]));
+  const pKeys = Object.keys(pc).sort((a,b)=>pc[b]-pc[a]);
+  makePie('cPriority', pKeys, pKeys.map(k=>pc[k]), pKeys.map(k=>PC[k]||'#ccc'), 'priority');
+  document.getElementById('lPriority').innerHTML = pKeys.map(k=>`<span class="li"><span class="ld" style="background:${PC[k]||'#ccc'}"></span>${k} <strong>${pc[k]}</strong></span>`).join('');
 
   renderTable();
-  const now=new Date();
-  
-  if(API_URL === '') {
-    document.getElementById('sub').textContent=`[Pratinjau] ${allData.length} proyek — diperbarui ${now.toLocaleTimeString('id-ID')}`;
-  } else {
-    document.getElementById('sub').textContent=`${allData.length} proyek — diperbarui ${now.toLocaleTimeString('id-ID')}`;
-  }
 }
 
 async function init(){
-  document.getElementById('sub').textContent='Memuat data...';
-  document.getElementById('tbl').innerHTML='<div class="msg"><div class="spinner"></div>Memuat data...</div>';
-  
-  if (API_URL === '') {
-    setTimeout(() => {
-      let mockData = [];
-      for(let i=1; i<=12; i++){
-        mockData.push({
-          'ID': 'PRJ-00' + i, 'Project Name': 'Rustika Project ' + i, 'Client': i%2==0 ? 'Acme Corp' : 'Globex',
-          'Active By Project': i%3==0 ? 'Closed' : 'Active', 'Active By Status/Priority': i%4==0 ? 'High' : 'Medium',
-          'Notes': 'Catatan operasional untuk proyek Rustika.', 'URL File': 'https://google.com'
-        });
-      }
-      renderAll(mockData);
-    }, 800);
-  } else {
-    try {
-      const response = await fetch(API_URL);
-      if (!response.ok) throw new Error('Gagal menghubungi server data');
-      const data = await response.json();
-      if (data.error) throw new Error(data.error);
-      renderAll(data);
-    } catch (err) {
-      document.getElementById('tbl').innerHTML=`<div class="msg" style="color:#ef4444">Error: ${err.message}</div>`;
-      document.getElementById('sub').textContent='Gagal memuat data';
-    }
+  try {
+    const res = await fetch(API_URL);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    renderAll(data);
+  } catch (err) {
+    document.getElementById('tbl').innerHTML = `<div class="msg" style="color:#ef4444">⚠️ Gagal memuat data.</div>`;
   }
 }
 
