@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RUSTIKA MANAGEMENT PROJECT</title>
-<!-- Menggunakan Chart.js untuk grafik 2D yang bersih dan DataLabels untuk angka di dalam -->
+<title>Core Project Management Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 <style>
@@ -35,7 +34,7 @@
   .topbar {
     background: var(--bg2); 
     border-bottom: 1px solid var(--border);
-    padding: 12px 32px; 
+    padding: 16px 32px; 
     display: flex; 
     align-items: center;
     justify-content: space-between; 
@@ -43,22 +42,18 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.02);
   }
   
-  .topbar-left { display: flex; align-items: center; gap: 16px; }
+  .topbar-left { display: flex; align-items: center; gap: 14px; }
   
-  /* Gaya untuk Logo Baru */
-  .logo-container {
-    height: 42px;
-    display: flex;
-    align-items: center;
-  }
-  .logo-img {
-    max-height: 100%;
-    width: auto;
-    object-fit: contain;
+  .logo { 
+    width: 38px; height: 38px; border-radius: 10px;
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700; color: #fff; 
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
   }
   
-  .topbar h1 { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: -0.01em; text-transform: uppercase;}
-  .topbar p { font-size: 11px; color: var(--text2); margin-top: 1px; }
+  .topbar h1 { font-size: 16px; font-weight: 600; color: var(--text); letter-spacing: -0.01em;}
+  .topbar p { font-size: 12px; color: var(--text2); margin-top: 2px; }
   
   .btn-refresh {
     font-size: 13px; font-weight: 500; padding: 8px 18px; border-radius: 8px;
@@ -153,9 +148,10 @@
   .fb:hover { border-color: var(--border2); color: var(--text); background: var(--bg3); }
   .fb.on { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 2px 6px rgba(37,99,235,0.2); }
   
+  /* --- DESAIN BARU: GRID KARTU (CARD GRID) --- */
   .grid-cards {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, 1fr); /* 4 Kolom seperti permintaan Anda */
     gap: 16px;
     padding: 10px 0;
     min-height: 250px;
@@ -168,7 +164,7 @@
     background: var(--bg2);
     border: 1px solid var(--border);
     border-radius: 16px;
-    padding: 30px 16px 16px 16px;
+    padding: 30px 16px 16px 16px; /* Spasi atas dilebarkan sedikit agar teks tidak nabrak tombol file */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -220,9 +216,11 @@
     padding: 10px 4px; display: flex; flex-direction: column;
     align-items: center; justify-content: center; background: var(--bg3);
   }
-  .stat-val { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
-  .stat-label { font-size: 8px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  .stat-val { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+  .stat-label { font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  /* ------------------------------------------- */
 
+  /* Desain Paginasi */
   .pagination-container {
     display: flex; justify-content: space-between; align-items: center;
     margin-top: 10px; padding-top: 16px; border-top: 1px solid var(--border);
@@ -255,12 +253,9 @@
 
 <div class="topbar">
   <div class="topbar-left">
-    <div class="logo-container">
-      <!-- Image of Rustika Logo -->
-      <img src="https://rustikaconsultant.com/wp-content/uploads/2026/03/logo-rustika.png" alt="RUSTIKA" class="logo-img" onerror="this.src='https://via.placeholder.com/150x50?text=RUSTIKA'">
-    </div>
+    <div class="logo">CP</div>
     <div>
-      <h1>RUSTIKA MANAGEMENT PROJECT</h1>
+      <h1>Core Project Management</h1>
       <p id="sub">Memuat data...</p>
     </div>
   </div>
@@ -393,6 +388,7 @@ function makeLegend(elId,labels,colors,counts){
   ).join('');
 }
 
+// Fungsi helper warna untuk label kartu grid
 function getStatusColor(s){ return SC[s] || '#64748b'; }
 function getPriorityColor(p){ return PC[p] || '#64748b'; }
 
@@ -439,6 +435,7 @@ function renderTable(){
   const startIndex = (currentPage - 1) * rowsPerPage;
   const paginatedData = d.slice(startIndex, startIndex + rowsPerPage);
 
+  // Render Grid Kartu (Card Grid)
   document.getElementById('tbl').innerHTML=`<div class="grid-cards">
     ${paginatedData.map(r=>{
       const keys = Object.keys(r);
@@ -561,9 +558,9 @@ async function init(){
       let mockData = [];
       for(let i=1; i<=12; i++){
         mockData.push({
-          'ID': 'PRJ-00' + i, 'Project Name': 'Rustika Project ' + i, 'Client': i%2==0 ? 'Acme Corp' : 'Globex',
+          'ID': 'PRJ-00' + i, 'Project Name': 'Proyek Perluasan Pabrik ' + i, 'Client': i%2==0 ? 'Acme Corp' : 'Globex',
           'Active By Project': i%3==0 ? 'Closed' : 'Active', 'Active By Status/Priority': i%4==0 ? 'High' : 'Medium',
-          'Notes': 'Catatan operasional untuk proyek Rustika.', 'URL File': 'https://google.com'
+          'Notes': 'Ini adalah catatan untuk proyek ini, mencakup tahap operasional dan arsitektur.', 'URL File': 'https://google.com'
         });
       }
       renderAll(mockData);
