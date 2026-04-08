@@ -236,10 +236,18 @@
          <p style="color:#93c5fd; font-size:11px;" id="engineerNameLabel">Selamat bekerja!</p>
        </div>
      </div>
-     <button class="btn-refresh" style="background:rgba(255,255,255,0.1); color:#fff; border-color:rgba(255,255,255,0.2);" onclick="switchView('view-gateway')">
-       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-       KELUAR
-     </button>
+     
+     <div style="display:flex; gap:10px;">
+       <button class="btn-refresh" style="background:rgba(255,255,255,0.1); color:#fff; border-color:rgba(255,255,255,0.2);" onclick="init(false)">
+         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+         REFRESH
+       </button>
+       <button class="btn-refresh" style="background:rgba(255,255,255,0.1); color:#fff; border-color:rgba(255,255,255,0.2);" onclick="switchView('view-gateway')">
+         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+         KELUAR
+       </button>
+     </div>
+
    </div>
    
    <div class="main">
@@ -510,8 +518,17 @@ function renderTeamWorkspace() {
 
 window.toggleAccordion = function(id, headerEl) {
     const contentEl = document.getElementById(id);
-    if (contentEl.classList.contains('hidden')) { contentEl.classList.remove('hidden'); contentEl.classList.add('block', 'animate-in'); } 
-    else { contentEl.classList.add('hidden'); contentEl.classList.remove('block', 'animate-in'); }
+    const chevron = headerEl.querySelector('svg:last-child');
+    if (contentEl.classList.contains('hidden')) { 
+        contentEl.classList.remove('hidden'); 
+        contentEl.classList.add('block', 'animate-in'); 
+        if(chevron) chevron.style.transform = 'rotate(180deg)';
+    } 
+    else { 
+        contentEl.classList.add('hidden'); 
+        contentEl.classList.remove('block', 'animate-in'); 
+        if(chevron) chevron.style.transform = 'rotate(0deg)';
+    }
 };
 
 window.saveTaskProgress = async function(btnEl, projectName, taskName) {
@@ -526,7 +543,9 @@ window.saveTaskProgress = async function(btnEl, projectName, taskName) {
         const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'UPDATE_PROGRESS', projectName: projectName, taskName: taskName, teamCode: currentUser['NAMA'] || currentUser['EMAIL'], progress: progressVal, keterangan: rowEl.querySelector('.tw-input-ket').value.trim() }) });
         if ((await res.json()).status === 'success') {
             btnEl.innerHTML = '✓ SAVED'; btnEl.style.backgroundColor = '#22c55e';
-            init(true); setTimeout(() => { btnEl.innerHTML = 'SAVE'; btnEl.style.backgroundColor = ''; btnEl.disabled = false; }, 2000);
+            // PERBAIKAN: Hapus panggilan init(true) di sini. 
+            // Cukup tampilkan indikator sukses tanpa menghapus ketikan di form tugas lainnya.
+            setTimeout(() => { btnEl.innerHTML = 'SAVE'; btnEl.style.backgroundColor = ''; btnEl.disabled = false; }, 2000);
         } else throw new Error();
     } catch(e) {
         btnEl.innerHTML = 'GAGAL'; btnEl.style.backgroundColor = '#ef4444'; setTimeout(() => { btnEl.innerHTML = 'SAVE'; btnEl.style.backgroundColor = ''; btnEl.disabled = false; }, 2000);
@@ -731,7 +750,13 @@ async function init(isAuto = false){
     
     renderAll(allData);
     
-    if(currentUser && document.getElementById('view-team-dashboard').classList.contains('active')) renderTeamWorkspace();
+    // HANYA RENDER ULANG DASHBOARD TIM JIKA MANUAL REFRESH (BUKAN AUTO)
+    if(currentUser && document.getElementById('view-team-dashboard').classList.contains('active')) {
+        if (!isAuto) {
+            renderTeamWorkspace();
+        }
+    }
+    
     if(!isAuto && btn) btn.innerHTML = 'REFRESH';
   } catch (err) {
     console.error(err);
@@ -748,7 +773,13 @@ async function init(isAuto = false){
 }
 
 init();
-setInterval(() => { init(true); }, 30000);
+setInterval(() => { 
+    // MENGADOPSI LOGIKA App.jsx:
+    // Auto-Refresh HANYA berjalan jika halaman Executive Dashboard sedang aktif.
+    if (document.getElementById('view-executive').classList.contains('active')) {
+        init(true); 
+    }
+}, 30000);
 </script>
 </body>
 </html>
