@@ -431,21 +431,32 @@ function handleTeamLogin(e) {
 function renderTeamWorkspace() {
     const container = document.getElementById('teamWorkspaceProjects');
     if (!currentUser) return;
-    const userDept = currentUser['DEPARTEMEN'] ? currentUser['DEPARTEMEN'].trim().toUpperCase() : '';
+    
+    const userDeptRaw = currentUser['DEPARTEMEN'] ? currentUser['DEPARTEMEN'].trim().toUpperCase() : '';
+    // Memecah departemen jika ada garis miring (misal: "IT ENGGINEER / SURVEYOUR" jadi 2 role terpisah)
+    const userDepts = userDeptRaw.split(/[\/,]+/).map(d => d.trim()).filter(d => d !== '');
     
     const activeProjects = allData.filter(r => { 
         let st = getVal(r, KEY_MAP.status).toLowerCase().trim(); 
         if (st !== 'active' && st !== 'actived') return false;
+        
         const filteredTasks = (r.Tasks || []).filter(t => {
-            const taskDept = t.dept ? t.dept.trim().toUpperCase() : '';
-            return taskDept !== '' && (taskDept === userDept || userDept.includes(taskDept) || taskDept.includes(userDept));
+            const taskDeptRaw = t.dept ? t.dept.trim().toUpperCase() : '';
+            if (taskDeptRaw === '') return false;
+            
+            // Memecah role tugas di SOP juga
+            const taskDepts = taskDeptRaw.split(/[\/,]+/).map(d => d.trim()).filter(d => d !== '');
+            
+            // LOGIKA KETAT: Harus persis (Exact Match), tidak sekadar mengandung kata
+            return taskDepts.some(td => userDepts.includes(td));
         });
+        
         r.userTasks = filteredTasks;
         return filteredTasks.length > 0; 
     });
     
     if (activeProjects.length === 0) {
-        container.innerHTML = `<div class="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-300"><p class="text-slate-500 font-medium text-sm">Tidak ada proyek aktif untuk departemen <strong class="text-slate-800">${userDept}</strong> saat ini.</p></div>`;
+        container.innerHTML = `<div class="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-300"><p class="text-slate-500 font-medium text-sm">Tidak ada proyek aktif untuk departemen <strong class="text-slate-800">${userDeptRaw}</strong> saat ini.</p></div>`;
         return;
     }
 
