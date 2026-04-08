@@ -559,6 +559,15 @@ function renderProgressCards() {
         }
         proj.phaseList = phaseList;
 
+        // MENGAMBIL DATA PRIORITAS & MENENTUKAN WARNA BADGE OTOMATIS
+        const prRaw = getVal(proj, KEY_MAP.priority) || 'Belum Diset';
+        const priorityVal = (prRaw.toLowerCase() === 'hight' || prRaw.toLowerCase() === 'high') ? 'High' : prRaw;
+        
+        let pBg = 'bg-white'; let pText = 'text-slate-800'; let pBorder = 'border-slate-100';
+        if(priorityVal === 'High') { pBg = 'bg-red-50'; pText = 'text-red-600'; pBorder = 'border-red-200'; }
+        else if(priorityVal === 'Medium') { pBg = 'bg-orange-50'; pText = 'text-orange-600'; pBorder = 'border-orange-200'; }
+        else if(priorityVal === 'Low') { pBg = 'bg-green-50'; pText = 'text-green-600'; pBorder = 'border-green-200'; }
+
         return `
         <div class="bg-[#FDE472] rounded-3xl p-4 flex flex-col shadow-sm border border-[#FCD34D] relative overflow-hidden transition-all hover:shadow-md hover:-translate-y-1">
             <div class="mb-3 relative z-10">
@@ -575,7 +584,7 @@ function renderProgressCards() {
                         </svg>
                         <div class="absolute inset-0 flex items-center justify-center text-[11px] font-black text-slate-800">${avgProgress}%</div>
                     </div>
-                    <span class="bg-white text-slate-800 text-[8px] font-bold px-2 py-1 rounded-md lowercase shadow-sm mt-0.5 border border-slate-100">in progress</span>
+                    <span class="${pBg} ${pText} text-[8px] font-bold px-2 py-1 rounded-md uppercase shadow-sm mt-0.5 border ${pBorder}">${priorityVal}</span>
                 </div>
                 <div class="w-full h-[1px] bg-white rounded-full mb-3 opacity-80"></div>
                 <div class="flex flex-col gap-1.5">
