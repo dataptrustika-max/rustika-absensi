@@ -250,15 +250,58 @@
 
    </div>
    
-   <div class="main">
-       <div class="bg-gradient-to-br from-[#003366] to-[#001b36] rounded-[24px] p-6 md:p-8 mb-8 shadow-xl relative overflow-hidden border border-[#003366]">
+   <div class="main max-w-[1440px] mx-auto px-4 lg:px-8 py-6">
+       <!-- KOTAK HEADER UTAMA -->
+       <div class="bg-gradient-to-br from-[#003366] to-[#001b36] rounded-[24px] p-6 md:p-8 mb-6 shadow-xl relative overflow-hidden border border-[#003366]">
            <div class="absolute top-0 right-0 w-64 h-64 bg-[#f5a20f]/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
-           <h2 class="text-2xl md:text-3xl font-black text-white mb-2 tracking-tight relative z-10">Daftar Proyek Berjalan</h2>
+           <h2 class="text-2xl md:text-3xl font-black text-white mb-2 tracking-tight relative z-10">Ruang Kerja Proyek</h2>
            <p class="text-sm text-indigo-100/70 font-medium max-w-xl leading-relaxed relative z-10">
-               Pilih kategori di bawah ini untuk melihat dan memperbarui persentase rincian tugas harian Anda.
+               Gunakan menu navigasi di bawah untuk memfilter kategori dan melihat proyek mana saja yang telah Anda selesaikan.
            </p>
        </div>
-       <div id="teamWorkspaceProjects"></div>
+
+       <!-- LAYOUT BARU: SIDEBAR MENU & KONTEN KARTU -->
+       <div class="flex flex-col lg:flex-row gap-6 items-start">
+           
+           <!-- SIDEBAR MENU KATEGORI (DIPERKECIL & DIBERI IKON) -->
+           <div class="w-full lg:w-48 shrink-0 bg-white rounded-2xl shadow-sm border border-slate-200 p-3 lg:sticky lg:top-24 z-10">
+               <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 hidden lg:block px-1">Kategori Proyek</h3>
+               <div class="flex flex-row lg:flex-col gap-1.5 overflow-x-auto pb-2 lg:pb-0" style="scrollbar-width: none;">
+                   <button id="tFilter-active_all" onclick="setTeamFilter('active_all')" class="text-left px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 shrink-0 border bg-[#003366] text-white shadow-sm border-transparent">
+                       <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg> Semua Proyek
+                   </button>
+                   <button id="tFilter-active_slf" onclick="setTeamFilter('active_slf')" class="text-left px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 shrink-0 border bg-white text-slate-600 hover:bg-slate-50 border-slate-200">
+                       <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg> Kategori SLF
+                   </button>
+                   <button id="tFilter-active_pbg" onclick="setTeamFilter('active_pbg')" class="text-left px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 shrink-0 border bg-white text-slate-600 hover:bg-slate-50 border-slate-200">
+                       <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> Kategori PBG
+                   </button>
+                   
+                   <div class="hidden lg:block w-full h-px bg-slate-100 my-1"></div>
+                   <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 mb-1 hidden lg:block px-1">Filter Klien</h3>
+                   
+                   <button id="tFilter-client_vale" onclick="setTeamFilter('client_vale')" class="text-left px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 shrink-0 border bg-white text-slate-600 hover:bg-slate-50 border-slate-200">
+                       <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M2 22h20M12 2v20M5 22V10l7-8 7 8v12"></path></svg> PT VALE
+                   </button>
+                   <button id="tFilter-client_clm" onclick="setTeamFilter('client_clm')" class="text-left px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 shrink-0 border bg-white text-slate-600 hover:bg-slate-50 border-slate-200">
+                       <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 21h18M3 7v14M21 7v14M8 21v-4M16 21v-4M3 7l9-4 9 4"></path></svg> PT CLM
+                   </button>
+                   <button id="tFilter-client_perorangan" onclick="setTeamFilter('client_perorangan')" class="text-left px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 shrink-0 border bg-white text-slate-600 hover:bg-slate-50 border-slate-200">
+                       <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="7" r="4"></circle><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path></svg> PERORANGAN
+                   </button>
+
+                   <div class="hidden lg:block w-full h-px bg-slate-100 my-1"></div>
+                   
+                   <button id="tFilter-completed" onclick="setTeamFilter('completed')" class="text-left px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 shrink-0 border bg-white text-emerald-600 hover:bg-emerald-50 border-emerald-100">
+                       <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg> Selesai (100%)
+                   </button>
+               </div>
+           </div>
+           
+           <!-- KONTEN PROYEK (KARTU-KARTU) -->
+           <div id="teamWorkspaceProjects" class="flex-1 w-full min-w-0"></div>
+
+       </div>
    </div>
 </div>
 
@@ -423,7 +466,11 @@ function handleTeamLogin(e) {
             currentUser = user;
             const namaPendek = user['NAMA'] ? user['NAMA'].split(' ')[0] : 'Engineer';
             document.getElementById('engineerNameLabel').textContent = namaPendek.toUpperCase();
-            renderTeamWorkspace();
+            
+            // Set default tab ke 'Semua Proyek Aktif' tiap kali login
+            window.currentTeamFilter = 'active_all';
+            window.setTeamFilter('active_all'); 
+
             switchView('view-team-dashboard');
             document.getElementById('loginId').value = ''; document.getElementById('loginPass').value = '';
         } else {
@@ -434,14 +481,39 @@ function handleTeamLogin(e) {
 }
 
 // ==========================================
-// 3. RENDER DASHBOARD TIM (PORTAL ENGINEER)
+// 3. RENDER DASHBOARD TIM (PORTAL ENGINEER) DENGAN SISTEM TAB
 // ==========================================
+window.currentTeamFilter = 'active_all';
+
+window.setTeamFilter = function(filter) {
+    window.currentTeamFilter = filter;
+    
+    const btnStyles = {
+        'active_all': { active: 'bg-[#003366] text-white shadow-sm border-transparent', inactive: 'bg-white text-slate-600 hover:bg-slate-50 border-slate-200' },
+        'active_slf': { active: 'bg-[#ef4444] text-white shadow-sm border-transparent', inactive: 'bg-white text-slate-600 hover:bg-slate-50 border-slate-200' },
+        'active_pbg': { active: 'bg-[#0ea5e9] text-white shadow-sm border-transparent', inactive: 'bg-white text-slate-600 hover:bg-slate-50 border-slate-200' },
+        'client_vale': { active: 'bg-[#f5a20f] text-white shadow-sm border-transparent', inactive: 'bg-white text-slate-600 hover:bg-slate-50 border-slate-200' },
+        'client_clm': { active: 'bg-rose-500 text-white shadow-sm border-transparent', inactive: 'bg-white text-slate-600 hover:bg-slate-50 border-slate-200' },
+        'client_perorangan': { active: 'bg-indigo-500 text-white shadow-sm border-transparent', inactive: 'bg-white text-slate-600 hover:bg-slate-50 border-slate-200' },
+        'completed': { active: 'bg-[#22c55e] text-white shadow-sm border-transparent', inactive: 'bg-white text-emerald-600 hover:bg-emerald-50 border-emerald-100' }
+    };
+
+    // Update gaya tombol menu di sidebar
+    Object.keys(btnStyles).forEach(key => {
+        const el = document.getElementById('tFilter-' + key);
+        if (el) {
+            el.className = `text-left px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 shrink-0 border ${key === filter ? btnStyles[key].active : btnStyles[key].inactive}`;
+        }
+    });
+
+    renderTeamWorkspace();
+};
+
 function renderTeamWorkspace() {
     const container = document.getElementById('teamWorkspaceProjects');
     if (!currentUser) return;
     
     const userDeptRaw = currentUser['DEPARTEMEN'] ? currentUser['DEPARTEMEN'].trim().toUpperCase() : '';
-    // Memecah departemen jika ada garis miring (misal: "IT ENGGINEER / SURVEYOUR" jadi 2 role terpisah)
     const userDepts = userDeptRaw.split(/[\/,]+/).map(d => d.trim()).filter(d => d !== '');
     
     const activeProjects = allData.filter(r => { 
@@ -451,16 +523,19 @@ function renderTeamWorkspace() {
         const filteredTasks = (r.Tasks || []).filter(t => {
             const taskDeptRaw = t.dept ? t.dept.trim().toUpperCase() : '';
             if (taskDeptRaw === '') return false;
-            
-            // Memecah role tugas di SOP juga
             const taskDepts = taskDeptRaw.split(/[\/,]+/).map(d => d.trim()).filter(d => d !== '');
-            
-            // LOGIKA KETAT: Harus persis (Exact Match), tidak sekadar mengandung kata
             return taskDepts.some(td => userDepts.includes(td));
         });
         
         r.userTasks = filteredTasks;
         return filteredTasks.length > 0; 
+    });
+
+    // 1. KALKULASI DULU RATA-RATA PROGRES USER DI PROYEK TERSEBUT
+    activeProjects.forEach(proj => {
+        let totalProg = 0; 
+        proj.userTasks.forEach(t => totalProg += (t.progress || 0));
+        proj.userAvgProgress = proj.userTasks.length > 0 ? Math.round(totalProg / proj.userTasks.length) : 0;
     });
     
     if (activeProjects.length === 0) {
@@ -468,30 +543,126 @@ function renderTeamWorkspace() {
         return;
     }
 
-    const slfProjects = activeProjects.filter(p => (p['Type'] || (getVal(p, KEY_MAP.name).toLowerCase().includes('pbg') ? 'PBG' : 'SLF')) === 'SLF');
-    const pbgProjects = activeProjects.filter(p => (p['Type'] || (getVal(p, KEY_MAP.name).toLowerCase().includes('pbg') ? 'PBG' : 'SLF')) === 'PBG');
+    // 2. FILTER BERDASARKAN MENU YANG DIPILIH ENGINEER
+    let filteredProjects = [];
+    let groupTitle = '';
+    let themeColor = '#003366';
+    let bgBadge = '#f1f5f9';
 
+    if (window.currentTeamFilter === 'completed') {
+        // Tampilkan hanya yang rata-ratanya 100%
+        filteredProjects = activeProjects.filter(p => p.userAvgProgress === 100);
+        groupTitle = 'PROYEK SELESAI (100%)';
+        themeColor = '#22c55e'; 
+        bgBadge = '#f0fdf4';
+    } else {
+        // Tampilkan yang belum 100%
+        let incompleteProjects = activeProjects.filter(p => p.userAvgProgress < 100);
+        
+        if (window.currentTeamFilter === 'active_slf') {
+            filteredProjects = incompleteProjects.filter(p => (p['Type'] || (getVal(p, KEY_MAP.name).toLowerCase().includes('pbg') ? 'PBG' : 'SLF')) === 'SLF');
+            groupTitle = 'PROYEK BERJALAN: SLF';
+            themeColor = '#ef4444';
+            bgBadge = '#fef2f2';
+        } else if (window.currentTeamFilter === 'active_pbg') {
+            filteredProjects = incompleteProjects.filter(p => (p['Type'] || (getVal(p, KEY_MAP.name).toLowerCase().includes('pbg') ? 'PBG' : 'SLF')) === 'PBG');
+            groupTitle = 'PROYEK BERJALAN: PBG';
+            themeColor = '#0ea5e9';
+            bgBadge = '#f0f9ff';
+        } else if (window.currentTeamFilter === 'client_vale') {
+            filteredProjects = incompleteProjects.filter(p => {
+                const c = getVal(p, KEY_MAP.client).toUpperCase().trim();
+                return c === "PTVI" || c.includes("VALE");
+            });
+            groupTitle = 'KLIEN: PT VALE';
+            themeColor = '#d97706'; // Kuning Emas
+            bgBadge = '#FFF8D6';
+        } else if (window.currentTeamFilter === 'client_clm') {
+            filteredProjects = incompleteProjects.filter(p => {
+                const c = getVal(p, KEY_MAP.client).toUpperCase().trim();
+                return c.includes("CITRA LAMPIA MANDIRI") || c.includes("CLM");
+            });
+            groupTitle = 'KLIEN: PT CLM';
+            themeColor = '#e11d48'; // Merah
+            bgBadge = '#ffe4e6';
+        } else if (window.currentTeamFilter === 'client_perorangan') {
+            filteredProjects = incompleteProjects.filter(p => {
+                const c = getVal(p, KEY_MAP.client).toUpperCase().trim();
+                return !(c === "PTVI" || c.includes("VALE")) && !(c.includes("CITRA LAMPIA MANDIRI") || c.includes("CLM"));
+            });
+            groupTitle = 'KLIEN: PERORANGAN';
+            themeColor = '#4f46e5'; // Biru Indigo
+            bgBadge = '#e0e7ff';
+        } else {
+            filteredProjects = incompleteProjects;
+            groupTitle = 'SEMUA PROYEK BERJALAN';
+            themeColor = '#003366';
+            bgBadge = '#e2e8f0';
+        }
+    }
+
+    if (filteredProjects.length === 0) {
+        container.innerHTML = `
+            <div class="mb-6"><h3 class="text-lg md:text-xl font-black text-slate-800 uppercase" style="color:${themeColor};">${groupTitle}</h3></div>
+            <div class="text-center py-16 bg-white rounded-2xl border border-dashed border-slate-300 shadow-sm flex flex-col items-center justify-center">
+                <svg viewBox="0 0 24 24" width="48" height="48" stroke="currentColor" stroke-width="1.5" fill="none" class="text-slate-300 mb-4"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <p class="text-slate-500 font-medium text-sm">Tidak ada daftar proyek dalam kategori ini.</p>
+            </div>`;
+        return;
+    }
+
+    // 3. FUNGSI RENDER (DENGAN LAYOUT GRID YANG LEBIH RAPI)
     const renderGroup = (projects, title, themeColor, bgBadge) => {
         if(projects.length === 0) return '';
-        let groupHtml = `<div class="mb-10"><h3 class="text-lg font-black text-slate-800 uppercase mb-4" style="color:${themeColor};">${title}</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-start">`;
+        let groupHtml = `
+        <div class="mb-10 animate-in fade-in duration-300">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-lg md:text-xl font-black uppercase" style="color:${themeColor};">${title}</h3>
+                <span class="text-[10px] font-bold px-3 py-1 rounded-full border shadow-sm" style="color:${themeColor}; background:${bgBadge}; border-color:${themeColor}30;">
+                    ${projects.length} PROYEK
+                </span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4 lg:gap-5 items-start">`;
 
         projects.forEach((proj, pIdx) => {
             const name = getVal(proj, KEY_MAP.name) || 'Tanpa Nama';
-            const globalIdx = name.replace(/\s+/g, '-') + pIdx + title.substring(0,3);
+            const globalIdx = name.replace(/[^a-zA-Z0-9]/g, '-') + pIdx + title.substring(0,3);
             const tasks = proj.userTasks || [];
-            let totalProg = 0; tasks.forEach(t => totalProg += (t.progress || 0));
-            const avgProgress = tasks.length > 0 ? Math.round(totalProg / tasks.length) : 0;
+            // Gunakan progress yang sudah dihitung sebelumnya
+            const avgProgress = proj.userAvgProgress;
+
+            // LOGIKA BARU: MENENTUKAN KATEGORI KLIEN (VALE, CLM, PERORANGAN)
+            const rawClient = getVal(proj, KEY_MAP.client) || '';
+            const clientUpper = rawClient.toUpperCase().trim();
+            let clientCategory = "PERORANGAN";
+            let clientBadgeClass = "bg-indigo-50 text-indigo-600 border-indigo-200"; // Default warna perorangan
+            
+            if (clientUpper === "PTVI" || clientUpper.includes("VALE")) {
+                clientCategory = "PT VALE";
+                clientBadgeClass = "bg-[#FFF8D6] text-[#d97706] border-[#FCD34D]"; // Warna Kuning PT VALE
+            } else if (clientUpper.includes("CITRA LAMPIA MANDIRI") || clientUpper.includes("CLM")) {
+                clientCategory = "PT CLM";
+                clientBadgeClass = "bg-rose-50 text-rose-600 border-rose-200"; // Warna Merah PT CLM
+            }
 
             groupHtml += `
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200" style="border-top: 4px solid ${themeColor};">
                 <div class="p-5 flex justify-between items-start cursor-pointer hover:bg-slate-50" onclick="toggleAccordion('acc-${globalIdx}', this)">
                     <div class="flex-1 pr-3">
                         <h4 class="text-[14px] font-bold text-slate-800 leading-snug mb-2">${name}</h4>
-                        <span class="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded-md border border-slate-200 inline-block">${tasks.length} TUGAS</span>
+                        
+                        <!-- MENAMPILKAN BADGE TUGAS & KLIEN SECARA BERDAMPINGAN -->
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded-md border border-slate-200 inline-block">${tasks.length} TUGAS</span>
+                            <span class="text-[9px] font-bold px-2 py-1 rounded-md border ${clientBadgeClass} inline-flex items-center gap-1 uppercase tracking-widest shadow-sm">
+                                <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                ${clientCategory}
+                            </span>
+                        </div>
                     </div>
                     <div class="flex flex-col items-end shrink-0">
-                        <span class="text-2xl font-black leading-none" style="color: ${themeColor};">${avgProgress}%</span>
-                        <div class="w-12 h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden shadow-inner"><div class="h-full rounded-full" style="width: ${avgProgress}%; background: ${themeColor};"></div></div>
+                        <span id="avg-text-${globalIdx}" class="text-2xl font-black leading-none transition-all duration-300" style="color: ${themeColor};">${avgProgress}%</span>
+                        <div class="w-12 h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden shadow-inner"><div id="avg-bar-${globalIdx}" class="h-full rounded-full transition-all duration-500" style="width: ${avgProgress}%; background: ${themeColor};"></div></div>
                     </div>
                 </div>
                 <div id="acc-${globalIdx}" class="hidden">
@@ -501,7 +672,7 @@ function renderTeamWorkspace() {
                                 <div class="w-full"><h5 class="text-[11px] font-bold text-[#003366] uppercase mb-1">${t.name}</h5><p class="text-[9px] font-medium text-slate-500">Update: <strong>${t.updatedBy || '-'}</strong></p></div>
                                 <input type="text" class="tw-input-ket w-full text-[11px] p-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-blue-500" placeholder="Keterangan..." value="${t.keterangan || ''}">
                                 <div class="flex gap-2">
-                                    <div class="relative w-20 shrink-0"><input type="number" class="tw-input-prog w-full text-xs font-black p-2.5 pr-6 bg-slate-50 border border-slate-200 rounded-lg outline-none text-center" min="0" max="100" value="${t.progress || 0}"><span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">%</span></div>
+                                    <div class="relative w-20 shrink-0"><input type="number" data-calc-id="${globalIdx}" oninput="updateLocalAverage('${globalIdx}')" class="tw-input-prog w-full text-xs font-black p-2.5 pr-6 bg-slate-50 border border-slate-200 rounded-lg outline-none text-center" min="0" max="100" value="${t.progress || 0}"><span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">%</span></div>
                                     <button onclick="saveTaskProgress(this, '${name}', '${t.name}')" class="flex-1 text-[10px] font-bold text-white rounded-lg" style="background-color: ${themeColor};">SAVE</button>
                                 </div>
                             </div>
@@ -513,8 +684,31 @@ function renderTeamWorkspace() {
         groupHtml += `</div></div>`; return groupHtml;
     };
 
-    container.innerHTML = renderGroup(slfProjects, 'KATEGORI SLF', '#ef4444', '#fef2f2') + renderGroup(pbgProjects, 'KATEGORI PBG', '#0ea5e9', '#f0f9ff');
+    container.innerHTML = renderGroup(filteredProjects, groupTitle, themeColor, bgBadge);
 }
+
+// FUNGSI BARU: KALKULASI PERSENTASE REAL-TIME SAAT MENGETIK
+window.updateLocalAverage = function(globalIdx) {
+    const inputs = document.querySelectorAll(`input[data-calc-id="${globalIdx}"]`);
+    if (inputs.length === 0) return;
+    
+    let total = 0;
+    inputs.forEach(input => {
+        let val = parseInt(input.value, 10);
+        if (isNaN(val) || val < 0) val = 0;
+        if (val > 100) val = 100;
+        total += val;
+    });
+    
+    const avg = Math.round(total / inputs.length);
+    
+    // Update Angka dan Lebar Progress Bar secara langsung
+    const textEl = document.getElementById(`avg-text-${globalIdx}`);
+    const barEl = document.getElementById(`avg-bar-${globalIdx}`);
+    
+    if (textEl) textEl.textContent = avg + '%';
+    if (barEl) barEl.style.width = avg + '%';
+};
 
 window.toggleAccordion = function(id, headerEl) {
     const contentEl = document.getElementById(id);
