@@ -35,8 +35,6 @@
   .view-section.active { display: block; animation: fadeIn 0.4s ease forwards; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-  .gateway-bg-top { position: absolute; top: 0; left: 0; width: 100%; height: 50vh; background: var(--rustika-navy); border-bottom-left-radius: 60px; border-bottom-right-radius: 60px; z-index: 0; }
-  
   /* GAYA EXECUTIVE DASHBOARD */
   .kpi-card { background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; height: 110px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
   .kpi-card::after { content:''; position: absolute; bottom:0; left:0; right:0; height: 3px; background: var(--kc, #cbd5e1); }
@@ -56,9 +54,7 @@
   .legend-dot { width: 8px; height: 8px; border-radius: 50%; shrink-0; }
 
   .detail-panel { flex: 1; overflow-y: auto; padding-right: 4px; }
-  .detail-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 14px; margin-bottom: 6px; transition: all 0.2s; border-l-4 border-l-transparent; }
-  .detail-item:hover { border-l-indigo-500 border-color: var(--rustika-navy); background: white; transform: translateX(3px); }
-
+  
   @keyframes popUpAnim { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
   .modal-animate-in { animation: popUpAnim 0.25s ease-out forwards; }
 
@@ -69,32 +65,75 @@
 <body>
 
 <!-- ==========================================
-     1. GATEWAY
+     1. GATEWAY (DIKEMBALIKAN KE DESAIN ORANYE)
      ========================================== -->
-<div id="view-gateway" class="view-section active">
-   <div class="relative min-h-screen flex flex-col items-center justify-center p-4 bg-[#003366]">
-      <div class="relative z-10 w-full max-w-[480px] flex flex-col items-center">
-         <div class="bg-white rounded-3xl p-5 shadow-xl mb-8">
-            <img src="https://rustikaconsultant.com/wp-content/uploads/2026/03/logo-rustika.png" alt="RUSTIKA" class="w-20 h-20 object-contain">
+<div id="view-gateway" class="view-section active bg-slate-50 relative overflow-hidden">
+   <!-- Latar Belakang Oranye Melengkung -->
+   <div class="absolute top-0 left-0 w-full h-[60vh] bg-[#f5a20f] rounded-b-[4rem] md:rounded-b-[5rem] z-0 shadow-md"></div>
+
+   <!-- Header Kanan Atas -->
+   <div class="absolute top-6 right-6 z-20 flex gap-3">
+      <button class="bg-white rounded-full px-3 py-1.5 flex items-center gap-2 text-[10px] font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors">
+         <img src="https://flagcdn.com/w20/id.png" alt="ID" class="w-4 rounded-sm object-cover"> ID <i data-lucide="chevron-down" class="w-3 h-3"></i>
+      </button>
+      <button class="bg-white p-2 rounded-full text-slate-700 shadow-sm hover:bg-slate-50 transition-colors">
+         <i data-lucide="moon" class="w-4 h-4"></i>
+      </button>
+   </div>
+
+   <!-- Konten Utama -->
+   <div class="relative z-10 min-h-screen flex flex-col items-center justify-center p-4 w-full">
+      
+      <!-- Bagian Logo & Tagline -->
+      <div class="flex flex-col items-center mb-8 mt-[-60px]">
+         <div class="bg-white rounded-[1.8rem] p-4 shadow-lg mb-6 w-24 h-24 flex items-center justify-center">
+            <img src="https://rustikaconsultant.com/wp-content/uploads/2026/03/logo-rustika.png" alt="RUSTIKA" class="w-16 h-16 object-contain">
          </div>
-         <h1 class="text-white text-3xl font-black text-center tracking-tight mb-2 uppercase italic">PORTAL SISTEM RUSTIKA</h1>
-         <p class="text-indigo-200/70 text-sm font-medium text-center mb-10">Integrated Project Management & Reporting System</p>
+         <p class="text-white text-xs font-medium text-center mb-5 max-w-xs leading-relaxed">
+            Solusi digital untuk absensi dan manajemen tim yang lebih praktis.
+         </p>
+         <h2 class="text-white text-lg md:text-xl font-black tracking-[0.15em] uppercase">
+            #BERSAMABERTUMBUH
+         </h2>
+      </div>
+      
+      <!-- Kartu Navigasi Utama -->
+      <div class="bg-white rounded-[2rem] p-8 md:p-10 w-full max-w-[500px] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] flex flex-col items-center">
+         <h3 class="text-[10px] font-extrabold text-slate-800 uppercase tracking-[0.15em] mb-8">MULAI MENGGUNAKAN</h3>
          
-         <div class="bg-white rounded-[2.5rem] p-8 w-full shadow-2xl flex gap-5">
-            <div onclick="switchView('view-team-login')" class="flex-1 flex flex-col items-center gap-4 p-6 border-2 border-slate-100 rounded-3xl cursor-pointer hover:border-amber-400 hover:bg-amber-50 transition-all group text-center">
-               <div class="w-14 h-14 bg-slate-50 text-slate-400 rounded-2xl flex items-center justify-center group-hover:bg-amber-500 group-hover:text-white transition-all shadow-sm">
-                  <i data-lucide="users" class="w-7 h-7"></i>
+         <div class="flex justify-center gap-6 md:gap-10 w-full">
+            <!-- Tombol Absensi -->
+            <div onclick="alert('Sedang pengembangan oleh tim IT SUPPORT')" class="flex flex-col items-center gap-3 cursor-pointer group w-20">
+               <div class="w-16 h-16 rounded-2xl border border-[#f5a20f]/40 text-[#f5a20f] flex items-center justify-center group-hover:bg-[#f5a20f]/10 group-hover:scale-105 transition-all shadow-sm">
+                  <i data-lucide="scan-face" class="w-7 h-7 stroke-[1.5]"></i>
                </div>
-               <h3 class="text-[10px] font-black text-slate-800 uppercase tracking-wider leading-tight">PORTAL<br>ENGINEER</h3>
+               <span class="text-[11px] font-bold text-slate-700 text-center leading-tight group-hover:text-[#f5a20f] transition-colors">Absensi</span>
             </div>
             
-            <div onclick="switchView('view-executive')" class="flex-1 flex flex-col items-center gap-4 p-6 border-2 border-slate-100 rounded-3xl cursor-pointer hover:border-amber-400 hover:bg-amber-50 transition-all group text-center">
-               <div class="w-14 h-14 bg-slate-50 text-slate-400 rounded-2xl flex items-center justify-center group-hover:bg-amber-500 group-hover:text-white transition-all shadow-sm">
-                  <i data-lucide="layout-dashboard" class="w-7 h-7"></i>
+            <!-- Tombol Portal Engineer -->
+            <div onclick="switchView('view-team-login')" class="flex flex-col items-center gap-3 cursor-pointer group w-20">
+               <div class="w-16 h-16 rounded-2xl border border-[#f5a20f]/40 text-[#f5a20f] flex items-center justify-center group-hover:bg-[#f5a20f]/10 group-hover:scale-105 transition-all shadow-sm">
+                  <i data-lucide="file-text" class="w-7 h-7 stroke-[1.5]"></i>
                </div>
-               <h3 class="text-[10px] font-black text-slate-800 uppercase tracking-wider leading-tight">BOD<br>PANEL</h3>
+               <span class="text-[11px] font-bold text-slate-700 text-center leading-tight group-hover:text-[#f5a20f] transition-colors">Portal<br>Engineer</span>
+            </div>
+
+            <!-- Tombol BOD Panel -->
+            <div onclick="switchView('view-executive')" class="flex flex-col items-center gap-3 cursor-pointer group w-20">
+               <div class="w-16 h-16 rounded-2xl border border-[#f5a20f]/40 text-[#f5a20f] flex items-center justify-center group-hover:bg-[#f5a20f]/10 group-hover:scale-105 transition-all shadow-sm">
+                  <i data-lucide="layout-grid" class="w-7 h-7 stroke-[1.5]"></i>
+               </div>
+               <span class="text-[11px] font-bold text-slate-700 text-center leading-tight group-hover:text-[#f5a20f] transition-colors">BOD<br>Panel</span>
             </div>
          </div>
+      </div>
+      
+      <!-- Footer -->
+      <div class="absolute bottom-6 w-full text-center flex flex-col items-center justify-center gap-1.5">
+         <p class="text-[9px] font-bold text-slate-400">Powered By :</p>
+         <p class="text-[9px] font-bold text-slate-600">PT RUSTIKA CITRA GROUP & PT RUSTIKA GLOBAL INDONESIA</p>
+         <p class="text-[9px] font-medium text-slate-400">IT_Support Rustika Consultant</p>
+         <p class="text-[8px] font-medium text-slate-400 mt-1">Version 1.1.0</p>
       </div>
    </div>
 </div>
@@ -118,7 +157,7 @@
 </div>
 
 <!-- ==========================================
-     3. DASHBOARD TIM (TIDAK DISENTUH - DIKUNCI AMAN)
+     3. DASHBOARD TIM
      ========================================== -->
 <div id="view-team-dashboard" class="view-section bg-slate-50">
    <header class="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-40 shadow-sm">
@@ -217,7 +256,7 @@
             </div>
             <div class="chart-card">
                 <div class="chart-title" id="detailTitle">DAFTAR TERPILIH</div>
-                <!-- PANEL DIAGRAM KE ATAS (HORIZONTAL SCROLL) -->
+                <!-- PANEL DIAGRAM KE ATAS -->
                 <div class="flex-1 w-full overflow-x-auto overflow-y-hidden no-scrollbar relative" id="detailPanel">
                     <div class="w-full h-full flex flex-col items-center justify-center text-center p-8 text-slate-400 absolute inset-0">
                         <i data-lucide="bar-chart-3" class="w-8 h-8 mb-3 opacity-20"></i>
@@ -227,7 +266,7 @@
             </div>
         </div>
 
-        <!-- PROJECT PROGRESS TRACKER (KARTU KUNING DIKECILKAN & DIPERLEMBUT WARNANYA) -->
+        <!-- PROJECT PROGRESS TRACKER -->
         <div class="pt-6 border-t border-slate-200">
             <h2 class="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-6 flex items-center gap-3">
                 <i data-lucide="layout-grid" class="w-4 h-4 text-[#ef4444]"></i> Project Progress Tracker
@@ -241,7 +280,7 @@
      POPUP MODALS
      ========================================== -->
 
-<!-- MODAL POPUP BOD: DIPERBESAR AGAR LEGA (max-w-4xl) -->
+<!-- MODAL POPUP BOD -->
 <div id="bodModal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 transition-all">
     <div class="bg-white rounded-[2rem] w-full max-w-4xl shadow-2xl flex flex-col modal-animate-in max-h-[90vh] overflow-hidden">
         
@@ -354,7 +393,7 @@ function updateUI() {
 }
 
 // ==========================================
-// RENDER: ENGINEER WORKSPACE (STRICT MATCH)
+// RENDER: ENGINEER WORKSPACE
 // ==========================================
 function renderTeamWorkspace() {
   const cont = document.getElementById('projectList');
@@ -367,7 +406,6 @@ function renderTeamWorkspace() {
     const statusVal = getVal(p, KEY_MAP.status).toLowerCase();
     if (!statusVal.includes('active') && statusVal !== 'new') return false;
 
-    // Filter Strict Role
     const tasks = (p.Tasks || []).filter(t => {
        const taskRoles = (t.dept || '').toUpperCase().split(/[\/,]+/).map(r => r.trim());
        if (taskRoles.length === 0 || taskRoles[0] === '') return false;
@@ -484,7 +522,6 @@ async function saveProgress(btn, proj, task) {
     await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'UPDATE_PROGRESS', projectName: proj, taskName: task, teamCode: (currentUser['KODE'] || '-'), progress: prog, keterangan: ket }) });
     btn.innerHTML = '✓ SAVED'; btn.classList.replace('bg-slate-900', 'bg-emerald-500');
     
-    // Optimistic Update
     const pData = allData.find(p => getVal(p, KEY_MAP.name) === proj);
     if(pData && pData.Tasks) {
         const tData = pData.Tasks.find(t => t.name === task);
@@ -524,13 +561,12 @@ function renderFilteredList(type, value) {
       return;
   }
   
-  // MERENDER DIAGRAM BATANG VERTIKAL
   panel.innerHTML = `<div class="flex gap-4 items-end h-full min-w-max px-2 pb-2 pt-8">` + 
     filtered.map((p, idx) => {
         const name = getVal(p, KEY_MAP.name);
         const pic = getVal(p, ['pic']) || '-';
         const progress = parseInt(p['Overall Progress']) || 0;
-        const targetHeight = Math.max(progress, 5);
+        const targetHeight = Math.max(progress, 5); 
         const barColor = progress === 100 ? 'bg-emerald-400' : 'bg-sky-400';
 
         return `
