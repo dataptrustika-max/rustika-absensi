@@ -268,11 +268,19 @@
             </div>
         </div>
 
-        <!-- PROJECT PROGRESS TRACKER -->
+        <!-- PROJECT PROGRESS TRACKER DENGAN FILTER TAB BARU -->
         <div class="pt-6 border-t border-slate-200">
-            <h2 class="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-6 flex items-center gap-3">
-                <i data-lucide="layout-grid" class="w-4 h-4 text-[#ef4444]"></i> Project Progress Tracker
-            </h2>
+            <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
+                <h2 class="text-xs font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-3 shrink-0">
+                    <i data-lucide="layout-grid" class="w-4 h-4 text-[#ef4444]"></i> Project Progress Tracker
+                </h2>
+                
+                <!-- CONTAINER MENU KATEGORI (HORIZONTAL SCROLL) -->
+                <div id="execFilters" class="flex gap-2 overflow-x-auto no-scrollbar pb-2 xl:pb-0 w-full xl:w-auto">
+                    <!-- Tombol-tombol akan di-render melalui JavaScript -->
+                </div>
+            </div>
+            
             <div id="executiveGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5"></div>
         </div>
     </main>
@@ -331,6 +339,7 @@
 // CONFIG & STATE ENGINE
 // ==========================================
 let allData = [], teamsData = [], currentUser = null, curTeamFilter = 'active_all';
+let curExecFilter = 'ACTIVE'; // State untuk filter Executive Dashboard
 let charts = {};
 const API_URL = 'https://script.google.com/macros/s/AKfycbwsrw3LWLuHK8e5X1ABtOqbVaMfGwHFiFoG9kJ3lcNUPte3Ssf88hEwrkJoMBnt1zysTw/exec';
 
@@ -340,6 +349,21 @@ const KEY_MAP = {
     status: ['active by project', 'status'],
     priority: ['active by status/priority', 'priority']
 };
+
+// Konfigurasi Kategori Filter untuk Executive Dashboard
+const execFiltersConfig = [
+    { id: 'ACTIVE', label: 'Active', color: 'bg-sky-500' },
+    { id: 'SLF', label: 'SLF', color: 'bg-rose-500' },
+    { id: 'PBG', label: 'PBG', color: 'bg-amber-500' },
+    { id: 'VALE', label: 'PT VALE', color: 'bg-teal-600' },
+    { id: 'CLM', label: 'PT CLM', color: 'bg-red-600' },
+    { id: 'PERORANGAN', label: 'Perorangan', color: 'bg-indigo-500' },
+    { id: 'HIGH', label: 'High', color: 'bg-rose-600' },
+    { id: 'MEDIUM', label: 'Medium', color: 'bg-orange-500' },
+    { id: 'LOW', label: 'Low', color: 'bg-emerald-500' },
+    { id: 'CLOSED', label: 'Closed', color: 'bg-slate-500' },
+    { id: 'COMPLETE', label: 'Complete', color: 'bg-green-600' }
+];
 
 // Auto load data dari cache saat aplikasi dibuka pertama kali
 try {
@@ -357,7 +381,6 @@ function getVal(obj, keys) {
   return "";
 }
 
-// FIX: Cegah double fetch jika parameter skipInit bernilai true
 function switchView(id, skipInit = false) {
   document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -365,12 +388,11 @@ function switchView(id, skipInit = false) {
   lucide.createIcons();
 }
 
-// FUNGSI AUTO LOGIN UNTUK ENGINEER
 function checkLoginAndGo() {
     if(currentUser) {
         updateUI();
         renderTeamWorkspace();
-        switchView('view-team-dashboard', true); // Lewati fetch ulang karena sudah dikerjakan di latar belakang
+        switchView('view-team-dashboard', true); 
     } else {
         switchView('view-team-login', true);
     }
@@ -388,21 +410,19 @@ async function handleTeamLogin(e) {
   
   btn.innerHTML = 'VERIFIKASI...'; btn.disabled = true; msg.classList.add('hidden');
   try {
-    // Tarik data 1x saja saat login
     const res = await fetch(API_URL + "?nocache=" + new Date().getTime(), { cache: "no-store" });
     const data = await res.json();
     
-    // Simpan ke Cache Memory agar akses berikutnya super kilat
     localStorage.setItem('rustikaData', JSON.stringify(data));
     
     allData = data.projects || []; teamsData = data.teams || [];
     const user = teamsData.find(t => (t['EMAIL'] || '').toLowerCase() === email && (t['PASSWORD'] || '').toString() === pass);
     if(user) {
       currentUser = user; 
-      localStorage.setItem('rustikaUser', JSON.stringify(user)); // Simpan Sesi Login
+      localStorage.setItem('rustikaUser', JSON.stringify(user)); 
       updateUI(); 
       renderTeamWorkspace(); 
-      switchView('view-team-dashboard', true); // True untuk memblokir bug double-fetch
+      switchView('view-team-dashboard', true); 
     } else { msg.textContent = "Email atau Password salah!"; msg.classList.remove('hidden'); }
   } catch(e) { msg.textContent = "Masalah koneksi!"; msg.classList.remove('hidden'); }
   btn.innerHTML = 'Masuk Sekarang'; btn.disabled = false;
@@ -410,7 +430,7 @@ async function handleTeamLogin(e) {
 
 function handleLogout() { 
     currentUser = null; 
-    localStorage.removeItem('rustikaUser'); // Hapus memori sesi
+    localStorage.removeItem('rustikaUser'); 
     switchView('view-gateway', true); 
 }
 
@@ -566,7 +586,7 @@ async function saveProgress(btn, proj, task) {
 }
 
 // ==========================================
-// RENDER: EXECUTIVE (BOD) PANEL
+// RENDER: EXECUTIVE (BOD) PANEL 
 // ==========================================
 function renderFilteredList(type, value) {
   const panel = document.getElementById('detailPanel');
@@ -655,37 +675,61 @@ function makePie(id, labels, data, colors, type){
   `).join('');
 }
 
-function renderExecutive() {
+// MENGATUR FILTER EXECUTIVE DASHBOARD GRID
+window.setExecFilter = function(filterId) {
+    curExecFilter = filterId;
+    renderExecutiveGrid();
+};
+
+// RENDER GRID KARTU KUNING EXECUTIVE
+function renderExecutiveGrid() {
     const grid = document.getElementById('executiveGrid');
-    const active = allData.filter(p => getVal(p, KEY_MAP.status).toLowerCase().includes('active'));
+    const filterContainer = document.getElementById('execFilters');
+    
+    // Render tombol Filter
+    if (filterContainer) {
+        filterContainer.innerHTML = execFiltersConfig.map(f => `
+            <button onclick="setExecFilter('${f.id}')" class="px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border ${curExecFilter === f.id ? f.color + ' text-white border-transparent shadow-md scale-[1.02]' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50 hover:text-slate-700'}">
+                ${f.label}
+            </button>
+        `).join('');
+    }
 
-    const stats = allData.reduce((a,p) => {
-        const s = getVal(p, KEY_MAP.status).toLowerCase();
-        if(s.includes('complete')) a.comp++; else if(s.includes('hold')) a.hold++; else if(s.includes('closed')) a.closed++; else if(s === 'new') a.new++; else if(s.includes('active')) a.act++;
-        return a;
-    }, { act:0, new:0, comp:0, hold:0, closed:0 });
-
-    document.getElementById('k0').textContent = allData.length;
-    document.getElementById('k1').textContent = stats.act;
-    document.getElementById('k2').textContent = stats.new;
-    document.getElementById('k3').textContent = stats.comp;
-    document.getElementById('k4').textContent = stats.hold;
-    document.getElementById('k5').textContent = stats.closed;
-
-    makePie('cProjType', ['Active', 'Closed', 'Complete'], [stats.act, stats.closed, stats.comp], ['#0ea5e9', '#94a3b8', '#22c55e'], 'status');
-
-    const pCounts = allData.reduce((a,p) => {
+    // Filter Data untuk Grid Kartu Kuning
+    const filteredData = allData.filter(p => {
+        const statusVal = getVal(p, KEY_MAP.status).toLowerCase();
+        const pType = (p.Type || (getVal(p, KEY_MAP.name).includes('PBG') ? 'PBG' : 'SLF')).toUpperCase();
+        const client = getVal(p, KEY_MAP.client).toUpperCase();
         const prRaw = getVal(p, KEY_MAP.priority).toUpperCase();
-        if(prRaw.includes('HIGH') || prRaw.includes('HIGHT')) a.High++;
-        else if(prRaw.includes('MEDIUM')) a.Medium++;
-        else if(prRaw.includes('LOW')) a.Low++;
-        return a;
-    }, { High: 0, Medium: 0, Low: 0 });
-    makePie('cPriority', ['High', 'Medium', 'Low'], [pCounts.High, pCounts.Medium, pCounts.Low], ['#ef4444', '#f97316', '#22c55e'], 'priority');
+        const priority = prRaw.includes('HIGH') || prRaw.includes('HIGHT') ? 'HIGH' : (prRaw.includes('MEDIUM') ? 'MEDIUM' : 'LOW');
 
-    window.currentExecutiveData = active;
+        if(curExecFilter === 'ACTIVE') return statusVal.includes('active');
+        if(curExecFilter === 'CLOSED') return statusVal.includes('closed');
+        if(curExecFilter === 'COMPLETE') return statusVal.includes('complete');
+        
+        if(curExecFilter === 'SLF') return pType === 'SLF';
+        if(curExecFilter === 'PBG') return pType === 'PBG';
+        
+        if(curExecFilter === 'VALE') return client.includes('VALE') || client.includes('PTVI');
+        if(curExecFilter === 'CLM') return client.includes('CLM') || client.includes('CITRA LAMPIA');
+        if(curExecFilter === 'PERORANGAN') return !client.includes('VALE') && !client.includes('PTVI') && !client.includes('CLM') && !client.includes('CITRA LAMPIA');
+        
+        if(curExecFilter === 'HIGH') return priority === 'HIGH';
+        if(curExecFilter === 'MEDIUM') return priority === 'MEDIUM';
+        if(curExecFilter === 'LOW') return priority === 'LOW';
 
-    grid.innerHTML = active.map((p, pIdx) => {
+        return true;
+    });
+
+    window.currentExecutiveData = filteredData;
+
+    if (filteredData.length === 0) {
+        grid.innerHTML = `<div class="col-span-full py-16 flex flex-col items-center justify-center text-slate-400 text-[11px] font-bold uppercase tracking-widest bg-white rounded-3xl border border-dashed border-slate-200"><i data-lucide="inbox" class="w-8 h-8 mb-3 opacity-20"></i> Tidak ada data di kategori ini.</div>`;
+        lucide.createIcons();
+        return;
+    }
+
+    grid.innerHTML = filteredData.map((p, pIdx) => {
         const progress = p['Overall Progress'] || 0;
         const tasks = p.Tasks || [];
         const priorityRaw = getVal(p, KEY_MAP.priority).toUpperCase();
@@ -740,6 +784,35 @@ function renderExecutive() {
         </div>`;
     }).join('');
     lucide.createIcons();
+}
+
+function renderExecutive() {
+    const stats = allData.reduce((a,p) => {
+        const s = getVal(p, KEY_MAP.status).toLowerCase();
+        if(s.includes('complete')) a.comp++; else if(s.includes('hold')) a.hold++; else if(s.includes('closed')) a.closed++; else if(s === 'new') a.new++; else if(s.includes('active')) a.act++;
+        return a;
+    }, { act:0, new:0, comp:0, hold:0, closed:0 });
+
+    document.getElementById('k0').textContent = allData.length;
+    document.getElementById('k1').textContent = stats.act;
+    document.getElementById('k2').textContent = stats.new;
+    document.getElementById('k3').textContent = stats.comp;
+    document.getElementById('k4').textContent = stats.hold;
+    document.getElementById('k5').textContent = stats.closed;
+
+    makePie('cProjType', ['Active', 'Closed', 'Complete'], [stats.act, stats.closed, stats.comp], ['#0ea5e9', '#94a3b8', '#22c55e'], 'status');
+
+    const pCounts = allData.reduce((a,p) => {
+        const prRaw = getVal(p, KEY_MAP.priority).toUpperCase();
+        if(prRaw.includes('HIGH') || prRaw.includes('HIGHT')) a.High++;
+        else if(prRaw.includes('MEDIUM')) a.Medium++;
+        else if(prRaw.includes('LOW')) a.Low++;
+        return a;
+    }, { High: 0, Medium: 0, Low: 0 });
+    makePie('cPriority', ['High', 'Medium', 'Low'], [pCounts.High, pCounts.Medium, pCounts.Low], ['#ef4444', '#f97316', '#22c55e'], 'priority');
+
+    // Panggil fungsi render grid terpisah agar tidak mereset pie charts
+    renderExecutiveGrid();
 }
 
 window.openBodModal = function(pIdx, phIdx) {
@@ -798,10 +871,9 @@ function openPasswordModal() { document.getElementById('passwordModal').classLis
 function closePasswordModal() { document.getElementById('passwordModal').classList.replace('flex', 'hidden'); }
 
 // ==========================================
-// ENGINE DATA DENGAN HYPER-CACHE
+// ENGINE DATA
 // ==========================================
 async function init(isAuto = false) {
-    // 1. TAMPILKAN DATA DARI MEMORI LOKAL DULU (Pemuatan Instan 0.1 Detik)
     try {
         const cached = localStorage.getItem('rustikaData');
         if (cached) {
@@ -818,16 +890,13 @@ async function init(isAuto = false) {
         }
     } catch(e) {}
 
-    // 2. SINKRONISASI DATA TERBARU DARI EXCEL (Berjalan diam-diam di latar belakang)
     try {
         const res = await fetch(API_URL + "?nocache=" + new Date().getTime(), { cache: "no-store" });
         const data = await res.json();
         
-        // Simpan data terbaru ke memori
         localStorage.setItem('rustikaData', JSON.stringify(data));
         allData = data.projects || []; teamsData = data.teams || [];
         
-        // Refresh tampilan secara otomatis jika ada progres baru masuk
         if (document.getElementById('view-team-dashboard').classList.contains('active') && currentUser) {
             currentUser = teamsData.find(t => (t['EMAIL'] || '') === currentUser['EMAIL']) || currentUser;
             updateUI(); renderTeamWorkspace();
