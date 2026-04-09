@@ -614,7 +614,8 @@ function renderFilteredList(type, value) {
       return;
   }
   
-  panel.innerHTML = `<div class="flex gap-4 items-end h-full min-w-max px-2 pb-2 pt-8">` + 
+  // PERBAIKAN: GRAFIK DIRAPATKAN, LEBAR DIKECILKAN, DAN TEKS DIMIRINGKAN (-45 DEGREE)
+  panel.innerHTML = `<div class="flex gap-2.5 items-end h-full min-w-max px-4 pb-2 pt-4">` + 
     filtered.map((p, idx) => {
         const name = getVal(p, KEY_MAP.name);
         const pic = getVal(p, ['pic']) || '-';
@@ -623,19 +624,22 @@ function renderFilteredList(type, value) {
         const barColor = progress === 100 ? 'bg-emerald-400' : 'bg-sky-400';
 
         return `
-        <div class="flex flex-col items-center justify-end h-full w-[85px] shrink-0 group cursor-default animate-in fade-in slide-in-from-bottom-4 duration-500" style="animation-delay: ${idx * 50}ms; animation-fill-mode: both;">
-            <span class="text-[11px] font-black text-indigo-600 mb-2 opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 duration-300">${progress}%</span>
+        <div class="flex flex-col items-center justify-end h-full w-[38px] shrink-0 group cursor-default animate-in fade-in slide-in-from-bottom-4 duration-500" style="animation-delay: ${idx * 30}ms; animation-fill-mode: both;">
+            <span class="text-[9px] font-black text-indigo-600 mb-1 opacity-0 group-hover:opacity-100 transition-opacity translate-y-1 group-hover:translate-y-0 duration-300">${progress}%</span>
             
-            <div class="w-12 bg-slate-100/80 rounded-t-xl h-[130px] flex items-end overflow-hidden relative shadow-inner border border-slate-200/50 border-b-0">
-                <div class="animated-bar w-full ${barColor} rounded-t-xl transition-all duration-1000 ease-out relative" style="height: 0%" data-height="${targetHeight}%">
+            <div class="w-8 bg-slate-100/80 rounded-t-md h-[130px] flex items-end overflow-hidden relative shadow-inner border border-slate-200/50 border-b-0 group-hover:bg-slate-200 transition-colors">
+                <div class="animated-bar w-full ${barColor} rounded-t-md transition-all duration-1000 ease-out relative" style="height: 0%" data-height="${targetHeight}%">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
                 </div>
-                <span class="absolute bottom-2 w-full text-center text-[10px] font-black ${progress < 15 ? 'text-slate-500' : 'text-white'} drop-shadow-sm transition-colors duration-500">${progress}%</span>
+                <span class="absolute bottom-1 w-full text-center text-[8px] font-black ${progress < 15 ? 'text-slate-500' : 'text-white'} drop-shadow-sm transition-colors duration-500">${progress}%</span>
             </div>
             
-            <div class="mt-3 w-full text-center">
-                <p class="text-[9px] font-black text-slate-700 truncate w-full uppercase" title="${name}">${name}</p>
-                <p class="text-[7.5px] font-bold text-slate-400 truncate w-full uppercase mt-1" title="${pic}">${pic}</p>
+            <!-- Ruang khusus untuk teks yang dimiringkan (slanted) -->
+            <div class="mt-2 h-[75px] relative w-[2px]">
+                <div class="absolute top-1 right-1 origin-top-right -rotate-45 w-[100px] text-right">
+                    <p class="text-[8px] font-extrabold text-slate-700 truncate w-full uppercase" title="${name}">${name}</p>
+                    <p class="text-[6.5px] font-bold text-slate-400 truncate w-full uppercase mt-0.5" title="${pic}">${pic}</p>
+                </div>
             </div>
         </div>`;
     }).join('') + `</div>`;
