@@ -35,6 +35,8 @@
   .view-section.active { display: block; animation: fadeIn 0.4s ease forwards; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+  .gateway-bg-top { position: absolute; top: 0; left: 0; width: 100%; height: 50vh; background: var(--rustika-navy); border-bottom-left-radius: 60px; border-bottom-right-radius: 60px; z-index: 0; }
+  
   /* GAYA EXECUTIVE DASHBOARD */
   .kpi-card { background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; height: 110px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
   .kpi-card::after { content:''; position: absolute; bottom:0; left:0; right:0; height: 3px; background: var(--kc, #cbd5e1); }
@@ -65,7 +67,7 @@
 <body>
 
 <!-- ==========================================
-     1. GATEWAY (DIKEMBALIKAN KE DESAIN ORANYE)
+     1. GATEWAY
      ========================================== -->
 <div id="view-gateway" class="view-section active bg-slate-50 relative overflow-hidden">
    <!-- Latar Belakang Oranye Melengkung -->
@@ -111,7 +113,7 @@
             </div>
             
             <!-- Tombol Portal Engineer -->
-            <div onclick="switchView('view-team-login')" class="flex flex-col items-center gap-3 cursor-pointer group w-20">
+            <div onclick="checkLoginAndGo()" class="flex flex-col items-center gap-3 cursor-pointer group w-20">
                <div class="w-16 h-16 rounded-2xl border border-[#f5a20f]/40 text-[#f5a20f] flex items-center justify-center group-hover:bg-[#f5a20f]/10 group-hover:scale-105 transition-all shadow-sm">
                   <i data-lucide="file-text" class="w-7 h-7 stroke-[1.5]"></i>
                </div>
@@ -339,6 +341,12 @@ const KEY_MAP = {
     priority: ['active by status/priority', 'priority']
 };
 
+// Auto load data dari cache saat aplikasi dibuka pertama kali
+try {
+    const savedUser = localStorage.getItem('rustikaUser');
+    if(savedUser) currentUser = JSON.parse(savedUser);
+} catch(e){}
+
 function getVal(obj, keys) {
   if(!obj) return "";
   const oKeys = Object.keys(obj);
@@ -349,11 +357,23 @@ function getVal(obj, keys) {
   return "";
 }
 
-function switchView(id) {
+// FIX: Cegah double fetch jika parameter skipInit bernilai true
+function switchView(id, skipInit = false) {
   document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  if(id === 'view-executive' || id === 'view-team-dashboard') init(false);
+  if(!skipInit && (id === 'view-executive' || id === 'view-team-dashboard')) init(false);
   lucide.createIcons();
+}
+
+// FUNGSI AUTO LOGIN UNTUK ENGINEER
+function checkLoginAndGo() {
+    if(currentUser) {
+        updateUI();
+        renderTeamWorkspace();
+        switchView('view-team-dashboard', true); // Lewati fetch ulang karena sudah dikerjakan di latar belakang
+    } else {
+        switchView('view-team-login', true);
+    }
 }
 
 // ==========================================
@@ -368,18 +388,31 @@ async function handleTeamLogin(e) {
   
   btn.innerHTML = 'VERIFIKASI...'; btn.disabled = true; msg.classList.add('hidden');
   try {
+    // Tarik data 1x saja saat login
     const res = await fetch(API_URL + "?nocache=" + new Date().getTime(), { cache: "no-store" });
     const data = await res.json();
+    
+    // Simpan ke Cache Memory agar akses berikutnya super kilat
+    localStorage.setItem('rustikaData', JSON.stringify(data));
+    
     allData = data.projects || []; teamsData = data.teams || [];
     const user = teamsData.find(t => (t['EMAIL'] || '').toLowerCase() === email && (t['PASSWORD'] || '').toString() === pass);
     if(user) {
-      currentUser = user; updateUI(); renderTeamWorkspace(); switchView('view-team-dashboard');
+      currentUser = user; 
+      localStorage.setItem('rustikaUser', JSON.stringify(user)); // Simpan Sesi Login
+      updateUI(); 
+      renderTeamWorkspace(); 
+      switchView('view-team-dashboard', true); // True untuk memblokir bug double-fetch
     } else { msg.textContent = "Email atau Password salah!"; msg.classList.remove('hidden'); }
   } catch(e) { msg.textContent = "Masalah koneksi!"; msg.classList.remove('hidden'); }
   btn.innerHTML = 'Masuk Sekarang'; btn.disabled = false;
 }
 
-function handleLogout() { currentUser = null; switchView('view-gateway'); }
+function handleLogout() { 
+    currentUser = null; 
+    localStorage.removeItem('rustikaUser'); // Hapus memori sesi
+    switchView('view-gateway', true); 
+}
 
 function updateUI() {
   if(!currentUser) return;
@@ -765,14 +798,36 @@ function openPasswordModal() { document.getElementById('passwordModal').classLis
 function closePasswordModal() { document.getElementById('passwordModal').classList.replace('flex', 'hidden'); }
 
 // ==========================================
-// ENGINE DATA
+// ENGINE DATA DENGAN HYPER-CACHE
 // ==========================================
 async function init(isAuto = false) {
+    // 1. TAMPILKAN DATA DARI MEMORI LOKAL DULU (Pemuatan Instan 0.1 Detik)
+    try {
+        const cached = localStorage.getItem('rustikaData');
+        if (cached) {
+            const data = JSON.parse(cached);
+            allData = data.projects || []; teamsData = data.teams || [];
+            
+            if (document.getElementById('view-team-dashboard').classList.contains('active') && currentUser) {
+                currentUser = teamsData.find(t => (t['EMAIL'] || '') === currentUser['EMAIL']) || currentUser;
+                updateUI(); renderTeamWorkspace();
+            }
+            if (document.getElementById('view-executive').classList.contains('active')) {
+                renderExecutive();
+            }
+        }
+    } catch(e) {}
+
+    // 2. SINKRONISASI DATA TERBARU DARI EXCEL (Berjalan diam-diam di latar belakang)
     try {
         const res = await fetch(API_URL + "?nocache=" + new Date().getTime(), { cache: "no-store" });
         const data = await res.json();
+        
+        // Simpan data terbaru ke memori
+        localStorage.setItem('rustikaData', JSON.stringify(data));
         allData = data.projects || []; teamsData = data.teams || [];
         
+        // Refresh tampilan secara otomatis jika ada progres baru masuk
         if (document.getElementById('view-team-dashboard').classList.contains('active') && currentUser) {
             currentUser = teamsData.find(t => (t['EMAIL'] || '') === currentUser['EMAIL']) || currentUser;
             updateUI(); renderTeamWorkspace();
