@@ -48,9 +48,16 @@
   .chart-title { font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9; }
   .chart-wrap { position: relative; height: 200px; display: flex; align-items: center; justify-content: center; }
   
+  /* EFEK SHADOW PREMIUM UNTUK PIE CHART */
+  .chart-canvas-3d { filter: drop-shadow(0px 10px 14px rgba(0, 0, 0, 0.18)); transition: all 0.3s ease; }
+  
   .legend-item { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; color: #475569; background: #f8fafc; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 99px; cursor: pointer; transition: all 0.2s; }
   .legend-item:hover { border-color: var(--rustika-navy); background: white; }
   .legend-dot { width: 8px; height: 8px; border-radius: 50%; shrink-0; }
+
+  .detail-panel { flex: 1; overflow-y: auto; padding-right: 4px; }
+  .detail-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 14px; margin-bottom: 6px; transition: all 0.2s; border-l-4 border-l-transparent; }
+  .detail-item:hover { border-l-indigo-500 border-color: var(--rustika-navy); background: white; transform: translateX(3px); }
 
   @keyframes popUpAnim { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
   .modal-animate-in { animation: popUpAnim 0.25s ease-out forwards; }
@@ -139,7 +146,7 @@
             <h2 id="engName" class="text-3xl font-black uppercase tracking-tight">-</h2>
             <p id="engMeta" class="text-sm font-bold text-indigo-600 uppercase tracking-widest mt-1">-</p>
          </div>
-         <button onclick="openPasswordModal()" class="z-10 bg-[#5046e5] text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase shadow-lg shadow-indigo-500/20">Ubah Sandi</button>
+         <button onclick="openPasswordModal()" class="z-10 bg-[#5046e5] hover:bg-[#4338ca] text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase shadow-lg shadow-indigo-500/20">Ubah Sandi</button>
       </div>
 
       <div class="bg-white rounded-[2rem] border border-slate-200 p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
@@ -200,12 +207,12 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div class="chart-card">
                 <div class="chart-title">Active by Project</div>
-                <div class="chart-wrap"><canvas id="cProjType"></canvas></div>
+                <div class="chart-wrap"><canvas id="cProjType" class="chart-canvas-3d"></canvas></div>
                 <div class="flex flex-wrap gap-2 justify-center mt-6" id="lProjType"></div>
             </div>
             <div class="chart-card">
                 <div class="chart-title">Active by Priority</div>
-                <div class="chart-wrap"><canvas id="cPriority"></canvas></div>
+                <div class="chart-wrap"><canvas id="cPriority" class="chart-canvas-3d"></canvas></div>
                 <div class="flex flex-wrap gap-2 justify-center mt-6" id="lPriority"></div>
             </div>
             <div class="chart-card">
@@ -489,7 +496,7 @@ async function saveProgress(btn, proj, task) {
 }
 
 // ==========================================
-// RENDER: EXECUTIVE (BOD) PANEL (DENGAN DIAGRAM BAR)
+// RENDER: EXECUTIVE (BOD) PANEL
 // ==========================================
 function renderFilteredList(type, value) {
   const panel = document.getElementById('detailPanel');
@@ -505,8 +512,8 @@ function renderFilteredList(type, value) {
     }
     if(type === 'priority') {
         const prRaw = getVal(p, KEY_MAP.priority).toUpperCase();
-        const prName = prRaw.includes('HIGH') || prRaw.includes('HIGHT') ? 'High' : (prRaw.includes('MEDIUM') ? 'Medium' : 'Low');
-        return prName === value && statusVal.includes('active');
+        const prName = prRaw.includes('HIGH') || prRaw.includes('HIGHT') ? 'High' : (prRaw.includes('MEDIUM') ? 'Medium' : (prRaw.includes('LOW') ? 'Low' : ''));
+        return prName === value;
     }
     return false;
   });
@@ -517,29 +524,26 @@ function renderFilteredList(type, value) {
       return;
   }
   
-  // MERENDER DIAGRAM BATANG VERTIKAL (Diagram Ke Atas)
-  panel.innerHTML = `<div class="flex gap-4 items-end h-full min-w-max px-2 pb-2">` + 
+  // MERENDER DIAGRAM BATANG VERTIKAL
+  panel.innerHTML = `<div class="flex gap-4 items-end h-full min-w-max px-2 pb-2 pt-8">` + 
     filtered.map((p, idx) => {
         const name = getVal(p, KEY_MAP.name);
         const pic = getVal(p, ['pic']) || '-';
         const progress = parseInt(p['Overall Progress']) || 0;
-        const targetHeight = Math.max(progress, 5); // Minimum height agar balok tetap terlihat di 0%
+        const targetHeight = Math.max(progress, 5);
         const barColor = progress === 100 ? 'bg-emerald-400' : 'bg-sky-400';
 
         return `
         <div class="flex flex-col items-center justify-end h-full w-[85px] shrink-0 group cursor-default animate-in fade-in slide-in-from-bottom-4 duration-500" style="animation-delay: ${idx * 50}ms; animation-fill-mode: both;">
-            <!-- Tooltip Angka Persentase di Atas Batang -->
             <span class="text-[11px] font-black text-indigo-600 mb-2 opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 duration-300">${progress}%</span>
             
-            <!-- Batang Grafik -->
-            <div class="w-12 bg-slate-100/80 rounded-t-xl h-[160px] flex items-end overflow-hidden relative shadow-inner border border-slate-200/50 border-b-0">
+            <div class="w-12 bg-slate-100/80 rounded-t-xl h-[130px] flex items-end overflow-hidden relative shadow-inner border border-slate-200/50 border-b-0">
                 <div class="animated-bar w-full ${barColor} rounded-t-xl transition-all duration-1000 ease-out relative" style="height: 0%" data-height="${targetHeight}%">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
                 </div>
                 <span class="absolute bottom-2 w-full text-center text-[10px] font-black ${progress < 15 ? 'text-slate-500' : 'text-white'} drop-shadow-sm transition-colors duration-500">${progress}%</span>
             </div>
             
-            <!-- Informasi Proyek di Bawah Batang -->
             <div class="mt-3 w-full text-center">
                 <p class="text-[9px] font-black text-slate-700 truncate w-full uppercase" title="${name}">${name}</p>
                 <p class="text-[7.5px] font-bold text-slate-400 truncate w-full uppercase mt-1" title="${pic}">${pic}</p>
@@ -547,7 +551,6 @@ function renderFilteredList(type, value) {
         </div>`;
     }).join('') + `</div>`;
 
-    // Trigger Animasi Pertumbuhan Batang
     setTimeout(() => {
         const bars = panel.querySelectorAll('.animated-bar');
         bars.forEach(bar => {
@@ -560,7 +563,13 @@ function makePie(id, labels, data, colors, type){
   if(charts[id]) charts[id].destroy();
   charts[id] = new Chart(document.getElementById(id), {
     type: 'pie',
-    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 1, borderColor: '#fff' }] },
+    data: { labels, datasets: [{ 
+        data, 
+        backgroundColor: colors, 
+        borderWidth: 2, 
+        borderColor: '#ffffff',
+        hoverOffset: 6 
+    }] },
     options: {
       responsive: true, maintainAspectRatio: false,
       onClick: (e, el) => { if(el.length) renderFilteredList(type, labels[el[0].index]); },
@@ -596,10 +605,12 @@ function renderExecutive() {
 
     makePie('cProjType', ['Active', 'Closed', 'Complete'], [stats.act, stats.closed, stats.comp], ['#0ea5e9', '#94a3b8', '#22c55e'], 'status');
 
-    const pCounts = active.reduce((a,p) => {
+    const pCounts = allData.reduce((a,p) => {
         const prRaw = getVal(p, KEY_MAP.priority).toUpperCase();
-        const pr = prRaw.includes('HIGH') || prRaw.includes('HIGHT') ? 'High' : (prRaw.includes('MEDIUM') ? 'Medium' : 'Low');
-        a[pr]++; return a;
+        if(prRaw.includes('HIGH') || prRaw.includes('HIGHT')) a.High++;
+        else if(prRaw.includes('MEDIUM')) a.Medium++;
+        else if(prRaw.includes('LOW')) a.Low++;
+        return a;
     }, { High: 0, Medium: 0, Low: 0 });
     makePie('cPriority', ['High', 'Medium', 'Low'], [pCounts.High, pCounts.Medium, pCounts.Low], ['#ef4444', '#f97316', '#22c55e'], 'priority');
 
@@ -621,7 +632,6 @@ function renderExecutive() {
         });
         const phases = Object.keys(phaseMap).map(k => ({ name: k, avg: Math.round(phaseMap[k].sum / phaseMap[k].count), tasks: phaseMap[k].tasks }));
 
-        // PERBAIKAN: Warna kuning lebih soft, tulisan SLF lebih elegan
         return `
         <div class="bg-[#FEF08A] rounded-[20px] p-4 flex flex-col shadow-sm border border-[#FDE047] relative overflow-hidden hover:shadow-md transition-all h-[400px]">
             <div class="mb-3">
@@ -680,7 +690,6 @@ window.openBodModal = function(pIdx, phIdx) {
     document.getElementById('bodProjName').textContent = getVal(proj, KEY_MAP.name);
     document.getElementById('bodPhaseName').textContent = phaseName;
     
-    // PERBAIKAN: Detail Task di Popup Diperbesar & Tidak akan Penyet
     document.getElementById('bodTaskList').innerHTML = phaseTasks.map(t => `
         <div class="bg-white border border-slate-200 rounded-3xl p-6 lg:p-8 shadow-sm text-left relative shrink-0 overflow-hidden group hover:border-indigo-200 transition-colors">
             <div class="absolute top-0 left-0 w-2 h-full bg-slate-200 group-hover:bg-indigo-500 transition-colors"></div>
@@ -706,6 +715,15 @@ window.closeBodModal = function() {
     document.getElementById('bodModal').classList.replace('flex', 'hidden'); 
     document.body.style.overflow = ''; 
 };
+
+function handlePasswordChange(e) {
+    e.preventDefault();
+    const p1 = document.getElementById('newPass').value;
+    const p2 = document.getElementById('confirmPass').value;
+    if(p1 !== p2) return alert('Password tidak cocok!');
+    alert('Fitur ganti password sedang dalam pengembangan.');
+    closePasswordModal();
+}
 
 function openPasswordModal() { document.getElementById('passwordModal').classList.replace('hidden', 'flex'); }
 function closePasswordModal() { document.getElementById('passwordModal').classList.replace('flex', 'hidden'); }
