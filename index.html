@@ -307,7 +307,7 @@
         </div>
         
         <!-- List Detail Pekerjaan -->
-        <div class="p-6 lg:p-8 flex flex-col gap-6 overflow-y-auto bg-slate-50/80 no-scrollbar flex-1 relative z-0" id="bodTaskList">
+        <div class="p-6 lg:p-8 flex flex-col gap-3 overflow-y-auto bg-slate-50/80 no-scrollbar flex-1 relative z-0" id="bodTaskList">
             <!-- Rincian Tugas Dimasukkan via JS -->
         </div>
         
@@ -833,18 +833,18 @@ window.openBodModal = function(pIdx, phIdx) {
     document.getElementById('bodPhaseName').textContent = phaseName;
     
     document.getElementById('bodTaskList').innerHTML = phaseTasks.map(t => `
-        <div class="bg-white border border-slate-200 rounded-3xl p-6 lg:p-8 shadow-sm text-left relative shrink-0 overflow-hidden group hover:border-indigo-200 transition-colors">
-            <div class="absolute top-0 left-0 w-2 h-full bg-slate-200 group-hover:bg-indigo-500 transition-colors"></div>
-            <div class="flex justify-between items-start mb-4">
-                <span class="text-[10px] font-black bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg border border-indigo-100 uppercase tracking-widest">${t.dept || 'UMUM'}</span>
-                <span class="text-4xl font-black ${t.progress === 100 ? 'text-emerald-500' : 'text-slate-900'} leading-none">${t.progress}%</span>
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 lg:p-5 shadow-sm text-left relative shrink-0 overflow-hidden group hover:border-indigo-200 transition-colors">
+            <div class="absolute top-0 left-0 w-1.5 h-full bg-slate-200 group-hover:bg-indigo-500 transition-colors"></div>
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-[8px] font-black bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-md border border-indigo-100 uppercase tracking-widest">${t.dept || 'UMUM'}</span>
+                <span class="text-2xl font-black ${t.progress === 100 ? 'text-emerald-500' : 'text-slate-900'} leading-none">${t.progress}%</span>
             </div>
-            <h5 class="text-lg font-bold text-slate-800 uppercase leading-snug mb-4">${t.name}</h5>
-            <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100">
-                <p class="text-xs text-slate-600 italic font-medium leading-relaxed">"${t.keterangan || 'Belum ada rincian/progress lapangan.'}"</p>
+            <h5 class="text-[11px] font-bold text-slate-800 uppercase leading-snug mb-2.5">${t.name}</h5>
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                <p class="text-[9px] text-slate-600 italic font-medium leading-relaxed">"${t.keterangan || 'Belum ada rincian/progress lapangan.'}"</p>
             </div>
-            <div class="mt-5 flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest pt-5 border-t border-slate-100">
-                <span class="flex items-center gap-2"><i data-lucide="user" class="w-4 h-4"></i> Update: ${t.updatedBy || '-'}</span>
+            <div class="mt-3 flex items-center justify-between text-[8px] font-bold text-slate-400 uppercase tracking-widest pt-3 border-t border-slate-100">
+                <span class="flex items-center gap-1.5"><i data-lucide="user" class="w-3 h-3"></i> Update: ${t.updatedBy || '-'}</span>
             </div>
         </div>`).join('');
     
