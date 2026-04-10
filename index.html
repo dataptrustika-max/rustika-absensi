@@ -198,7 +198,8 @@
                <p class="text-[10px] text-slate-500 font-medium mt-1.5 leading-relaxed">Wajib diisi setiap hari sebelum pulang untuk laporan progres Direksi.</p>
             </div>
          </div>
-         <button onclick="alert('Modul sedang dikembangkan.')" class="bg-[#10b981] text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center gap-2">
+         <!-- PERUBAHAN: Memanggil Form Time Sheet, bukan lagi peringatan -->
+         <button onclick="openTimesheetModal()" class="bg-[#10b981] text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center gap-2 hover:bg-emerald-600 transition-colors">
             <i data-lucide="list-todo" class="w-5 h-5"></i> Isi Time Sheet
          </button>
       </div>
@@ -334,6 +335,53 @@
     </div>
 </div>
 
+<!-- MODAL TIMESHEET (FORMULIR LAPORAN HARIAN) -->
+<div id="timesheetModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-[2.5rem] w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col p-8 modal-animate-in max-h-[90vh]">
+        <div class="flex justify-between items-center mb-6 shrink-0">
+           <div>
+               <h3 class="text-xl font-black text-slate-900 uppercase tracking-tight">Form Time Sheet</h3>
+               <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Laporan Aktivitas Harian</p>
+           </div>
+           <button onclick="closeTimesheetModal()" class="text-slate-400 hover:text-slate-600 transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </div>
+        <form onsubmit="submitTimesheet(event)" class="space-y-5 overflow-y-auto no-scrollbar pr-2 pb-4">
+           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+               <div>
+                   <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tanggal</label>
+                   <input type="date" id="tsTanggal" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-medium text-sm">
+               </div>
+               <div>
+                   <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Pilih Proyek</label>
+                   <select id="tsProyek" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-medium text-sm appearance-none">
+                       <option value="">-- Pilih Proyek --</option>
+                   </select>
+               </div>
+               <div>
+                   <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Jam Mulai</label>
+                   <input type="time" id="tsMulai" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-medium text-sm">
+               </div>
+               <div>
+                   <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Jam Selesai</label>
+                   <input type="time" id="tsSelesai" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-medium text-sm">
+               </div>
+           </div>
+           <div>
+               <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Deskripsi Pekerjaan</label>
+               <textarea id="tsDeskripsi" required rows="3" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-medium text-sm resize-none" placeholder="Rincian aktivitas hari ini..."></textarea>
+           </div>
+           <div>
+               <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Kendala Lapangan (Opsional)</label>
+               <textarea id="tsKendala" rows="2" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-medium text-sm resize-none" placeholder="Apakah ada kendala yang menghambat?"></textarea>
+           </div>
+           
+           <button type="submit" id="btnSubmitTS" class="w-full py-4 mt-2 bg-[#10b981] hover:bg-emerald-600 text-white font-black rounded-2xl shadow-lg transition-all active:scale-95 uppercase tracking-widest flex justify-center items-center gap-2">
+               <i data-lucide="send" class="w-5 h-5"></i> Kirim Laporan
+           </button>
+        </form>
+    </div>
+</div>
+
 <script>
 // ==========================================
 // PENGAMANAN KARAKTER KHUSUS (ANTI SYNTAX ERROR)
@@ -342,6 +390,16 @@ const escapeJS = (str) => {
     if (!str) return '';
     return str.toString().replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n|\r/g, " ");
 };
+
+// ==========================================
+// FUNGSI KALKULASI PROGRES DINAMIS (ANTI-BELANG)
+// ==========================================
+function getCalcProgress(p) {
+    if (!p.Tasks || p.Tasks.length === 0) return parseInt(p['Overall Progress']) || 0;
+    let sum = 0;
+    p.Tasks.forEach(t => sum += (parseInt(t.progress) || 0));
+    return Math.round(sum / p.Tasks.length);
+}
 
 // ==========================================
 // CONFIG & STATE ENGINE
@@ -452,6 +510,91 @@ function updateUI() {
 }
 
 // ==========================================
+// FORM TIMESHEET LOGIC
+// ==========================================
+function openTimesheetModal() {
+    if(!currentUser) return;
+    
+    // Setel Tanggal Default Hari Ini
+    document.getElementById('tsTanggal').valueAsDate = new Date();
+    
+    const projSelect = document.getElementById('tsProyek');
+    projSelect.innerHTML = '<option value="">-- Pilih Proyek --</option>';
+    
+    const userRoles = (currentUser['DEPARTEMEN'] || '').toUpperCase().split(/[\/,]+/).map(r => r.trim());
+
+    // Hanya Tampilkan Proyek Aktif yang dimiliki oleh Engineer yang login
+    const myProjects = allData.filter(p => {
+        const statusVal = getVal(p, KEY_MAP.status).toLowerCase();
+        if (!statusVal.includes('active') && statusVal !== 'new') return false;
+
+        const tasks = (p.Tasks || []).filter(t => {
+           const taskRoles = (t.dept || '').toUpperCase().split(/[\/,]+/).map(r => r.trim());
+           if (taskRoles.length === 0 || taskRoles[0] === '') return false;
+           return taskRoles.some(role => userRoles.includes(role));
+        });
+        return tasks.length > 0;
+    });
+
+    // Masukkan ke dropdown pilihan proyek
+    myProjects.forEach(p => {
+        const pName = getVal(p, KEY_MAP.name);
+        projSelect.innerHTML += `<option value="${escapeJS(pName)}">${pName}</option>`;
+    });
+
+    document.getElementById('timesheetModal').classList.replace('hidden', 'flex');
+    lucide.createIcons();
+}
+
+function closeTimesheetModal() {
+    document.getElementById('timesheetModal').classList.replace('flex', 'hidden');
+}
+
+async function submitTimesheet(e) {
+    e.preventDefault();
+    if(!currentUser) return alert('Sesi habis, silakan login ulang.');
+
+    const btn = document.getElementById('btnSubmitTS');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = 'MENGIRIM...';
+    btn.disabled = true;
+
+    const payload = {
+        action: 'SUBMIT_TIMESHEET',
+        tanggal: document.getElementById('tsTanggal').value,
+        namaEngineer: currentUser['NAMA'] || '',
+        deptEngineer: currentUser['DEPARTEMEN'] || '',
+        namaProyek: document.getElementById('tsProyek').value,
+        jamMulai: document.getElementById('tsMulai').value,
+        jamSelesai: document.getElementById('tsSelesai').value,
+        deskripsi: document.getElementById('tsDeskripsi').value,
+        kendala: document.getElementById('tsKendala').value || '-'
+    };
+
+    try {
+        await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+        btn.innerHTML = '✓ TERKIRIM';
+        btn.classList.replace('bg-[#10b981]', 'bg-emerald-500');
+        
+        setTimeout(() => {
+            closeTimesheetModal();
+            e.target.reset();
+            btn.innerHTML = originalText;
+            btn.classList.replace('bg-emerald-500', 'bg-[#10b981]');
+            btn.disabled = false;
+        }, 1500);
+
+    } catch (err) {
+        alert('Gagal mengirim data. Periksa koneksi internet Anda.');
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
+// ==========================================
 // RENDER: ENGINEER WORKSPACE
 // ==========================================
 function renderTeamWorkspace() {
@@ -521,7 +664,6 @@ function renderTeamWorkspace() {
     
     const safeProj = escapeJS(getVal(p, KEY_MAP.name));
 
-    // PERBAIKAN: Mengelompokkan Tugas (MyTasks) Berdasarkan Head (Tahapan)
     let phaseMap = {};
     p.myTasks.forEach(t => {
         let g = t.group && t.group.trim() !== "" ? t.group : "TAHAPAN UMUM";
@@ -593,7 +735,6 @@ function renderTeamWorkspace() {
 }
 
 window.updateRealtimeAvg = function(globalIdx, phaseGlobalIdx) {
-    // 1. Update Rata-rata Proyek Utama
     const projectCard = document.getElementById('projectList').querySelector(`[id="avg-text-${globalIdx}"]`).closest('.bg-white');
     const inputs = projectCard.querySelectorAll('.tw-input-prog');
     let sum = 0; inputs.forEach(i => { let v = parseInt(i.value) || 0; if(v > 100) v = 100; if(v < 0) v = 0; sum += v; });
@@ -601,7 +742,6 @@ window.updateRealtimeAvg = function(globalIdx, phaseGlobalIdx) {
     document.getElementById(`avg-text-${globalIdx}`).textContent = avg + '%';
     document.getElementById(`avg-bar-${globalIdx}`).style.width = avg + '%';
 
-    // 2. Update Rata-rata Tahapan (Head)
     if(phaseGlobalIdx) {
         const phaseCard = document.getElementById(`avg-text-${phaseGlobalIdx}`).closest('.bg-white');
         const phaseInputs = phaseCard.querySelectorAll('.tw-input-prog');
@@ -664,11 +804,10 @@ function renderFilteredList(type, value) {
     filtered.map((p, idx) => {
         const nameRaw = getVal(p, KEY_MAP.name);
         const picRaw = getVal(p, ['pic']) || '-';
-        // Hapus karakter yang dapat merusak string HTML
-        const name = nameRaw.replace(/["']/g, ''); 
-        const pic = picRaw.replace(/["']/g, '');
+        const name = escapeJS(nameRaw); 
+        const pic = escapeJS(picRaw);
         
-        const progress = parseInt(p['Overall Progress']) || 0;
+        const progress = getCalcProgress(p);
         const targetHeight = Math.max(progress, 5); 
         const barColor = progress === 100 ? 'bg-emerald-400' : 'bg-sky-400';
 
@@ -683,7 +822,6 @@ function renderFilteredList(type, value) {
                 <span class="absolute bottom-1 w-full text-center text-[8px] font-black ${progress < 15 ? 'text-slate-500' : 'text-white'} drop-shadow-sm transition-colors duration-500">${progress}%</span>
             </div>
             
-            <!-- Ruang khusus untuk teks yang dimiringkan (slanted) -->
             <div class="mt-2 h-[75px] relative w-[2px]">
                 <div class="absolute top-1 right-1 origin-top-right -rotate-45 w-[100px] text-right">
                     <p class="text-[8px] font-extrabold text-slate-700 truncate w-full uppercase" title="${name}">${name}</p>
@@ -728,18 +866,15 @@ function makePie(id, labels, data, colors, type){
   `).join('');
 }
 
-// MENGATUR FILTER EXECUTIVE DASHBOARD GRID
 window.setExecFilter = function(filterId) {
     curExecFilter = filterId;
     renderExecutiveGrid();
 };
 
-// RENDER GRID KARTU KUNING EXECUTIVE
 function renderExecutiveGrid() {
     const grid = document.getElementById('executiveGrid');
     const filterContainer = document.getElementById('execFilters');
     
-    // Render tombol Filter
     if (filterContainer) {
         filterContainer.innerHTML = execFiltersConfig.map(f => `
             <button onclick="setExecFilter('${f.id}')" class="px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border ${curExecFilter === f.id ? f.color + ' text-white border-transparent shadow-md scale-[1.02]' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50 hover:text-slate-700'}">
@@ -748,7 +883,6 @@ function renderExecutiveGrid() {
         `).join('');
     }
 
-    // Filter Data untuk Grid Kartu Kuning
     const filteredData = allData.filter(p => {
         const statusVal = getVal(p, KEY_MAP.status).toLowerCase();
         const pType = (p.Type || (getVal(p, KEY_MAP.name).includes('PBG') ? 'PBG' : 'SLF')).toUpperCase();
@@ -783,7 +917,7 @@ function renderExecutiveGrid() {
     }
 
     grid.innerHTML = filteredData.map((p, pIdx) => {
-        const progress = p['Overall Progress'] || 0;
+        const progress = getCalcProgress(p);
         const tasks = p.Tasks || [];
         const priorityRaw = getVal(p, KEY_MAP.priority).toUpperCase();
         const priority = priorityRaw.includes('HIGH') || priorityRaw.includes('HIGHT') ? 'HIGH' : (priorityRaw.includes('MEDIUM') ? 'MEDIUM' : 'LOW');
@@ -796,7 +930,7 @@ function renderExecutiveGrid() {
             phaseMap[g].count++; 
             phaseMap[g].tasks.push(t);
         });
-        const phases = Object.keys(phaseMap).map(k => ({ name: k, avg: Math.round(phaseMap[k].sum / phaseMap[k].count), tasks: phaseMap[k].tasks }));
+        const phases = Object.keys(phaseMap).map(k => ({ name: k, avg: Math.round(phaseMap[k].sum / Math.max(1, phaseMap[k].count)), tasks: phaseMap[k].tasks }));
 
         return `
         <div class="bg-[#FEF08A] rounded-[20px] p-4 flex flex-col shadow-sm border border-[#FDE047] relative overflow-hidden hover:shadow-md transition-all h-[400px]">
