@@ -67,7 +67,7 @@
 <body>
 
 <!-- ==========================================
-     1. GATEWAY
+     1. GATEWAY (HALAMAN AWAL)
      ========================================== -->
 <div id="view-gateway" class="view-section active bg-slate-50 relative overflow-hidden">
    <!-- Latar Belakang Oranye Melengkung -->
@@ -258,7 +258,7 @@
             </div>
             <div class="chart-card">
                 <div class="chart-title" id="detailTitle">DAFTAR TERPILIH</div>
-                <!-- PANEL DIAGRAM KE ATAS -->
+                <!-- PANEL DIAGRAM KE ATAS (HORIZONTAL SCROLL) -->
                 <div class="flex-1 w-full overflow-x-auto overflow-y-hidden no-scrollbar relative" id="detailPanel">
                     <div class="w-full h-full flex flex-col items-center justify-center text-center p-8 text-slate-400 absolute inset-0">
                         <i data-lucide="bar-chart-3" class="w-8 h-8 mb-3 opacity-20"></i>
@@ -336,10 +336,18 @@
 
 <script>
 // ==========================================
+// PENGAMANAN KARAKTER KHUSUS (ANTI SYNTAX ERROR)
+// ==========================================
+const escapeJS = (str) => {
+    if (!str) return '';
+    return str.toString().replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n|\r/g, " ");
+};
+
+// ==========================================
 // CONFIG & STATE ENGINE
 // ==========================================
 let allData = [], teamsData = [], currentUser = null, curTeamFilter = 'active_all';
-let curExecFilter = 'ACTIVE'; // State untuk filter Executive Dashboard
+let curExecFilter = 'ACTIVE'; 
 let charts = {};
 const API_URL = 'https://script.google.com/macros/s/AKfycbwsrw3LWLuHK8e5X1ABtOqbVaMfGwHFiFoG9kJ3lcNUPte3Ssf88hEwrkJoMBnt1zysTw/exec';
 
@@ -350,7 +358,6 @@ const KEY_MAP = {
     priority: ['active by status/priority', 'priority']
 };
 
-// Konfigurasi Kategori Filter untuk Executive Dashboard
 const execFiltersConfig = [
     { id: 'ACTIVE', label: 'Active', color: 'bg-sky-500' },
     { id: 'SLF', label: 'SLF', color: 'bg-rose-500' },
@@ -365,7 +372,6 @@ const execFiltersConfig = [
     { id: 'COMPLETE', label: 'Complete', color: 'bg-green-600' }
 ];
 
-// Auto load data dari cache saat aplikasi dibuka pertama kali
 try {
     const savedUser = localStorage.getItem('rustikaUser');
     if(savedUser) currentUser = JSON.parse(savedUser);
@@ -513,7 +519,16 @@ function renderTeamWorkspace() {
     const theme = (p.Type || getVal(p, KEY_MAP.name).includes('PBG') ? 'PBG' : 'SLF') === 'SLF' ? '#ef4444' : '#0ea5e9';
     const globalIdx = 'team-' + idx;
     
-    const safeProj = getVal(p, KEY_MAP.name).replace(/'/g, "\\'");
+    const safeProj = escapeJS(getVal(p, KEY_MAP.name));
+
+    // PERBAIKAN: Mengelompokkan Tugas (MyTasks) Berdasarkan Head (Tahapan)
+    let phaseMap = {};
+    p.myTasks.forEach(t => {
+        let g = t.group && t.group.trim() !== "" ? t.group : "TAHAPAN UMUM";
+        if(!phaseMap[g]) phaseMap[g] = { tasks: [] };
+        phaseMap[g].tasks.push(t);
+    });
+    const phases = Object.keys(phaseMap).map(k => ({ name: k, tasks: phaseMap[k].tasks }));
 
     return `
     <div class="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col animate-in fade-in duration-300">
@@ -533,21 +548,41 @@ function renderTeamWorkspace() {
           </div>
        </div>
        <div class="hidden border-t bg-slate-50/50 p-5 space-y-4">
-          ${p.myTasks.map(t => {
-             const safeTask = t.name.replace(/'/g, "\\'");
+          ${phases.map((ph, phIdx) => {
+             const phaseGlobalIdx = globalIdx + '-ph-' + phIdx;
+             let phSum = 0;
+             ph.tasks.forEach(t => phSum += (parseInt(t.progress) || 0));
+             let phAvg = ph.tasks.length > 0 ? Math.round(phSum / ph.tasks.length) : 0;
+
              return `
-             <div class="bg-white p-4 rounded-2xl border shadow-sm flex flex-col gap-3 tw-task-row">
-                <div class="flex justify-between items-center mb-1">
-                   <h5 class="text-[11px] font-black uppercase text-slate-700 leading-snug">${t.name}</h5>
-                   <span class="text-[9px] font-bold text-slate-400">Upd: ${t.updatedBy || '-'}</span>
-                </div>
-                <input type="text" value="${t.keterangan || ''}" class="w-full p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-amber-400 transition-all font-medium" placeholder="Rincian aktivitas...">
-                <div class="flex gap-2">
-                   <div class="relative w-20 shrink-0">
-                      <input type="number" oninput="updateRealtimeAvg('${globalIdx}')" value="${t.progress}" class="tw-input-prog w-full p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl font-black text-center pr-6">
-                      <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">%</span>
+             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 cursor-pointer hover:bg-slate-50 transition-colors flex justify-between items-center" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                   <h5 class="text-[11px] font-black uppercase text-slate-800 leading-snug">${ph.name}</h5>
+                   <div class="flex items-center gap-3 shrink-0 pl-3">
+                      <span class="text-[10px] font-black text-slate-600 bg-slate-100 border border-slate-200 px-2 py-1 rounded-md" id="avg-text-${phaseGlobalIdx}">${phAvg}%</span>
+                      <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
                    </div>
-                   <button onclick="saveProgress(this, '${safeProj}', '${safeTask}')" class="flex-1 bg-slate-900 text-white text-[10px] font-black rounded-xl hover:bg-black transition-all">SAVE</button>
+                </div>
+                <div class="hidden border-t bg-slate-50 p-4 space-y-4">
+                   ${ph.tasks.map(t => {
+                      const safeTask = escapeJS(t.name);
+                      const safeKet = escapeJS(t.keterangan || '');
+                      return `
+                      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-3 tw-task-row">
+                         <div class="flex justify-between items-center mb-1">
+                            <h6 class="text-[11px] font-black uppercase text-slate-700 leading-snug">${t.name}</h6>
+                            <span class="text-[9px] font-bold text-slate-400">Upd: ${t.updatedBy || '-'}</span>
+                         </div>
+                         <input type="text" value="${safeKet}" class="w-full p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-amber-400 transition-all font-medium" placeholder="Rincian aktivitas...">
+                         <div class="flex gap-2">
+                            <div class="relative w-20 shrink-0">
+                               <input type="number" oninput="updateRealtimeAvg('${globalIdx}', '${phaseGlobalIdx}')" value="${t.progress}" class="tw-input-prog w-full p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl font-black text-center pr-6">
+                               <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">%</span>
+                            </div>
+                            <button onclick="saveProgress(this, '${safeProj}', '${safeTask}')" class="flex-1 bg-slate-900 text-white text-[10px] font-black rounded-xl hover:bg-black transition-all">SAVE</button>
+                         </div>
+                      </div>`;
+                   }).join('')}
                 </div>
              </div>`;
           }).join('')}
@@ -557,13 +592,24 @@ function renderTeamWorkspace() {
   lucide.createIcons();
 }
 
-window.updateRealtimeAvg = function(globalIdx) {
-    const card = document.getElementById('projectList').querySelector(`[id="avg-text-${globalIdx}"]`).closest('.bg-white');
-    const inputs = card.querySelectorAll('.tw-input-prog');
+window.updateRealtimeAvg = function(globalIdx, phaseGlobalIdx) {
+    // 1. Update Rata-rata Proyek Utama
+    const projectCard = document.getElementById('projectList').querySelector(`[id="avg-text-${globalIdx}"]`).closest('.bg-white');
+    const inputs = projectCard.querySelectorAll('.tw-input-prog');
     let sum = 0; inputs.forEach(i => { let v = parseInt(i.value) || 0; if(v > 100) v = 100; if(v < 0) v = 0; sum += v; });
     const avg = Math.round(sum / inputs.length);
     document.getElementById(`avg-text-${globalIdx}`).textContent = avg + '%';
     document.getElementById(`avg-bar-${globalIdx}`).style.width = avg + '%';
+
+    // 2. Update Rata-rata Tahapan (Head)
+    if(phaseGlobalIdx) {
+        const phaseCard = document.getElementById(`avg-text-${phaseGlobalIdx}`).closest('.bg-white');
+        const phaseInputs = phaseCard.querySelectorAll('.tw-input-prog');
+        let phaseSum = 0;
+        phaseInputs.forEach(i => { let v = parseInt(i.value) || 0; if(v > 100) v = 100; if(v < 0) v = 0; phaseSum += v; });
+        const phaseAvg = Math.round(phaseSum / phaseInputs.length);
+        document.getElementById(`avg-text-${phaseGlobalIdx}`).textContent = phaseAvg + '%';
+    }
 };
 
 async function saveProgress(btn, proj, task) {
@@ -614,11 +660,14 @@ function renderFilteredList(type, value) {
       return;
   }
   
-  // PERBAIKAN: GRAFIK DIRAPATKAN, LEBAR DIKECILKAN, DAN TEKS DIMIRINGKAN (-45 DEGREE)
   panel.innerHTML = `<div class="flex gap-2.5 items-end h-full min-w-max px-4 pb-2 pt-4">` + 
     filtered.map((p, idx) => {
-        const name = getVal(p, KEY_MAP.name);
-        const pic = getVal(p, ['pic']) || '-';
+        const nameRaw = getVal(p, KEY_MAP.name);
+        const picRaw = getVal(p, ['pic']) || '-';
+        // Hapus karakter yang dapat merusak string HTML
+        const name = nameRaw.replace(/["']/g, ''); 
+        const pic = picRaw.replace(/["']/g, '');
+        
         const progress = parseInt(p['Overall Progress']) || 0;
         const targetHeight = Math.max(progress, 5); 
         const barColor = progress === 100 ? 'bg-emerald-400' : 'bg-sky-400';
@@ -815,7 +864,6 @@ function renderExecutive() {
     }, { High: 0, Medium: 0, Low: 0 });
     makePie('cPriority', ['High', 'Medium', 'Low'], [pCounts.High, pCounts.Medium, pCounts.Low], ['#ef4444', '#f97316', '#22c55e'], 'priority');
 
-    // Panggil fungsi render grid terpisah agar tidak mereset pie charts
     renderExecutiveGrid();
 }
 
