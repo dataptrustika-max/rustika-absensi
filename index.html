@@ -309,7 +309,7 @@
                     </h2>
                     <div id="execFilters" class="flex gap-2 overflow-x-auto no-scrollbar pb-2 xl:pb-0 w-full xl:w-auto"></div>
                 </div>
-                <div id="executiveGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5"></div>
+                <div id="executiveGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 items-start"></div>
             </div>
         </div>
 
@@ -1276,7 +1276,7 @@ window.renderExecutiveGrid = function() {
         const ph = Object.keys(phM).map(k => ({ name: k, avg: Math.round(phM[k].s / Math.max(1, phM[k].c)), t: phM[k].t }));
 
         return `
-        <div class="bg-[#FEF08A] rounded-[20px] p-4 flex flex-col shadow-sm border border-[#FDE047] hover:shadow-md transition-all h-[400px]">
+        <div class="bg-[#FEF08A] rounded-[20px] p-4 flex flex-col shadow-sm border border-[#FDE047] hover:shadow-md transition-all w-full min-h-[400px]">
             <div class="mb-3">
                 <h2 class="text-lg font-extrabold text-slate-700 uppercase leading-none">${p.Type || (getVal(p, KEY_MAP.name).includes('PBG') ? 'PBG' : 'SLF')}</h2>
                 <p class="text-[10px] font-bold text-slate-800 mt-1 line-clamp-2 uppercase">${getVal(p, KEY_MAP.name)}</p>
@@ -1299,7 +1299,7 @@ window.renderExecutiveGrid = function() {
                 </table>
             </div>
             <p class="text-[9px] font-black uppercase tracking-widest mb-2 text-slate-800 shrink-0">TOTAL TASK (TAHAPAN)</p>
-            <div class="flex flex-col gap-1.5 overflow-y-auto no-scrollbar pb-2">
+            <div class="flex flex-col gap-1.5 pb-2">
                 ${ph.map((h, hi) => `
                 <div onclick="openBodModal(${i},${hi})" class="bg-white p-2.5 rounded-xl flex justify-between items-center cursor-pointer hover:bg-slate-50 hover:border-sky-300 group">
                     <span class="text-[8px] font-black text-slate-800 uppercase truncate pr-2 group-hover:text-sky-600">${h.name}</span>
