@@ -70,7 +70,10 @@
      1. GATEWAY (HALAMAN AWAL)
      ========================================== -->
 <div id="view-gateway" class="view-section active bg-slate-50 relative overflow-hidden">
+   <!-- Latar Belakang Oranye Melengkung -->
    <div class="absolute top-0 left-0 w-full h-[60vh] bg-[#f5a20f] rounded-b-[4rem] md:rounded-b-[5rem] z-0 shadow-md"></div>
+
+   <!-- Header Kanan Atas -->
    <div class="absolute top-6 right-6 z-20 flex gap-3">
       <button class="bg-white rounded-full px-3 py-1.5 flex items-center gap-2 text-[10px] font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors">
          <img src="https://flagcdn.com/w20/id.png" alt="ID" class="w-4 rounded-sm object-cover"> ID <i data-lucide="chevron-down" class="w-3 h-3"></i>
@@ -80,7 +83,10 @@
       </button>
    </div>
 
+   <!-- Konten Utama -->
    <div class="relative z-10 min-h-screen flex flex-col items-center justify-center p-4 w-full">
+      
+      <!-- Bagian Logo & Tagline -->
       <div class="flex flex-col items-center mb-8 mt-[-60px]">
          <div class="bg-white rounded-[1.8rem] p-4 shadow-lg mb-6 w-24 h-24 flex items-center justify-center">
             <img src="https://rustikaconsultant.com/wp-content/uploads/2026/03/logo-rustika.png" alt="RUSTIKA" class="w-16 h-16 object-contain">
@@ -93,10 +99,12 @@
          </h2>
       </div>
       
+      <!-- Kartu Navigasi Utama -->
       <div class="bg-white rounded-[2rem] p-8 md:p-10 w-full max-w-[500px] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] flex flex-col items-center">
          <h3 class="text-[10px] font-extrabold text-slate-800 uppercase tracking-[0.15em] mb-8">MULAI MENGGUNAKAN</h3>
          
          <div class="flex justify-center gap-6 md:gap-10 w-full">
+            <!-- Tombol Absensi -->
             <div onclick="alert('Sedang pengembangan oleh tim IT SUPPORT')" class="flex flex-col items-center gap-3 cursor-pointer group w-20">
                <div class="w-16 h-16 rounded-2xl border border-[#f5a20f]/40 text-[#f5a20f] flex items-center justify-center group-hover:bg-[#f5a20f]/10 group-hover:scale-105 transition-all shadow-sm">
                   <i data-lucide="scan-face" class="w-7 h-7 stroke-[1.5]"></i>
@@ -104,6 +112,7 @@
                <span class="text-[11px] font-bold text-slate-700 text-center leading-tight group-hover:text-[#f5a20f] transition-colors">Absensi</span>
             </div>
             
+            <!-- Tombol Portal Engineer -->
             <div onclick="checkLoginAndGo()" class="flex flex-col items-center gap-3 cursor-pointer group w-20">
                <div class="w-16 h-16 rounded-2xl border border-[#f5a20f]/40 text-[#f5a20f] flex items-center justify-center group-hover:bg-[#f5a20f]/10 group-hover:scale-105 transition-all shadow-sm">
                   <i data-lucide="file-text" class="w-7 h-7 stroke-[1.5]"></i>
@@ -111,6 +120,7 @@
                <span class="text-[11px] font-bold text-slate-700 text-center leading-tight group-hover:text-[#f5a20f] transition-colors">Portal<br>Engineer</span>
             </div>
 
+            <!-- Tombol BOD Panel -->
             <div onclick="switchView('view-executive')" class="flex flex-col items-center gap-3 cursor-pointer group w-20">
                <div class="w-16 h-16 rounded-2xl border border-[#f5a20f]/40 text-[#f5a20f] flex items-center justify-center group-hover:bg-[#f5a20f]/10 group-hover:scale-105 transition-all shadow-sm">
                   <i data-lucide="layout-grid" class="w-7 h-7 stroke-[1.5]"></i>
@@ -120,11 +130,12 @@
          </div>
       </div>
       
+      <!-- Footer -->
       <div class="absolute bottom-6 w-full text-center flex flex-col items-center justify-center gap-1.5">
          <p class="text-[9px] font-bold text-slate-400">Powered By :</p>
          <p class="text-[9px] font-bold text-slate-600">PT RUSTIKA CITRA GROUP & PT RUSTIKA GLOBAL INDONESIA</p>
          <p class="text-[9px] font-medium text-slate-400">IT_Support Rustika Consultant</p>
-         <p class="text-[8px] font-medium text-slate-400 mt-1">Version 1.3.1 (Stable Fix)</p>
+         <p class="text-[8px] font-medium text-slate-400 mt-1">Version 1.4.0 (Sidebar Layout)</p>
       </div>
    </div>
 </div>
@@ -206,29 +217,57 @@
      4. DASHBOARD EXECUTIVE (BOD PANEL)
      ========================================== -->
 <div id="view-executive" class="view-section bg-slate-50">
-    <div class="bg-white border-b px-8 py-4 flex justify-between items-center sticky top-0 z-40 shadow-sm">
-        <div class="flex items-center gap-4">
-            <img src="https://rustikaconsultant.com/wp-content/uploads/2026/03/logo-rustika.png" class="h-10">
-            <div>
-                <h1 class="text-base font-black uppercase tracking-tight">Executive Dashboard</h1>
-                <div class="flex items-center gap-1.5 text-[9px] font-bold text-emerald-500 uppercase tracking-widest">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live Monitoring
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- SIDEBAR KIRI (ICON ONLY) -->
+        <aside class="w-[72px] bg-white border-r border-slate-200 flex flex-col items-center py-6 gap-4 shrink-0 z-50 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+            <!-- Logo Mini -->
+            <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100 shadow-sm p-2">
+                <img src="https://rustikaconsultant.com/wp-content/uploads/2026/03/logo-rustika.png" alt="R" class="w-full h-full object-contain" />
+            </div>
+            
+            <!-- Menu KPI -->
+            <button onclick="switchExecTab('overview')" id="tab-overview" title="KPI Dashboard" class="w-12 h-12 rounded-2xl bg-[#003366] text-white flex items-center justify-center transition-all shadow-md group">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+            </button>
+            
+            <!-- Menu Timesheet -->
+            <button onclick="switchExecTab('timesheet')" id="tab-timesheet" title="Time Sheet Report" class="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-[#003366] flex items-center justify-center transition-all border border-slate-200 group">
+                <i data-lucide="file-text" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+            </button>
+            
+            <!-- Ruang kosong ke bawah untuk menu-menu selanjutnya -->
+            <div class="flex-1"></div>
+            
+            <!-- Tombol Keluar / Menu -->
+            <button onclick="switchView('view-gateway')" title="Kembali ke Menu Utama" class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-500 hover:bg-rose-100 hover:text-rose-700 flex items-center justify-center transition-all group mt-auto">
+                <i data-lucide="log-out" class="w-5 h-5 group-hover:-translate-x-1 transition-transform"></i>
+            </button>
+        </aside>
+
+        <!-- KONTEN UTAMA -->
+        <div class="flex-1 flex flex-col overflow-hidden relative">
+            
+            <!-- HEADER -->
+            <div class="bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 py-4 flex justify-between items-center sticky top-0 z-40 shadow-sm">
+                <div class="flex items-center gap-4">
+                    <div>
+                        <h1 class="text-base font-black uppercase tracking-tight text-[#003366]">Executive Dashboard</h1>
+                        <div class="flex items-center gap-1.5 text-[9px] font-bold text-emerald-500 uppercase tracking-widest mt-0.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live Monitoring
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="init(false)" class="px-5 py-2.5 bg-[#003366] hover:bg-[#002244] text-white rounded-xl text-xs font-bold uppercase shadow-lg shadow-blue-900/20 transition-colors flex items-center gap-2">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i> Refresh
+                    </button>
                 </div>
             </div>
-        </div>
-        <div class="flex gap-3">
-            <button onclick="switchView('view-gateway')" class="px-5 py-2.5 border border-slate-200 rounded-xl text-xs font-bold uppercase text-slate-500 hover:bg-slate-50 transition-colors shadow-sm">Menu</button>
-            <button onclick="init(false)" class="px-5 py-2.5 bg-[#003366] hover:bg-[#002244] text-white rounded-xl text-xs font-bold uppercase shadow-lg shadow-blue-900/20 transition-colors">Refresh</button>
-        </div>
-    </div>
 
-    <main class="max-w-[1440px] mx-auto p-6 space-y-8">
-        
-        <!-- TAB MENU BOD PANEL -->
-        <div class="flex gap-2 border-b border-slate-200 pb-4">
-            <button onclick="switchExecTab('overview')" id="tab-overview" class="px-5 py-2.5 bg-[#003366] text-white rounded-xl text-xs font-bold transition-all shadow-sm">KPI DASHBOARD</button>
-            <button onclick="switchExecTab('timesheet')" id="tab-timesheet" class="px-5 py-2.5 bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-bold transition-all">TIME SHEET REPORT</button>
-        </div>
+            <!-- SCROLLABLE MAIN -->
+            <main class="flex-1 overflow-y-auto p-6 scroll-smooth">
+                <div class="max-w-[1440px] mx-auto space-y-8">
 
         <!-- SECTION: KPI DASHBOARD -->
         <div id="exec-overview-section" class="space-y-8 animate-in fade-in">
@@ -318,7 +357,10 @@
             </div>
         </div>
 
-    </main>
+                </div>
+            </main>
+        </div>
+    </div>
 </div>
 
 <!-- ==========================================
@@ -1092,13 +1134,13 @@ window.switchExecTab = function(t) {
     if (t === 'overview') {
         $id('exec-overview-section').classList.remove('hidden');
         $id('exec-timesheet-section').classList.add('hidden');
-        $id('tab-overview').className = "px-5 py-2.5 bg-[#003366] text-white rounded-xl text-xs font-bold transition-all shadow-sm";
-        $id('tab-timesheet').className = "px-5 py-2.5 bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-bold transition-all";
+        $id('tab-overview').className = "w-12 h-12 rounded-2xl bg-[#003366] text-white flex items-center justify-center transition-all shadow-md group";
+        $id('tab-timesheet').className = "w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-[#003366] flex items-center justify-center transition-all border border-slate-200 group";
     } else {
         $id('exec-overview-section').classList.add('hidden');
         $id('exec-timesheet-section').classList.remove('hidden');
-        $id('tab-timesheet').className = "px-5 py-2.5 bg-[#003366] text-white rounded-xl text-xs font-bold transition-all shadow-sm";
-        $id('tab-overview').className = "px-5 py-2.5 bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-bold transition-all";
+        $id('tab-timesheet').className = "w-12 h-12 rounded-2xl bg-[#003366] text-white flex items-center justify-center transition-all shadow-md group";
+        $id('tab-overview').className = "w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-[#003366] flex items-center justify-center transition-all border border-slate-200 group";
         renderTimesheetControls();
     }
 };
@@ -1675,17 +1717,14 @@ window.handlePrintPDF = function() {
             tR += `<tr style="${l.b ? 'background:#f8fafc;' : 'background:#fff;'}">`;
             if (i === 0) {
                 tR += `<td rowspan="${hourlyLogs.length}" style="border-right:1px solid #e2e8f0;vertical-align:top;width:16%;padding:12px;">
-                    <div style="font-weight:700;font-size:13px;color:#1e293b;white-space: pre-wrap;">${formatTanggalHari(d).replace('\n',' ')}</div>
-                    <div style="margin-top:12px;font-size:9px;font-weight:700;background:#f1f5f9;padding:6px;border-radius:6px;display:inline-block;border:1px solid #cbd5e1;">TOTAL: ${Math.round(th * 10) / 10} JAM</div>
+                    <div style="font-weight:700;font-size:13px;color:#1e293b;">${formatTanggalHari(d)}</div>
+                    <div style="margin-top:12px;font-size:9px;font-weight:700;background:#f1f5f9;padding:6px;border-radius:6px;display:inline-block;">TOTAL: ${Math.round(th * 10) / 10} JAM</div>
                 </td>`;
             }
-            tR += `<td style="border-bottom:1px solid #e2e8f0;vertical-align:top;width:10%;font-size:11px;padding:12px;color:${l.b ? '#ef4444' : '#334155'};font-weight:600;">${l.j}</td>
-                <td style="border-bottom:1px solid #e2e8f0;border-left:1px solid #e2e8f0;vertical-align:top;width:34%;font-size:11px;padding:12px;${l.b ? 'font-weight:800;color:#ef4444;text-transform:uppercase;letter-spacing:1px;' : 'font-weight:500;color:#334155;line-height:1.5;'}">${l.ds}</td>
-                <td style="border-bottom:1px solid #e2e8f0;border-left:1px solid #e2e8f0;vertical-align:top;width:20%;font-size:10px;padding:12px;font-weight:700;color:#003366;text-transform:uppercase;">${l.b ? '' : l.p}</td>
-                <td style="border-bottom:1px solid #e2e8f0;border-left:1px solid #e2e8f0;vertical-align:top;width:10%;font-size:10px;padding:12px;color:${l.k && l.k !== '-' ? '#ef4444' : '#94a3b8'};font-weight:${l.k && l.k !== '-' ? '600' : 'normal'};text-transform:uppercase;">${l.b ? '' : l.k}</td>
-                <td style="border-bottom:1px solid #e2e8f0;border-left:1px solid #e2e8f0;vertical-align:top;width:10%;padding:12px;text-align:center;">
-                    ${l.b ? '' : `<span style="font-size: 9px; font-weight: 700; color: #0284c7; background-color: #f0f9ff; border: 1px solid #bae6fd; padding: 4px 8px; border-radius: 99px; text-transform: uppercase; display: inline-block;">${l.lokasi}</span>`}
-                </td>
+            tR += `<td style="border-bottom:1px solid #e2e8f0;vertical-align:top;width:10%;font-size:11px;padding:12px;color:${l.b ? '#ef4444' : '#334155'};">${l.j}</td>
+                <td style="border-bottom:1px solid #e2e8f0;border-left:1px solid #e2e8f0;vertical-align:top;width:44%;font-size:11px;padding:12px;${l.b ? 'font-weight:800;color:#ef4444;text-transform:uppercase;' : 'color:#334155;'}">${l.ds}</td>
+                <td style="border-bottom:1px solid #e2e8f0;border-left:1px solid #e2e8f0;vertical-align:top;width:20%;font-size:10px;padding:12px;font-weight:700;color:#003366;">${l.b ? '' : l.p}</td>
+                <td style="border-bottom:1px solid #e2e8f0;border-left:1px solid #e2e8f0;vertical-align:top;width:10%;font-size:10px;padding:12px;color:${l.k && l.k !== '-' ? '#ef4444' : '#94a3b8'};">${l.b ? '' : l.k}</td>
             </tr>`;
         });
         tR += `</tbody>`;
