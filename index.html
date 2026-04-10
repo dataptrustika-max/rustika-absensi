@@ -70,10 +70,7 @@
      1. GATEWAY (HALAMAN AWAL)
      ========================================== -->
 <div id="view-gateway" class="view-section active bg-slate-50 relative overflow-hidden">
-   <!-- Latar Belakang Oranye Melengkung -->
    <div class="absolute top-0 left-0 w-full h-[60vh] bg-[#f5a20f] rounded-b-[4rem] md:rounded-b-[5rem] z-0 shadow-md"></div>
-
-   <!-- Header Kanan Atas -->
    <div class="absolute top-6 right-6 z-20 flex gap-3">
       <button class="bg-white rounded-full px-3 py-1.5 flex items-center gap-2 text-[10px] font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors">
          <img src="https://flagcdn.com/w20/id.png" alt="ID" class="w-4 rounded-sm object-cover"> ID <i data-lucide="chevron-down" class="w-3 h-3"></i>
@@ -83,10 +80,7 @@
       </button>
    </div>
 
-   <!-- Konten Utama -->
    <div class="relative z-10 min-h-screen flex flex-col items-center justify-center p-4 w-full">
-      
-      <!-- Bagian Logo & Tagline -->
       <div class="flex flex-col items-center mb-8 mt-[-60px]">
          <div class="bg-white rounded-[1.8rem] p-4 shadow-lg mb-6 w-24 h-24 flex items-center justify-center">
             <img src="https://rustikaconsultant.com/wp-content/uploads/2026/03/logo-rustika.png" alt="RUSTIKA" class="w-16 h-16 object-contain">
@@ -99,12 +93,10 @@
          </h2>
       </div>
       
-      <!-- Kartu Navigasi Utama -->
       <div class="bg-white rounded-[2rem] p-8 md:p-10 w-full max-w-[500px] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] flex flex-col items-center">
          <h3 class="text-[10px] font-extrabold text-slate-800 uppercase tracking-[0.15em] mb-8">MULAI MENGGUNAKAN</h3>
          
          <div class="flex justify-center gap-6 md:gap-10 w-full">
-            <!-- Tombol Absensi -->
             <div onclick="alert('Sedang pengembangan oleh tim IT SUPPORT')" class="flex flex-col items-center gap-3 cursor-pointer group w-20">
                <div class="w-16 h-16 rounded-2xl border border-[#f5a20f]/40 text-[#f5a20f] flex items-center justify-center group-hover:bg-[#f5a20f]/10 group-hover:scale-105 transition-all shadow-sm">
                   <i data-lucide="scan-face" class="w-7 h-7 stroke-[1.5]"></i>
@@ -112,7 +104,6 @@
                <span class="text-[11px] font-bold text-slate-700 text-center leading-tight group-hover:text-[#f5a20f] transition-colors">Absensi</span>
             </div>
             
-            <!-- Tombol Portal Engineer -->
             <div onclick="checkLoginAndGo()" class="flex flex-col items-center gap-3 cursor-pointer group w-20">
                <div class="w-16 h-16 rounded-2xl border border-[#f5a20f]/40 text-[#f5a20f] flex items-center justify-center group-hover:bg-[#f5a20f]/10 group-hover:scale-105 transition-all shadow-sm">
                   <i data-lucide="file-text" class="w-7 h-7 stroke-[1.5]"></i>
@@ -120,7 +111,6 @@
                <span class="text-[11px] font-bold text-slate-700 text-center leading-tight group-hover:text-[#f5a20f] transition-colors">Portal<br>Engineer</span>
             </div>
 
-            <!-- Tombol BOD Panel -->
             <div onclick="switchView('view-executive')" class="flex flex-col items-center gap-3 cursor-pointer group w-20">
                <div class="w-16 h-16 rounded-2xl border border-[#f5a20f]/40 text-[#f5a20f] flex items-center justify-center group-hover:bg-[#f5a20f]/10 group-hover:scale-105 transition-all shadow-sm">
                   <i data-lucide="layout-grid" class="w-7 h-7 stroke-[1.5]"></i>
@@ -130,12 +120,11 @@
          </div>
       </div>
       
-      <!-- Footer -->
       <div class="absolute bottom-6 w-full text-center flex flex-col items-center justify-center gap-1.5">
          <p class="text-[9px] font-bold text-slate-400">Powered By :</p>
          <p class="text-[9px] font-bold text-slate-600">PT RUSTIKA CITRA GROUP & PT RUSTIKA GLOBAL INDONESIA</p>
          <p class="text-[9px] font-medium text-slate-400">IT_Support Rustika Consultant</p>
-         <p class="text-[8px] font-medium text-slate-400 mt-1">Version 1.1.0</p>
+         <p class="text-[8px] font-medium text-slate-400 mt-1">Version 1.3.1 (Stable Fix)</p>
       </div>
    </div>
 </div>
@@ -187,7 +176,7 @@
             <h2 id="engName" class="text-3xl font-black uppercase tracking-tight">-</h2>
             <p id="engMeta" class="text-sm font-bold text-indigo-600 uppercase tracking-widest mt-1">-</p>
          </div>
-         <button onclick="openPasswordModal()" class="z-10 bg-[#5046e5] hover:bg-[#4338ca] text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase shadow-lg shadow-indigo-500/20">Ubah Sandi</button>
+         <button onclick="window.$id('passwordModal').classList.replace('hidden', 'flex')" class="z-10 bg-[#5046e5] hover:bg-[#4338ca] text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase shadow-lg shadow-indigo-500/20">Ubah Sandi</button>
       </div>
 
       <div class="bg-white rounded-[2rem] border border-slate-200 p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
@@ -198,7 +187,6 @@
                <p class="text-[10px] text-slate-500 font-medium mt-1.5 leading-relaxed">Wajib diisi setiap hari sebelum pulang untuk laporan progres Direksi.</p>
             </div>
          </div>
-         <!-- PERUBAHAN: Memanggil Form Time Sheet, bukan lagi peringatan -->
          <button onclick="openTimesheetModal()" class="bg-[#10b981] text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center gap-2 hover:bg-emerald-600 transition-colors">
             <i data-lucide="list-todo" class="w-5 h-5"></i> Isi Time Sheet
          </button>
@@ -235,67 +223,111 @@
     </div>
 
     <main class="max-w-[1440px] mx-auto p-6 space-y-8">
-        <!-- 6 KOTAK KPI -->
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div class="kpi-card" style="--kc: #3b82f6"><i data-lucide="clipboard-list" class="kpi-icon"></i><div class="kpi-label">Total</div><div class="kpi-value" id="k0">0</div></div>
-            <div class="kpi-card" style="--kc: #0ea5e9"><i data-lucide="play" class="kpi-icon"></i><div class="kpi-label">Active</div><div class="kpi-value" id="k1">0</div></div>
-            <div class="kpi-card" style="--kc: #8b5cf6"><i data-lucide="plus-circle" class="kpi-icon"></i><div class="kpi-label">New</div><div class="kpi-value" id="k2">0</div></div>
-            <div class="kpi-card" style="--kc: #22c55e"><i data-lucide="check-circle-2" class="kpi-icon"></i><div class="kpi-label">Complete</div><div class="kpi-value" id="k3">0</div></div>
-            <div class="kpi-card" style="--kc: #eab308"><i data-lucide="pause-circle" class="kpi-icon"></i><div class="kpi-label">On Hold</div><div class="kpi-value" id="k4">0</div></div>
-            <div class="kpi-card" style="--kc: #64748b"><i data-lucide="x-circle" class="kpi-icon"></i><div class="kpi-label">Closed</div><div class="kpi-value" id="k5">0</div></div>
+        
+        <!-- TAB MENU BOD PANEL -->
+        <div class="flex gap-2 border-b border-slate-200 pb-4">
+            <button onclick="switchExecTab('overview')" id="tab-overview" class="px-5 py-2.5 bg-[#003366] text-white rounded-xl text-xs font-bold transition-all shadow-sm">KPI DASHBOARD</button>
+            <button onclick="switchExecTab('timesheet')" id="tab-timesheet" class="px-5 py-2.5 bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-bold transition-all">TIME SHEET REPORT</button>
         </div>
 
-        <!-- 2 CHART & PANEL DIAGRAM -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div class="chart-card">
-                <div class="chart-title">Active by Project</div>
-                <div class="chart-wrap"><canvas id="cProjType" class="chart-canvas-3d"></canvas></div>
-                <div class="flex flex-wrap gap-2 justify-center mt-6" id="lProjType"></div>
+        <!-- SECTION: KPI DASHBOARD -->
+        <div id="exec-overview-section" class="space-y-8 animate-in fade-in">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div class="kpi-card" style="--kc: #3b82f6"><i data-lucide="clipboard-list" class="kpi-icon"></i><div class="kpi-label">Total</div><div class="kpi-value" id="k0">0</div></div>
+                <div class="kpi-card" style="--kc: #0ea5e9"><i data-lucide="play" class="kpi-icon"></i><div class="kpi-label">Active</div><div class="kpi-value" id="k1">0</div></div>
+                <div class="kpi-card" style="--kc: #8b5cf6"><i data-lucide="plus-circle" class="kpi-icon"></i><div class="kpi-label">New</div><div class="kpi-value" id="k2">0</div></div>
+                <div class="kpi-card" style="--kc: #22c55e"><i data-lucide="check-circle-2" class="kpi-icon"></i><div class="kpi-label">Complete</div><div class="kpi-value" id="k3">0</div></div>
+                <div class="kpi-card" style="--kc: #eab308"><i data-lucide="pause-circle" class="kpi-icon"></i><div class="kpi-label">On Hold</div><div class="kpi-value" id="k4">0</div></div>
+                <div class="kpi-card" style="--kc: #64748b"><i data-lucide="x-circle" class="kpi-icon"></i><div class="kpi-label">Closed</div><div class="kpi-value" id="k5">0</div></div>
             </div>
-            <div class="chart-card">
-                <div class="chart-title">Active by Priority</div>
-                <div class="chart-wrap"><canvas id="cPriority" class="chart-canvas-3d"></canvas></div>
-                <div class="flex flex-wrap gap-2 justify-center mt-6" id="lPriority"></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="chart-card">
+                    <div class="chart-title">Active by Project</div>
+                    <div class="chart-wrap"><canvas id="cProjType" class="chart-canvas-3d"></canvas></div>
+                    <div class="flex flex-wrap gap-2 justify-center mt-6" id="lProjType"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Active by Priority</div>
+                    <div class="chart-wrap"><canvas id="cPriority" class="chart-canvas-3d"></canvas></div>
+                    <div class="flex flex-wrap gap-2 justify-center mt-6" id="lPriority"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title" id="detailTitle">DAFTAR TERPILIH</div>
+                    <div class="flex-1 w-full overflow-x-auto overflow-y-hidden no-scrollbar relative" id="detailPanel">
+                        <div class="w-full h-full flex flex-col items-center justify-center text-center p-8 text-slate-400 absolute inset-0">
+                            <i data-lucide="bar-chart-3" class="w-8 h-8 mb-3 opacity-20"></i>
+                            <p class="text-[11px] font-medium italic leading-relaxed">Klik grafik lingkaran atau legenda untuk melihat diagram proyek di sini.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="chart-card">
-                <div class="chart-title" id="detailTitle">DAFTAR TERPILIH</div>
-                <!-- PANEL DIAGRAM KE ATAS (HORIZONTAL SCROLL) -->
-                <div class="flex-1 w-full overflow-x-auto overflow-y-hidden no-scrollbar relative" id="detailPanel">
-                    <div class="w-full h-full flex flex-col items-center justify-center text-center p-8 text-slate-400 absolute inset-0">
-                        <i data-lucide="bar-chart-3" class="w-8 h-8 mb-3 opacity-20"></i>
-                        <p class="text-[11px] font-medium italic leading-relaxed">Klik grafik lingkaran atau legenda untuk melihat diagram proyek di sini.</p>
+
+            <div class="pt-6 border-t border-slate-200">
+                <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
+                    <h2 class="text-xs font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-3 shrink-0">
+                        <i data-lucide="layout-grid" class="w-4 h-4 text-[#ef4444]"></i> Project Progress Tracker
+                    </h2>
+                    <div id="execFilters" class="flex gap-2 overflow-x-auto no-scrollbar pb-2 xl:pb-0 w-full xl:w-auto"></div>
+                </div>
+                <div id="executiveGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5"></div>
+            </div>
+        </div>
+
+        <!-- SECTION: TIME SHEET REPORT -->
+        <div id="exec-timesheet-section" class="hidden animate-in fade-in space-y-6">
+            <div class="bg-white shadow-sm rounded-2xl border border-slate-200 p-6 lg:p-8">
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                    <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
+                        <i data-lucide="file-text" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Time Sheet Generator</h2>
+                        <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest mt-0.5">Tarik Data Time Sheet Terpadu Engineer</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-5 items-end">
+                    <div class="md:col-span-2">
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wider">Pilih Tim / Engineer</label>
+                        <select id="repTeam" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 font-semibold text-sm">
+                            <option value="">-- Pilih Tim --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wider">Tanggal Mulai</label>
+                        <input type="date" id="repStart" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 font-semibold text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wider">Tanggal Akhir</label>
+                        <input type="date" id="repEnd" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 font-semibold text-sm">
+                    </div>
+                </div>
+                <button onclick="generateReport()" class="w-full mt-6 bg-[#003366] hover:bg-[#002244] text-white font-bold py-4 rounded-xl shadow-md transition-all flex justify-center items-center gap-2 active:scale-[0.98]">
+                    <i data-lucide="search" class="w-5 h-5"></i> GENERATE LAPORAN
+                </button>
+
+                <div class="mt-8 pt-6 border-t border-slate-100">
+                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <i data-lucide="users" class="w-4 h-4 text-indigo-500"></i> Akses Cepat (Quick Generate)
+                    </h3>
+                    <div id="quickSelectGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                        <!-- Rendered by JS -->
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- PROJECT PROGRESS TRACKER DENGAN FILTER TAB BARU -->
-        <div class="pt-6 border-t border-slate-200">
-            <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
-                <h2 class="text-xs font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-3 shrink-0">
-                    <i data-lucide="layout-grid" class="w-4 h-4 text-[#ef4444]"></i> Project Progress Tracker
-                </h2>
-                
-                <!-- CONTAINER MENU KATEGORI (HORIZONTAL SCROLL) -->
-                <div id="execFilters" class="flex gap-2 overflow-x-auto no-scrollbar pb-2 xl:pb-0 w-full xl:w-auto">
-                    <!-- Tombol-tombol akan di-render melalui JavaScript -->
-                </div>
-            </div>
-            
-            <div id="executiveGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5"></div>
-        </div>
     </main>
 </div>
 
 <!-- ==========================================
-     POPUP MODALS
+     POPUP MODALS (BOD, PASSWORD, TIMESHEET)
      ========================================== -->
 
 <!-- MODAL POPUP BOD -->
 <div id="bodModal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 transition-all">
     <div class="bg-white rounded-[2rem] w-full max-w-4xl shadow-2xl flex flex-col modal-animate-in max-h-[90vh] overflow-hidden">
-        
-        <!-- Header Popup -->
         <div class="bg-gradient-to-r from-slate-50 to-white border-b border-slate-200 p-6 lg:p-8 flex justify-between items-start shrink-0 relative z-10">
             <div class="pr-4 overflow-hidden text-left">
                 <span class="inline-block px-3 py-1.5 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-md text-[10px] font-black tracking-widest uppercase mb-3" id="bodProjType">-</span>
@@ -306,13 +338,7 @@
                 <i data-lucide="x" class="w-6 h-6"></i>
             </button>
         </div>
-        
-        <!-- List Detail Pekerjaan -->
-        <div class="p-6 lg:p-8 flex flex-col gap-3 overflow-y-auto bg-slate-50/80 no-scrollbar flex-1 relative z-0" id="bodTaskList">
-            <!-- Rincian Tugas Dimasukkan via JS -->
-        </div>
-        
-        <!-- Footer Popup -->
+        <div class="p-6 lg:p-8 flex flex-col gap-3 overflow-y-auto bg-slate-50/80 no-scrollbar flex-1 relative z-0" id="bodTaskList"></div>
         <div class="p-6 border-t border-slate-100 bg-white flex justify-between items-center shrink-0 relative z-10">
             <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Rincian Task & Progress Lapangan</p>
             <button onclick="closeBodModal()" class="text-xs font-black text-slate-600 bg-slate-100 hover:bg-slate-200 px-6 py-3 rounded-xl uppercase transition-colors">Tutup Jendela</button>
@@ -325,88 +351,191 @@
     <div class="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl overflow-hidden flex flex-col p-8 modal-animate-in">
         <div class="flex justify-between items-center mb-8">
            <h3 class="text-xl font-black text-slate-900 uppercase tracking-tight">Ganti Kata Sandi</h3>
-           <button onclick="closePasswordModal()" class="text-slate-400 hover:text-slate-600 transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
+           <button onclick="window.$id('passwordModal').classList.replace('flex','hidden')" class="text-slate-400 hover:text-slate-600 transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
         </div>
         <form onsubmit="handlePasswordChange(event)" class="space-y-5">
-           <input type="password" id="newPass" required placeholder="Password Baru" class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-indigo-500 font-semibold">
-           <input type="password" id="confirmPass" required placeholder="Ulangi Password Baru" class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-indigo-500 font-semibold">
+           <input type="password" required placeholder="Password Baru" class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-indigo-500 font-semibold">
+           <input type="password" required placeholder="Ulangi Password Baru" class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-indigo-500 font-semibold">
            <button type="submit" class="w-full py-4 bg-indigo-600 text-white font-black rounded-2xl shadow-lg transition-all active:scale-95 uppercase tracking-widest">Simpan Perubahan</button>
         </form>
     </div>
 </div>
 
-<!-- MODAL TIMESHEET (FORMULIR LAPORAN HARIAN) -->
-<div id="timesheetModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-    <div class="bg-white rounded-[2.5rem] w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col p-8 modal-animate-in max-h-[90vh]">
-        <div class="flex justify-between items-center mb-6 shrink-0">
-           <div>
-               <h3 class="text-xl font-black text-slate-900 uppercase tracking-tight">Form Time Sheet</h3>
-               <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Laporan Aktivitas Harian</p>
-           </div>
-           <button onclick="closeTimesheetModal()" class="text-slate-400 hover:text-slate-600 transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
+<!-- DYNAMIC TIMESHEET MODAL (ENGINEER) -->
+<div id="timesheetModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-[2rem] w-full max-w-6xl shadow-2xl flex flex-col modal-animate-in max-h-[95vh]">
+        <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center shadow-sm border border-indigo-200"><i data-lucide="clock" class="w-5 h-5"></i></div>
+            <div>
+              <h3 class="font-bold text-slate-900 uppercase tracking-tight text-base leading-none">Dynamic Time Sheet</h3>
+              <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-1">Laporan Aktivitas Pekerjaan Harian</p>
+            </div>
+          </div>
+          <button onclick="closeTimesheetModal()" class="p-2 text-slate-400 hover:text-rose-500 bg-white border border-slate-200 hover:bg-rose-50 transition-colors rounded-lg shadow-sm"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
-        <form onsubmit="submitTimesheet(event)" class="space-y-5 overflow-y-auto no-scrollbar pr-2 pb-4">
-           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-               <div>
-                   <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tanggal</label>
-                   <input type="date" id="tsTanggal" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-medium text-sm">
-               </div>
-               <div>
-                   <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Pilih Proyek</label>
-                   <select id="tsProyek" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-medium text-sm appearance-none">
-                       <option value="">-- Pilih Proyek --</option>
-                   </select>
-               </div>
-               <div>
-                   <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Jam Mulai</label>
-                   <input type="time" id="tsMulai" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-medium text-sm">
-               </div>
-               <div>
-                   <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Jam Selesai</label>
-                   <input type="time" id="tsSelesai" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-medium text-sm">
-               </div>
-           </div>
-           <div>
-               <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Deskripsi Pekerjaan</label>
-               <textarea id="tsDeskripsi" required rows="3" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-medium text-sm resize-none" placeholder="Rincian aktivitas hari ini..."></textarea>
-           </div>
-           <div>
-               <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Kendala Lapangan (Opsional)</label>
-               <textarea id="tsKendala" rows="2" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-medium text-sm resize-none" placeholder="Apakah ada kendala yang menghambat?"></textarea>
-           </div>
-           
-           <button type="submit" id="btnSubmitTS" class="w-full py-4 mt-2 bg-[#10b981] hover:bg-emerald-600 text-white font-black rounded-2xl shadow-lg transition-all active:scale-95 uppercase tracking-widest flex justify-center items-center gap-2">
-               <i data-lucide="send" class="w-5 h-5"></i> Kirim Laporan
+
+        <div class="p-5 overflow-y-auto flex-1 bg-slate-50/50">
+          <div class="mb-5">
+            <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wider">Tanggal Laporan</label>
+            <input type="date" id="tsDate" required class="w-full max-w-xs p-2.5 text-sm bg-white border border-slate-200 rounded-xl outline-none focus:border-indigo-500 font-semibold shadow-sm">
+          </div>
+
+          <div class="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+             <div class="hidden lg:flex bg-slate-100 p-3 text-[10px] font-bold text-slate-600 uppercase tracking-widest border-b border-slate-200">
+                <div class="w-[16%] text-center">Atur Jam</div>
+                <div class="w-1/5 px-2">Proyek / Kategori</div>
+                <div class="w-[12%] px-2">Lokasi</div>
+                <div class="flex-1 px-2">Deskripsi Pekerjaan</div>
+                <div class="w-[18%] px-2">Kendala Lapangan</div>
+                <div class="w-12"></div>
+             </div>
+             <div id="tsRowsContainer" class="divide-y divide-slate-100 pb-2">
+                <!-- Baris dinamis akan di-render di sini oleh JavaScript -->
+             </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row items-center gap-3 mt-4">
+            <button type="button" onclick="addTsRow()" class="flex items-center justify-center gap-2 w-full sm:w-auto text-[11px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-5 py-3 rounded-xl border border-indigo-200 transition-colors shadow-sm uppercase tracking-widest">
+              <i data-lucide="plus" class="w-4 h-4"></i> Tambah Aktivitas
+            </button>
+            <button type="button" onclick="addTsOvertime()" class="flex items-center justify-center gap-2 w-full sm:w-auto text-[11px] font-bold text-purple-600 bg-purple-50 hover:bg-purple-100 px-5 py-3 rounded-xl border border-purple-200 shadow-sm transition-colors uppercase tracking-widest">
+              <i data-lucide="clock" class="w-4 h-4"></i> Tambah Lembur (>17:00)
+            </button>
+          </div>
+        </div>
+
+        <div class="p-5 border-t border-slate-200 shrink-0 bg-white">
+           <button id="btnSubmitTS" onclick="submitTimesheet(event)" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl shadow-md transition-all flex justify-center items-center gap-2 active:scale-95 tracking-widest uppercase">
+              <i data-lucide="send" class="w-5 h-5"></i> KIRIM LAPORAN TIMESHEET
            </button>
-        </form>
+        </div>
+    </div>
+</div>
+
+<!-- REPORT MODAL KANBAN (BOD PANEL) -->
+<div id="reportModal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4 sm:p-6 bg-slate-900/80 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[95vh] flex flex-col overflow-hidden">
+        <div class="p-5 sm:p-8 border-b-4 border-[#003366] shrink-0 bg-white">
+            <div class="flex justify-between items-start mb-6">
+                <div class="flex items-center gap-3 sm:gap-5">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 bg-white border border-slate-200 rounded-xl p-1.5 sm:p-2 shadow-sm shrink-0">
+                        <img src="https://rustikaconsultant.com/wp-content/uploads/2026/03/logo-rustika.png" alt="Logo" class="w-full h-full object-contain">
+                    </div>
+                    <div>
+                        <h1 class="text-xl sm:text-[22px] font-black text-[#003366] uppercase tracking-tight leading-none mb-1">TIME SHEET REPORT</h1>
+                        <p class="text-[10px] sm:text-xs font-bold text-slate-500 tracking-widest uppercase">Rustika Consultant - Enterprise System</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4">
+                    <div class="text-right hidden md:block">
+                        <span class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Periode Laporan</span>
+                        <span id="repModalDate" class="font-bold text-xs text-slate-800 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200"></span>
+                    </div>
+                    <button onclick="closeReportModal()" class="p-2 sm:px-4 sm:py-2 bg-slate-100 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors shadow-sm font-bold text-xs uppercase tracking-widest border border-slate-200 flex items-center gap-2">
+                        <i data-lucide="x" class="w-4 h-4 sm:w-4 sm:h-4"></i> <span class="hidden sm:inline">Tutup</span>
+                    </button>
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
+                <div>
+                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Profil Engineer</p>
+                    <h2 id="repModalName" class="text-lg sm:text-xl font-black text-[#f5a20f] leading-tight truncate max-w-sm sm:max-w-md uppercase"></h2>
+                    <span id="repModalDept" class="inline-block bg-indigo-50 text-indigo-700 text-[10px] font-bold px-3 py-1 rounded-md mt-1.5 uppercase border border-indigo-200"></span>
+                </div>
+                
+                <div class="text-left md:hidden mt-2">
+                   <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Periode Laporan:</p>
+                   <span id="repModalDateMobile" class="font-bold text-[11px] text-slate-700 bg-slate-50 p-1.5 rounded-md border border-slate-200"></span>
+                </div>
+
+                <div class="flex gap-2 w-full md:w-auto mt-2 md:mt-0">
+                    <button onclick="exportToCSV()" class="flex-1 md:flex-none flex justify-center items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-bold px-4 py-2.5 rounded-xl text-xs shadow-sm transition-all tracking-widest">
+                        <i data-lucide="download" class="w-4 h-4"></i> EXCEL
+                    </button>
+                    <button onclick="handlePrintPDF()" class="flex-1 md:flex-none flex justify-center items-center gap-2 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 font-bold px-4 py-2.5 rounded-xl text-xs shadow-sm transition-all tracking-widest">
+                        <i data-lucide="printer" class="w-4 h-4"></i> CETAK PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-0 sm:p-6 md:p-8 overflow-y-auto flex-1 bg-slate-50/50">
+            <div class="bg-white sm:rounded-xl sm:border border-slate-200 shadow-sm overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[900px] table-fixed">
+                    <thead>
+                        <tr class="bg-slate-100 border-b border-slate-200">
+                            <th class="py-3 px-4 text-[11px] font-black text-slate-700 uppercase tracking-widest w-[15%]">Tanggal & Waktu</th>
+                            <th class="py-3 px-3 text-[11px] font-black text-slate-700 uppercase tracking-widest w-[10%]">Jam</th>
+                            <th class="py-3 px-3 text-[11px] font-black text-slate-700 uppercase tracking-widest w-[35%]">Deskripsi Pekerjaan</th>
+                            <th class="py-3 px-3 text-[11px] font-black text-slate-700 uppercase tracking-widest w-[20%]">Nama Proyek</th>
+                            <th class="py-3 px-3 text-[11px] font-black text-slate-700 uppercase tracking-widest w-[10%]">Kendala</th>
+                            <th class="py-3 px-3 text-[11px] font-black text-slate-700 uppercase tracking-widest w-[10%] text-center">Lokasi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTableBody" class="divide-y divide-slate-200">
+                        <!-- Rendered by JS using Tbody per date -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="p-4 border-t border-slate-200 bg-white flex justify-end shrink-0 sm:hidden">
+             <button onclick="closeReportModal()" class="w-full flex justify-center items-center gap-2 px-8 py-3 bg-[#003366] hover:bg-[#002244] text-white rounded-xl font-bold text-sm shadow-md transition-all uppercase tracking-widest active:scale-95">
+                <i data-lucide="x" class="w-4 h-4"></i> TUTUP LAPORAN
+             </button>
+        </div>
     </div>
 </div>
 
 <script>
 // ==========================================
-// PENGAMANAN KARAKTER KHUSUS (ANTI SYNTAX ERROR)
+// GLOBAL UTILITIES & PENGAMANAN KARAKTER
 // ==========================================
-const escapeJS = (str) => {
+window.$id = function(id) { return document.getElementById(id); };
+
+window.escapeJS = function(str) {
     if (!str) return '';
     return str.toString().replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n|\r/g, " ");
 };
 
-// ==========================================
-// FUNGSI KALKULASI PROGRES DINAMIS (ANTI-BELANG)
-// ==========================================
-function getCalcProgress(p) {
+window.getCalcProgress = function(p) {
     if (!p.Tasks || p.Tasks.length === 0) return parseInt(p['Overall Progress']) || 0;
     let sum = 0;
     p.Tasks.forEach(t => sum += (parseInt(t.progress) || 0));
     return Math.round(sum / p.Tasks.length);
-}
+};
+
+window.getVal = function(obj, keys) {
+  if(!obj) return "";
+  const oKeys = Object.keys(obj);
+  for(let k of keys) {
+      let f = oKeys.find(x => x.toLowerCase().trim() === k.toLowerCase());
+      if(f) return obj[f].toString().trim();
+  }
+  return "";
+};
+
+window.getTeamProp = function(teamObj, propType) {
+    if (!teamObj) return '-';
+    if (propType === 'KODE') return window.getVal(teamObj, ['KODE', 'ID', 'TIM', 'INISIAL']) || '---';
+    if (propType === 'NAMA') return window.getVal(teamObj, ['NAMA', 'NAME', 'NAMA LENGKAP', 'NAMA ENGINEER']) || 'Tanpa Nama';
+    if (propType === 'DEPT') return window.getVal(teamObj, ['DEPARTEMEN', 'DIVISI', 'DEVISI', 'JABATAN']) || '-';
+    if (propType === 'FOTO') return window.getVal(teamObj, ['FOTO', 'PHOTO', 'GAMBAR']) || '';
+    return '-';
+};
 
 // ==========================================
-// CONFIG & STATE ENGINE
+// GLOBAL STATE
 // ==========================================
-let allData = [], teamsData = [], currentUser = null, curTeamFilter = 'active_all';
+let allData = [];
+let teamsData = [];
+let timesheetsData = [];
+let currentUser = null;
+let curTeamFilter = 'active_all';
 let curExecFilter = 'ACTIVE'; 
 let charts = {};
+
 const API_URL = 'https://script.google.com/macros/s/AKfycbwsrw3LWLuHK8e5X1ABtOqbVaMfGwHFiFoG9kJ3lcNUPte3Ssf88hEwrkJoMBnt1zysTw/exec';
 
 const KEY_MAP = {
@@ -430,29 +559,24 @@ const execFiltersConfig = [
     { id: 'COMPLETE', label: 'Complete', color: 'bg-green-600' }
 ];
 
+// STATE TIMESHEET FORM
+let tsRows = [];
+// STATE REPORT GENERATOR
+let currentReportData = null;
+
 try {
     const savedUser = localStorage.getItem('rustikaUser');
-    if(savedUser) currentUser = JSON.parse(savedUser);
-} catch(e){}
+    if (savedUser) currentUser = JSON.parse(savedUser);
+} catch(e) {}
 
-function getVal(obj, keys) {
-  if(!obj) return "";
-  const oKeys = Object.keys(obj);
-  for(let k of keys) {
-    let f = oKeys.find(x => x.toLowerCase().trim() === k.toLowerCase());
-    if(f) return obj[f].toString().trim();
-  }
-  return "";
-}
-
-function switchView(id, skipInit = false) {
+window.switchView = function(id, skipInit = false) {
   document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  $id(id).classList.add('active');
   if(!skipInit && (id === 'view-executive' || id === 'view-team-dashboard')) init(false);
   lucide.createIcons();
-}
+};
 
-function checkLoginAndGo() {
+window.checkLoginAndGo = function() {
     if(currentUser) {
         updateUI();
         renderTeamWorkspace();
@@ -460,617 +584,1141 @@ function checkLoginAndGo() {
     } else {
         switchView('view-team-login', true);
     }
-}
+};
 
 // ==========================================
 // LOGIN & LOGOUT
 // ==========================================
-async function handleTeamLogin(e) {
+window.handleTeamLogin = async function(e) {
   e.preventDefault();
-  const email = document.getElementById('loginId').value.toLowerCase().trim();
-  const pass = document.getElementById('loginPass').value.trim();
-  const btn = document.getElementById('btnSubmitLogin');
-  const msg = document.getElementById('loginMsg');
+  const email = $id('loginId').value.toLowerCase().trim();
+  const pass = $id('loginPass').value.trim();
+  const btn = $id('btnSubmitLogin');
+  const msg = $id('loginMsg');
   
-  btn.innerHTML = 'VERIFIKASI...'; btn.disabled = true; msg.classList.add('hidden');
+  btn.innerHTML = 'VERIFIKASI...';
+  btn.disabled = true;
+  msg.classList.add('hidden');
+  
   try {
     const res = await fetch(API_URL + "?nocache=" + new Date().getTime(), { cache: "no-store" });
     const data = await res.json();
     
     localStorage.setItem('rustikaData', JSON.stringify(data));
+    allData = data.projects || [];
+    teamsData = data.teams || [];
+    timesheetsData = data.timesheets || [];
     
-    allData = data.projects || []; teamsData = data.teams || [];
     const user = teamsData.find(t => (t['EMAIL'] || '').toLowerCase() === email && (t['PASSWORD'] || '').toString() === pass);
-    if(user) {
-      currentUser = user; 
+    if (user) {
+      currentUser = user;
       localStorage.setItem('rustikaUser', JSON.stringify(user)); 
-      updateUI(); 
-      renderTeamWorkspace(); 
+      updateUI();
+      renderTeamWorkspace();
       switchView('view-team-dashboard', true); 
-    } else { msg.textContent = "Email atau Password salah!"; msg.classList.remove('hidden'); }
-  } catch(e) { msg.textContent = "Masalah koneksi!"; msg.classList.remove('hidden'); }
-  btn.innerHTML = 'Masuk Sekarang'; btn.disabled = false;
-}
-
-function handleLogout() { 
-    currentUser = null; 
-    localStorage.removeItem('rustikaUser'); 
-    switchView('view-gateway', true); 
-}
-
-function updateUI() {
-  if(!currentUser) return;
-  document.getElementById('engName').textContent = (currentUser['NAMA'] || 'GUEST').toUpperCase();
-  document.getElementById('engMeta').textContent = `${currentUser['DEPARTEMEN']} • ${currentUser['KODE']}`;
-  if(currentUser['FOTO'] && currentUser['FOTO'].startsWith('http')) {
-    const img = document.getElementById('profImg');
-    img.src = currentUser['FOTO']; img.classList.remove('hidden');
-    document.getElementById('profIcon').classList.add('hidden');
+    } else {
+      msg.textContent = "Email atau Password salah!";
+      msg.classList.remove('hidden');
+    }
+  } catch(e) {
+      msg.textContent = "Masalah koneksi!";
+      msg.classList.remove('hidden');
   }
-}
+  btn.innerHTML = 'Masuk Sekarang';
+  btn.disabled = false;
+};
+
+window.handleLogout = function() {
+    currentUser = null;
+    localStorage.removeItem('rustikaUser');
+    switchView('view-gateway', true);
+};
+
+window.updateUI = function() {
+  if (!currentUser) return;
+  $id('engName').textContent = getTeamProp(currentUser, 'NAMA').toUpperCase();
+  $id('engMeta').textContent = `${getTeamProp(currentUser, 'DEPT')} • ${getTeamProp(currentUser, 'KODE')}`;
+  const foto = getTeamProp(currentUser, 'FOTO');
+  if (foto && foto.startsWith('http')) {
+      $id('profImg').src = foto;
+      $id('profImg').classList.remove('hidden');
+      $id('profIcon').classList.add('hidden');
+  }
+};
 
 // ==========================================
-// FORM TIMESHEET LOGIC
+// TIMESHEET DYNAMIC FORM (ENGINEER)
 // ==========================================
-function openTimesheetModal() {
-    if(!currentUser) return;
-    
-    // Setel Tanggal Default Hari Ini
-    document.getElementById('tsTanggal').valueAsDate = new Date();
-    
-    const projSelect = document.getElementById('tsProyek');
-    projSelect.innerHTML = '<option value="">-- Pilih Proyek --</option>';
-    
-    const userRoles = (currentUser['DEPARTEMEN'] || '').toUpperCase().split(/[\/,]+/).map(r => r.trim());
+window.parseTimeMin = function(t) {
+    if (!t) return 0;
+    const str = t.toString().trim().toLowerCase();
+    let [h, m] = str.replace(/[^0-9:]/g, '').split(':');
+    let hours = parseInt(h) || 0;
+    let mins = parseInt(m) || 0;
+    if (str.includes('pm') && hours < 12) hours += 12;
+    if (str.includes('am') && hours === 12) hours = 0;
+    return hours * 60 + mins;
+};
 
-    // Hanya Tampilkan Proyek Aktif yang dimiliki oleh Engineer yang login
-    const myProjects = allData.filter(p => {
-        const statusVal = getVal(p, KEY_MAP.status).toLowerCase();
-        if (!statusVal.includes('active') && statusVal !== 'new') return false;
+window.formatTimeMin = function(m) {
+    return `${Math.floor(m / 60).toString().padStart(2, '0')}:${(m % 60).toString().padStart(2, '0')}`;
+};
 
-        const tasks = (p.Tasks || []).filter(t => {
-           const taskRoles = (t.dept || '').toUpperCase().split(/[\/,]+/).map(r => r.trim());
-           if (taskRoles.length === 0 || taskRoles[0] === '') return false;
-           return taskRoles.some(role => userRoles.includes(role));
-        });
-        return tasks.length > 0;
-    });
-
-    // Masukkan ke dropdown pilihan proyek
-    myProjects.forEach(p => {
-        const pName = getVal(p, KEY_MAP.name);
-        projSelect.innerHTML += `<option value="${escapeJS(pName)}">${pName}</option>`;
-    });
-
-    document.getElementById('timesheetModal').classList.replace('hidden', 'flex');
+window.openTimesheetModal = function() {
+    if (!currentUser) return;
+    $id('tsDate').valueAsDate = new Date();
+    tsRows = [{ id: Date.now(), start: '08:00', end: '09:00', proj: '', desc: '', loc: 'KANTOR', ken: '', isBreak: false, isOvertime: false }];
+    renderTsGrid();
+    $id('timesheetModal').classList.replace('hidden', 'flex');
     lucide.createIcons();
-}
+};
 
-function closeTimesheetModal() {
-    document.getElementById('timesheetModal').classList.replace('flex', 'hidden');
-}
+window.closeTimesheetModal = function() {
+    $id('timesheetModal').classList.replace('flex', 'hidden');
+};
 
-async function submitTimesheet(e) {
+window.renderTsGrid = function() {
+    const cont = $id('tsRowsContainer');
+    const dept = getTeamProp(currentUser, 'DEPT');
+    const uRoles = dept.toUpperCase().split(/[\/,]+/).map(r => r.trim());
+    
+    const myProjNames = allData.filter(p => {
+        if (!getVal(p, KEY_MAP.status).toLowerCase().includes('active') && getVal(p, KEY_MAP.status).toLowerCase() !== 'new') return false;
+        return (p.Tasks || []).some(t => {
+            const tRoles = (t.dept || '').toUpperCase().split(/[\/,]+/).map(r => r.trim());
+            return tRoles.length > 0 && tRoles[0] !== '' && tRoles.some(r => uRoles.includes(r));
+        });
+    }).map(p => escapeJS(getVal(p, KEY_MAP.name)));
+
+    cont.innerHTML = tsRows.map(r => {
+        if (r.isBreak) {
+            return `
+            <div class="flex items-center p-3 gap-4 bg-rose-50 border-y border-rose-100 my-1 shadow-sm">
+                <div class="w-full lg:w-[16%] text-center">
+                    <span class="text-[11px] font-bold text-rose-500 tracking-widest">${r.start} - ${r.end}</span>
+                </div>
+                <div class="flex-1 px-3">
+                    <span class="text-xs font-bold text-rose-500 uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="alert-triangle" class="w-4 h-4"></i> ${r.desc}
+                    </span>
+                </div>
+            </div>`;
+        }
+
+        let opts = `<option value="Pekerjaan Umum / Lainnya"></option>
+                    <option value="Administrasi & HRD"></option>
+                    <option value="Operasional Kantor"></option>
+                    ${myProjNames.map(pn => `<option value="${pn}"></option>`).join('')}`;
+
+        return `
+        <div class="flex flex-col lg:flex-row lg:items-center p-4 gap-3 transition-colors hover:bg-slate-50 ${r.isOvertime ? 'bg-indigo-50/50 border-l-4 border-indigo-500' : ''}">
+            
+            <div class="w-full lg:w-[16%] flex items-center gap-1.5 shrink-0">
+                <span class="lg:hidden font-semibold text-[10px] uppercase text-slate-400 w-12">Jam:</span>
+                <input type="time" value="${r.start}" onchange="updateTsRow(${r.id}, 'start', this.value)" class="p-2 w-full text-xs bg-slate-50 border border-slate-200 rounded-lg outline-none font-bold text-slate-700 text-center">
+                <span class="text-slate-400 font-bold">-</span>
+                <input type="time" value="${r.end}" onchange="updateTsRow(${r.id}, 'end', this.value)" class="p-2 w-full text-xs bg-slate-50 border border-slate-200 rounded-lg outline-none font-bold text-slate-700 text-center">
+            </div>
+            
+            <div class="w-full lg:w-1/5 flex items-center shrink-0">
+                ${r.isOvertime ? '<span class="hidden lg:inline-flex mr-2 text-[8px] bg-indigo-100 text-indigo-700 px-1 py-0.5 rounded font-bold uppercase tracking-widest border border-indigo-200">Lembur</span>' : ''}
+                <input type="text" list="proj-list-${r.id}" value="${r.proj}" onchange="updateTsRow(${r.id}, 'proj', this.value)" placeholder="Ketik/pilih proyek..." class="w-full p-2 text-xs bg-white border border-slate-200 rounded-lg outline-none focus:border-indigo-500 font-semibold text-slate-800">
+                <datalist id="proj-list-${r.id}">
+                    ${opts}
+                </datalist>
+            </div>
+            
+            <div class="w-full lg:w-[12%] shrink-0">
+                <input type="text" list="loc-list-${r.id}" value="${r.loc}" onchange="updateTsRow(${r.id}, 'loc', this.value)" placeholder="Lokasi..." class="w-full p-2 text-xs bg-white border border-slate-200 rounded-lg outline-none focus:border-sky-500 font-semibold text-sky-700">
+                <datalist id="loc-list-${r.id}">
+                    <option value="KANTOR"></option>
+                    <option value="SITE"></option>
+                    <option value="WFH"></option>
+                </datalist>
+            </div>
+
+            <div class="flex-1">
+                <input type="text" placeholder="Detail aktivitas..." value="${r.desc}" onchange="updateTsRow(${r.id}, 'desc', this.value)" class="w-full p-2 text-xs bg-white border border-slate-200 rounded-lg outline-none focus:border-indigo-500 font-medium">
+            </div>
+            
+            <div class="w-full lg:w-[18%] shrink-0">
+                <input type="text" placeholder="Tulis kendala..." value="${r.ken}" onchange="updateTsRow(${r.id}, 'ken', this.value)" class="w-full p-2 text-xs bg-rose-50/50 border border-rose-200 rounded-lg outline-none focus:border-rose-400 font-medium text-rose-700">
+            </div>
+            
+            <div class="w-full lg:w-12 flex justify-end shrink-0">
+                <button type="button" onclick="tsRows=tsRows.filter(x=>x.id!==${r.id});renderTsGrid();" title="Hapus baris" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-100 rounded-md transition-colors">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+            </div>
+            
+        </div>`;
+    }).join('');
+    
+    lucide.createIcons();
+};
+
+window.updateTsRow = function(id, field, val) {
+    const i = tsRows.findIndex(r => r.id === id);
+    if (i === -1) return;
+    
+    tsRows[i][field] = val;
+    
+    if (field === 'end' && !tsRows[i].isBreak) {
+        const sm = parseTimeMin(tsRows[i].start);
+        let em = parseTimeMin(val);
+        
+        if (!tsRows[i].isOvertime && em > 1020) {
+            alert("Jam normal mentok 17:00. Gunakan TAMBAH LEMBUR.");
+            tsRows[i].end = "17:00";
+            em = 1020;
+        }
+        if (sm < 720 && em > 720) {
+            alert("Mentok 12:00 (ISTIRAHAT).");
+            tsRows[i].end = "12:00";
+            em = 720;
+        }
+        if (em === 720 && sm < 720 && !tsRows.some(r => r.isBreak && r.start === "12:00")) {
+            tsRows.splice(i + 1, 0, { id: Date.now(), start: "12:00", end: "13:00", proj: "-", desc: "ISTIRAHAT", loc: "-", ken: "-", isBreak: true, isOvertime: false });
+            tsRows.splice(i + 2, 0, { id: Date.now() + 1, start: "13:00", end: "14:00", proj: "", desc: "", loc: "KANTOR", ken: "", isBreak: false, isOvertime: false });
+        }
+        if (sm < 930 && em > 930) {
+            alert("Mentok 15:30 (ASHAR).");
+            tsRows[i].end = "15:30";
+            em = 930;
+        }
+        if (em === 930 && sm < 930 && !tsRows.some(r => r.isBreak && r.start === "15:30")) {
+            tsRows.splice(i + 1, 0, { id: Date.now(), start: "15:30", end: "16:00", proj: "-", desc: "SHOLAT ASHAR", loc: "-", ken: "-", isBreak: true, isOvertime: false });
+            tsRows.splice(i + 2, 0, { id: Date.now() + 1, start: "16:00", end: "17:00", proj: "", desc: "", loc: "KANTOR", ken: "", isBreak: false, isOvertime: false });
+        }
+    }
+    renderTsGrid();
+};
+
+window.addTsRow = function() {
+    const nr = tsRows.filter(r => !r.isOvertime);
+    const lr = nr[nr.length - 1] || tsRows[tsRows.length - 1];
+    let ns = lr ? parseTimeMin(lr.end) : 480;
+    
+    if (ns >= 1020) return alert("Mentok 17:00. Gunakan TAMBAH LEMBUR.");
+    
+    if (ns >= 720 && ns < 780) {
+        tsRows.push({ id: Date.now(), start: "12:00", end: "13:00", proj: "-", desc: "ISTIRAHAT", loc: "-", ken: "-", isBreak: true, isOvertime: false });
+        ns = 780;
+    } else if (ns >= 930 && ns < 960) {
+        tsRows.push({ id: Date.now(), start: "15:30", end: "16:00", proj: "-", desc: "SHOLAT ASHAR", loc: "-", ken: "-", isBreak: true, isOvertime: false });
+        ns = 960;
+    }
+    
+    let ne = ns + 60;
+    if (ns < 720 && ne > 720) ne = 720;
+    if (ns < 930 && ne > 930) ne = 930;
+    if (ne > 1020) ne = 1020;
+    
+    tsRows.push({ id: Date.now() + 1, start: formatTimeMin(ns), end: formatTimeMin(ne), proj: "", desc: "", loc: "KANTOR", ken: "", isBreak: false, isOvertime: false });
+    renderTsGrid();
+};
+
+window.addTsOvertime = function() {
+    const lr = tsRows[tsRows.length - 1];
+    let ns = lr ? parseTimeMin(lr.end) : 1020;
+    if (ns < 1020) ns = 1020;
+    let ne = ns + 60;
+    if (ne > 1439) ne = 1439;
+    
+    tsRows.push({ id: Date.now(), start: formatTimeMin(ns), end: formatTimeMin(ne), proj: "", desc: "", loc: "KANTOR", ken: "", isBreak: false, isOvertime: true });
+    renderTsGrid();
+};
+
+window.submitTimesheet = async function(e) {
     e.preventDefault();
-    if(!currentUser) return alert('Sesi habis, silakan login ulang.');
-
-    const btn = document.getElementById('btnSubmitTS');
-    const originalText = btn.innerHTML;
+    if (!currentUser) return alert("Sesi habis.");
+    
+    let err = false;
+    const acts = tsRows.filter(r => !r.isBreak && (r.desc.trim() !== '' || r.proj.trim() !== '')).map(r => {
+        if (parseTimeMin(r.start) >= parseTimeMin(r.end)) err = true;
+        const locClean = (r.loc || 'KANTOR').replace(/\|/g, '').replace(/\[|\]/g, '');
+        const finalDesc = `[LOC:${locClean}] ${r.desc}`;
+        return { namaProyek: r.proj, jamMulai: r.start, jamSelesai: r.end, deskripsi: finalDesc, kendala: r.ken };
+    });
+    
+    if (err) return alert("Ada Jam Selesai <= Jam Mulai!");
+    if (acts.length === 0) return alert("Isi minimal 1 aktivitas valid!");
+    
+    const btn = $id('btnSubmitTS');
+    const orig = btn.innerHTML;
     btn.innerHTML = 'MENGIRIM...';
     btn.disabled = true;
-
-    const payload = {
-        action: 'SUBMIT_TIMESHEET',
-        tanggal: document.getElementById('tsTanggal').value,
-        namaEngineer: currentUser['NAMA'] || '',
-        deptEngineer: currentUser['DEPARTEMEN'] || '',
-        namaProyek: document.getElementById('tsProyek').value,
-        jamMulai: document.getElementById('tsMulai').value,
-        jamSelesai: document.getElementById('tsSelesai').value,
-        deskripsi: document.getElementById('tsDeskripsi').value,
-        kendala: document.getElementById('tsKendala').value || '-'
-    };
-
+    
     try {
         await fetch(API_URL, {
             method: 'POST',
-            body: JSON.stringify(payload)
+            body: JSON.stringify({
+                action: 'SUBMIT_TIMESHEET',
+                tanggal: $id('tsDate').value,
+                namaEngineer: getTeamProp(currentUser, 'NAMA'),
+                deptEngineer: getTeamProp(currentUser, 'DEPT'),
+                activities: acts
+            })
         });
         btn.innerHTML = '✓ TERKIRIM';
-        btn.classList.replace('bg-[#10b981]', 'bg-emerald-500');
+        btn.classList.replace('bg-emerald-600', 'bg-emerald-500');
         
         setTimeout(() => {
-            closeTimesheetModal();
-            e.target.reset();
-            btn.innerHTML = originalText;
-            btn.classList.replace('bg-emerald-500', 'bg-[#10b981]');
+            $id('timesheetModal').classList.replace('flex', 'hidden');
+            btn.innerHTML = orig;
+            btn.classList.replace('bg-emerald-500', 'bg-emerald-600');
             btn.disabled = false;
+            init(true); 
         }, 1500);
-
-    } catch (err) {
-        alert('Gagal mengirim data. Periksa koneksi internet Anda.');
-        btn.innerHTML = originalText;
+    } catch(err) {
+        alert('Gagal mengirim data. Cek koneksi.');
+        btn.innerHTML = orig;
         btn.disabled = false;
     }
-}
+};
 
 // ==========================================
 // RENDER: ENGINEER WORKSPACE
 // ==========================================
-function renderTeamWorkspace() {
-  const cont = document.getElementById('projectList');
-  const menu = document.getElementById('sideMenu');
-  if(!currentUser) return;
-
-  const userRoles = (currentUser['DEPARTEMEN'] || '').toUpperCase().split(/[\/,]+/).map(r => r.trim());
-
-  const myProjects = allData.filter(p => {
-    const statusVal = getVal(p, KEY_MAP.status).toLowerCase();
-    if (!statusVal.includes('active') && statusVal !== 'new') return false;
-
-    const tasks = (p.Tasks || []).filter(t => {
-       const taskRoles = (t.dept || '').toUpperCase().split(/[\/,]+/).map(r => r.trim());
-       if (taskRoles.length === 0 || taskRoles[0] === '') return false;
-       return taskRoles.some(role => userRoles.includes(role));
+window.renderTeamWorkspace = function() {
+  const cont = $id('projectList');
+  const m = $id('sideMenu');
+  if (!currentUser) return;
+  
+  const dept = getTeamProp(currentUser, 'DEPT');
+  const uR = dept.toUpperCase().split(/[\/,]+/).map(r => r.trim());
+  
+  const myP = allData.filter(p => {
+    const s = getVal(p, KEY_MAP.status).toLowerCase();
+    if (!s.includes('active') && s !== 'new') return false;
+    
+    const ts = (p.Tasks || []).filter(t => {
+        const tR = (t.dept || '').toUpperCase().split(/[\/,]+/).map(r => r.trim());
+        return tR.length > 0 && tR[0] !== '' && tR.some(r => uR.includes(r));
     });
-    p.myTasks = tasks;
-    return tasks.length > 0;
+    p.myTasks = ts;
+    return ts.length > 0;
+  });
+  
+  myP.forEach(p => {
+      let sum = 0;
+      p.myTasks.forEach(t => sum += (parseInt(t.progress) || 0));
+      p.myAvg = p.myTasks.length > 0 ? Math.round(sum / p.myTasks.length) : 0;
   });
 
-  myProjects.forEach(p => {
-    let sum = 0; p.myTasks.forEach(t => sum += (parseInt(t.progress) || 0));
-    p.myAvg = p.myTasks.length > 0 ? Math.round(sum / p.myTasks.length) : 0;
-  });
-
-  const sidebarItems = [
-    { id: 'active_all', label: 'Semua Proyek', icon: 'grid', color: 'bg-slate-900' },
-    { id: 'active_slf', label: 'Kategori SLF', icon: 'file-text', color: 'bg-rose-600' },
-    { id: 'active_pbg', label: 'Kategori PBG', icon: 'home', color: 'bg-sky-600' },
-    { id: 'client_vale', label: 'PT VALE', icon: 'landmark', color: 'bg-amber-600' },
-    { id: 'client_clm', label: 'PT CLM', icon: 'factory', color: 'bg-red-600' },
-    { id: 'client_perorangan', label: 'PERORANGAN', icon: 'user', color: 'bg-indigo-600' },
-    { id: 'completed', label: 'Selesai (100%)', icon: 'check-circle', color: 'bg-emerald-600' }
+  const sb = [
+      { id: 'active_all', label: 'Semua Proyek', icon: 'grid', c: 'bg-slate-900' },
+      { id: 'active_slf', label: 'Kategori SLF', icon: 'file-text', c: 'bg-rose-600' },
+      { id: 'active_pbg', label: 'Kategori PBG', icon: 'home', c: 'bg-sky-600' },
+      { id: 'client_vale', label: 'PT VALE', icon: 'landmark', c: 'bg-amber-600' },
+      { id: 'client_clm', label: 'PT CLM', icon: 'factory', c: 'bg-red-600' },
+      { id: 'client_perorangan', label: 'PERORANGAN', icon: 'user', c: 'bg-indigo-600' },
+      { id: 'completed', label: 'Selesai', icon: 'check-circle', c: 'bg-emerald-600' }
   ];
+  
+  m.innerHTML = sb.map(i => `<button onclick="curTeamFilter='${i.id}';renderTeamWorkspace()" class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[10px] font-black uppercase border whitespace-nowrap lg:w-full transition-all ${curTeamFilter === i.id ? i.c + ' text-white border-transparent shadow-md scale-[1.02]' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}"><i data-lucide="${i.icon}" class="w-3.5 h-3.5"></i> ${i.label}</button>`).join('');
 
-  menu.innerHTML = sidebarItems.map(i => `
-    <button onclick="curTeamFilter='${i.id}';renderTeamWorkspace()" class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[10px] font-black uppercase border whitespace-nowrap lg:w-full transition-all ${curTeamFilter===i.id ? i.color+' text-white border-transparent shadow-md scale-[1.02]' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}">
-      <i data-lucide="${i.icon}" class="w-3.5 h-3.5"></i> ${i.label}
-    </button>`).join('');
-
-  let filtered = myProjects.filter(p => {
-    if(curTeamFilter === 'completed') return p.myAvg === 100;
-    if(p.myAvg === 100) return false;
-    const pType = (p.Type || '').toUpperCase();
-    const pName = getVal(p, KEY_MAP.name).toUpperCase();
-    const client = getVal(p, KEY_MAP.client).toUpperCase();
-    if(curTeamFilter === 'active_slf') return pType === 'SLF' || pName.includes('SLF');
-    if(curTeamFilter === 'active_pbg') return pType === 'PBG' || pName.includes('PBG');
-    if(curTeamFilter === 'client_vale') return client.includes('VALE') || client.includes('PTVI');
-    if(curTeamFilter === 'client_clm') return client.includes('CLM') || client.includes('CITRA LAMPIA');
-    if(curTeamFilter === 'client_perorangan') return !client.includes('VALE') && !client.includes('PTVI') && !client.includes('CLM') && !client.includes('CITRA LAMPIA');
+  const fil = myP.filter(p => {
+    if (curTeamFilter === 'completed') return p.myAvg === 100;
+    if (p.myAvg === 100) return false;
+    
+    const t = (p.Type || '').toUpperCase();
+    const n = getVal(p, KEY_MAP.name).toUpperCase();
+    const cl = getVal(p, KEY_MAP.client).toUpperCase();
+    
+    if (curTeamFilter === 'active_slf') return t === 'SLF' || n.includes('SLF');
+    if (curTeamFilter === 'active_pbg') return t === 'PBG' || n.includes('PBG');
+    if (curTeamFilter === 'client_vale') return cl.includes('VALE') || cl.includes('PTVI');
+    if (curTeamFilter === 'client_clm') return cl.includes('CLM') || cl.includes('CITRA LAMPIA');
+    if (curTeamFilter === 'client_perorangan') return !cl.includes('VALE') && !cl.includes('PTVI') && !cl.includes('CLM') && !cl.includes('CITRA LAMPIA');
     return true;
   });
 
-  if (filtered.length === 0) {
-      cont.innerHTML = `<div class="col-span-full py-20 bg-white rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Data Kosong</div>`;
-      lucide.createIcons(); return;
+  if (fil.length === 0) {
+      cont.innerHTML = `<div class="col-span-full py-20 flex flex-col items-center text-slate-400 font-bold uppercase text-[10px] border-2 border-dashed rounded-3xl">Kosong</div>`;
+      lucide.createIcons();
+      return;
   }
 
-  cont.innerHTML = filtered.map((p, idx) => {
+  cont.innerHTML = fil.map((p, i) => {
     const cl = getVal(p, KEY_MAP.client).toUpperCase();
-    const clName = cl.includes('VALE') || cl.includes('PTVI') ? 'PT VALE' : (cl.includes('CLM') || cl.includes('CITRA LAMPIA') ? 'PT CLM' : 'PERORANGAN');
-    const theme = (p.Type || getVal(p, KEY_MAP.name).includes('PBG') ? 'PBG' : 'SLF') === 'SLF' ? '#ef4444' : '#0ea5e9';
-    const globalIdx = 'team-' + idx;
+    const cN = cl.includes('VALE') ? 'PT VALE' : cl.includes('CLM') ? 'PT CLM' : 'PERORANGAN';
+    const tm = (p.Type || getVal(p, KEY_MAP.name).includes('PBG') ? 'PBG' : 'SLF') === 'SLF' ? '#ef4444' : '#0ea5e9';
+    const gI = 'team-' + i;
+    const sp = escapeJS(getVal(p, KEY_MAP.name));
     
-    const safeProj = escapeJS(getVal(p, KEY_MAP.name));
-
-    let phaseMap = {};
+    let phM = {};
     p.myTasks.forEach(t => {
-        let g = t.group && t.group.trim() !== "" ? t.group : "TAHAPAN UMUM";
-        if(!phaseMap[g]) phaseMap[g] = { tasks: [] };
-        phaseMap[g].tasks.push(t);
+        let g = t.group && t.group.trim() !== "" ? t.group : "UMUM";
+        if (!phM[g]) phM[g] = { tasks: [] };
+        phM[g].tasks.push(t);
     });
-    const phases = Object.keys(phaseMap).map(k => ({ name: k, tasks: phaseMap[k].tasks }));
-
-    return `
-    <div class="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col animate-in fade-in duration-300">
-       <div class="p-6 cursor-pointer hover:bg-slate-50 transition-colors" onclick="this.nextElementSibling.classList.toggle('hidden')">
-          <div class="flex justify-between items-start mb-4 gap-4">
-             <div class="flex-1">
-                <h4 class="text-sm font-black uppercase leading-tight tracking-tight">${getVal(p, KEY_MAP.name)}</h4>
-                <div class="flex flex-wrap gap-1.5 mt-2.5">
-                   <span class="text-[8px] font-black px-2 py-0.5 border border-slate-200 rounded uppercase text-slate-400">${p.myTasks.length} TUGAS</span>
-                   <span class="text-[8px] font-black px-2 py-0.5 border border-slate-200 rounded uppercase tracking-widest ${clName==='PT VALE' ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600'}">${clName}</span>
+    const ph = Object.keys(phM).map(k => ({ name: k, tasks: phM[k].tasks }));
+    
+    return `<div class="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col animate-in fade-in duration-300">
+        <div class="p-6 cursor-pointer hover:bg-slate-50" onclick="this.nextElementSibling.classList.toggle('hidden')">
+            <div class="flex justify-between items-start gap-4">
+                <div class="flex-1">
+                    <h4 class="text-sm font-black uppercase leading-tight tracking-tight">${getVal(p, KEY_MAP.name)}</h4>
+                    <div class="flex flex-wrap gap-1.5 mt-2.5">
+                        <span class="text-[8px] font-black px-2 py-0.5 border rounded uppercase text-slate-400">${p.myTasks.length} TUGAS</span>
+                        <span class="text-[8px] font-black px-2 py-0.5 border rounded uppercase tracking-widest ${cN === 'PT VALE' ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600'}">${cN}</span>
+                    </div>
                 </div>
-             </div>
-             <div class="text-right shrink-0">
-                <span id="avg-text-${globalIdx}" class="text-2xl font-black text-slate-900">${p.myAvg}%</span>
-                <div class="w-16 h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden shadow-inner"><div id="avg-bar-${globalIdx}" class="h-full transition-all duration-500" style="width:${p.myAvg}%;background:${theme}"></div></div>
-             </div>
-          </div>
-       </div>
-       <div class="hidden border-t bg-slate-50/50 p-5 space-y-4">
-          ${phases.map((ph, phIdx) => {
-             const phaseGlobalIdx = globalIdx + '-ph-' + phIdx;
-             let phSum = 0;
-             ph.tasks.forEach(t => phSum += (parseInt(t.progress) || 0));
-             let phAvg = ph.tasks.length > 0 ? Math.round(phSum / ph.tasks.length) : 0;
-
-             return `
-             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                <div class="p-4 cursor-pointer hover:bg-slate-50 transition-colors flex justify-between items-center" onclick="this.nextElementSibling.classList.toggle('hidden')">
-                   <h5 class="text-[11px] font-black uppercase text-slate-800 leading-snug">${ph.name}</h5>
-                   <div class="flex items-center gap-3 shrink-0 pl-3">
-                      <span class="text-[10px] font-black text-slate-600 bg-slate-100 border border-slate-200 px-2 py-1 rounded-md" id="avg-text-${phaseGlobalIdx}">${phAvg}%</span>
-                      <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
-                   </div>
+                <div class="text-right shrink-0">
+                    <span id="avg-text-${gI}" class="text-2xl font-black text-slate-900">${p.myAvg}%</span>
+                    <div class="w-16 h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden shadow-inner">
+                        <div id="avg-bar-${gI}" class="h-full transition-all duration-500" style="width:${p.myAvg}%;background:${tm}"></div>
+                    </div>
                 </div>
-                <div class="hidden border-t bg-slate-50 p-4 space-y-4">
-                   ${ph.tasks.map(t => {
-                      const safeTask = escapeJS(t.name);
-                      const safeKet = escapeJS(t.keterangan || '');
-                      return `
-                      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-3 tw-task-row">
-                         <div class="flex justify-between items-center mb-1">
-                            <h6 class="text-[11px] font-black uppercase text-slate-700 leading-snug">${t.name}</h6>
-                            <span class="text-[9px] font-bold text-slate-400">Upd: ${t.updatedBy || '-'}</span>
-                         </div>
-                         <input type="text" value="${safeKet}" class="w-full p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-amber-400 transition-all font-medium" placeholder="Rincian aktivitas...">
-                         <div class="flex gap-2">
-                            <div class="relative w-20 shrink-0">
-                               <input type="number" oninput="updateRealtimeAvg('${globalIdx}', '${phaseGlobalIdx}')" value="${t.progress}" class="tw-input-prog w-full p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl font-black text-center pr-6">
-                               <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">%</span>
-                            </div>
-                            <button onclick="saveProgress(this, '${safeProj}', '${safeTask}')" class="flex-1 bg-slate-900 text-white text-[10px] font-black rounded-xl hover:bg-black transition-all">SAVE</button>
-                         </div>
-                      </div>`;
-                   }).join('')}
-                </div>
-             </div>`;
-          }).join('')}
-       </div>
+            </div>
+        </div>
+        <div class="hidden border-t bg-slate-50/50 p-5 space-y-4">
+            ${ph.map((h, hi) => {
+                const pGI = gI + '-ph-' + hi;
+                let hs = 0;
+                h.tasks.forEach(t => hs += (parseInt(t.progress) || 0));
+                let ha = h.tasks.length > 0 ? Math.round(hs / h.tasks.length) : 0;
+                return `<div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
+                    <div class="p-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                        <h5 class="text-[11px] font-black uppercase text-slate-800">${h.name}</h5>
+                        <div class="flex items-center gap-3 shrink-0 pl-3">
+                            <span class="text-[10px] font-black text-slate-600 bg-slate-100 border px-2 py-1 rounded-md" id="avg-text-${pGI}">${ha}%</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+                        </div>
+                    </div>
+                    <div class="hidden border-t bg-slate-50 p-4 space-y-4">
+                        ${h.tasks.map(t => {
+                            const st = escapeJS(t.name);
+                            const sk = escapeJS(t.keterangan || '');
+                            return `<div class="bg-white p-4 rounded-xl border shadow-sm flex flex-col gap-3 tw-task-row">
+                                <div class="flex justify-between items-center mb-1">
+                                    <h6 class="text-[11px] font-black uppercase text-slate-700">${t.name}</h6>
+                                    <span class="text-[9px] font-bold text-slate-400">Upd: ${t.updatedBy || '-'}</span>
+                                </div>
+                                <input type="text" value="${sk}" class="w-full p-2.5 text-xs bg-slate-50 border rounded-xl outline-none" placeholder="Rincian...">
+                                <div class="flex gap-2">
+                                    <div class="relative w-20 shrink-0">
+                                        <input type="number" oninput="updateRealtimeAvg('${gI}','${pGI}')" value="${t.progress}" class="tw-input-prog w-full p-2.5 text-xs bg-slate-50 border rounded-xl font-black text-center pr-6">
+                                        <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">%</span>
+                                    </div>
+                                    <button onclick="saveProgress(this,'${sp}','${st}')" class="flex-1 bg-slate-900 text-white text-[10px] font-black rounded-xl hover:bg-black">SAVE</button>
+                                </div>
+                            </div>`;
+                        }).join('')}
+                    </div>
+                </div>`;
+            }).join('')}
+        </div>
     </div>`;
   }).join('');
+  
   lucide.createIcons();
-}
+};
 
-window.updateRealtimeAvg = function(globalIdx, phaseGlobalIdx) {
-    const projectCard = document.getElementById('projectList').querySelector(`[id="avg-text-${globalIdx}"]`).closest('.bg-white');
-    const inputs = projectCard.querySelectorAll('.tw-input-prog');
-    let sum = 0; inputs.forEach(i => { let v = parseInt(i.value) || 0; if(v > 100) v = 100; if(v < 0) v = 0; sum += v; });
-    const avg = Math.round(sum / inputs.length);
-    document.getElementById(`avg-text-${globalIdx}`).textContent = avg + '%';
-    document.getElementById(`avg-bar-${globalIdx}`).style.width = avg + '%';
-
-    if(phaseGlobalIdx) {
-        const phaseCard = document.getElementById(`avg-text-${phaseGlobalIdx}`).closest('.bg-white');
-        const phaseInputs = phaseCard.querySelectorAll('.tw-input-prog');
-        let phaseSum = 0;
-        phaseInputs.forEach(i => { let v = parseInt(i.value) || 0; if(v > 100) v = 100; if(v < 0) v = 0; phaseSum += v; });
-        const phaseAvg = Math.round(phaseSum / phaseInputs.length);
-        document.getElementById(`avg-text-${phaseGlobalIdx}`).textContent = phaseAvg + '%';
+window.updateRealtimeAvg = function(gI, pGI) {
+    const pc = $id('projectList').querySelector(`[id="avg-text-${gI}"]`).closest('.bg-white');
+    const is = pc.querySelectorAll('.tw-input-prog');
+    let s = 0;
+    is.forEach(i => {
+        let v = parseInt(i.value) || 0;
+        if (v > 100) v = 100;
+        if (v < 0) v = 0;
+        s += v;
+    });
+    const a = Math.round(s / is.length);
+    $id(`avg-text-${gI}`).textContent = a + '%';
+    $id(`avg-bar-${gI}`).style.width = a + '%';
+    
+    if (pGI) {
+        const phC = $id(`avg-text-${pGI}`).closest('.bg-white');
+        const pIs = phC.querySelectorAll('.tw-input-prog');
+        let ps = 0;
+        pIs.forEach(i => {
+            let v = parseInt(i.value) || 0;
+            if (v > 100) v = 100;
+            if (v < 0) v = 0;
+            ps += v;
+        });
+        $id(`avg-text-${pGI}`).textContent = Math.round(ps / pIs.length) + '%';
     }
 };
 
-async function saveProgress(btn, proj, task) {
+window.saveProgress = async function(btn, proj, task) {
   const row = btn.closest('.tw-task-row');
   const prog = row.querySelector('.tw-input-prog').value;
   const ket = row.querySelector('input[type="text"]').value;
-  btn.innerHTML = 'WAIT'; btn.disabled = true;
-  try {
-    await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'UPDATE_PROGRESS', projectName: proj, taskName: task, teamCode: (currentUser['KODE'] || '-'), progress: prog, keterangan: ket }) });
-    btn.innerHTML = '✓ SAVED'; btn.classList.replace('bg-slate-900', 'bg-emerald-500');
-    
-    const pData = allData.find(p => getVal(p, KEY_MAP.name) === proj);
-    if(pData && pData.Tasks) {
-        const tData = pData.Tasks.find(t => t.name === task);
-        if(tData) { tData.progress = parseInt(prog); tData.keterangan = ket; }
-    }
-
-    setTimeout(() => { btn.innerHTML = 'SAVE'; btn.classList.replace('bg-emerald-500', 'bg-slate-900'); btn.disabled = false; }, 2000);
-  } catch(e) { btn.innerHTML = 'ERR'; }
-}
-
-// ==========================================
-// RENDER: EXECUTIVE (BOD) PANEL 
-// ==========================================
-function renderFilteredList(type, value) {
-  const panel = document.getElementById('detailPanel');
-  const title = document.getElementById('detailTitle');
-  title.textContent = `DAFTAR: ${value.toUpperCase()}`;
+  btn.innerHTML = 'WAIT';
+  btn.disabled = true;
   
-  const filtered = allData.filter(p => {
-    const statusVal = getVal(p, KEY_MAP.status).toLowerCase();
-    if(type === 'status') {
-        if(value === 'Active') return statusVal.includes('active');
-        if(value === 'Closed') return statusVal.includes('closed');
-        if(value === 'Complete') return statusVal.includes('complete');
+  try {
+    const code = getTeamProp(currentUser, 'KODE');
+    await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+            action: 'UPDATE_PROGRESS',
+            projectName: proj,
+            taskName: task,
+            teamCode: code,
+            progress: prog,
+            keterangan: ket
+        })
+    });
+    btn.innerHTML = '✓ SAVED';
+    btn.classList.replace('bg-slate-900', 'bg-emerald-500');
+    
+    const pD = allData.find(p => getVal(p, KEY_MAP.name) === proj);
+    if (pD && pD.Tasks) {
+        const tD = pD.Tasks.find(t => t.name === task);
+        if (tD) {
+            tD.progress = parseInt(prog);
+            tD.keterangan = ket;
+        }
     }
-    if(type === 'priority') {
-        const prRaw = getVal(p, KEY_MAP.priority).toUpperCase();
-        const prName = prRaw.includes('HIGH') || prRaw.includes('HIGHT') ? 'High' : (prRaw.includes('MEDIUM') ? 'Medium' : (prRaw.includes('LOW') ? 'Low' : ''));
-        return prName === value;
+    setTimeout(() => {
+        btn.innerHTML = 'SAVE';
+        btn.classList.replace('bg-emerald-500', 'bg-slate-900');
+        btn.disabled = false;
+    }, 2000);
+  } catch(e) {
+      btn.innerHTML = 'ERR';
+  }
+};
+
+// ==========================================
+// EXECUTIVE & REPORT
+// ==========================================
+window.switchExecTab = function(t) {
+    if (t === 'overview') {
+        $id('exec-overview-section').classList.remove('hidden');
+        $id('exec-timesheet-section').classList.add('hidden');
+        $id('tab-overview').className = "px-5 py-2.5 bg-[#003366] text-white rounded-xl text-xs font-bold transition-all shadow-sm";
+        $id('tab-timesheet').className = "px-5 py-2.5 bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-bold transition-all";
+    } else {
+        $id('exec-overview-section').classList.add('hidden');
+        $id('exec-timesheet-section').classList.remove('hidden');
+        $id('tab-timesheet').className = "px-5 py-2.5 bg-[#003366] text-white rounded-xl text-xs font-bold transition-all shadow-sm";
+        $id('tab-overview').className = "px-5 py-2.5 bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-bold transition-all";
+        renderTimesheetControls();
+    }
+};
+
+window.renderFilteredList = function(type, val) {
+  $id('detailTitle').textContent = `DAFTAR: ${val.toUpperCase()}`;
+  const fil = allData.filter(p => {
+    const sv = getVal(p, KEY_MAP.status).toLowerCase();
+    if (type === 'status') return val === 'Active' ? sv.includes('active') : (val === 'Closed' ? sv.includes('closed') : sv.includes('complete'));
+    if (type === 'priority') {
+        const pr = getVal(p, KEY_MAP.priority).toUpperCase();
+        return (pr.includes('HIGH') || pr.includes('HIGHT') ? 'High' : (pr.includes('MEDIUM') ? 'Medium' : (pr.includes('LOW') ? 'Low' : ''))) === val;
     }
     return false;
   });
 
-  if (filtered.length === 0) {
-      panel.innerHTML = `<div class="w-full h-full flex flex-col items-center justify-center text-slate-400 text-[11px] italic"><i data-lucide="inbox" class="w-8 h-8 mb-2 opacity-20"></i>Data Kosong.</div>`; 
-      lucide.createIcons();
-      return;
-  }
+  if (fil.length === 0) return $id('detailPanel').innerHTML = `<div class="w-full h-full flex flex-col items-center justify-center text-slate-400 text-[11px] italic">Kosong</div>`;
   
-  panel.innerHTML = `<div class="flex gap-2.5 items-end h-full min-w-max px-4 pb-2 pt-4">` + 
-    filtered.map((p, idx) => {
-        const nameRaw = getVal(p, KEY_MAP.name);
-        const picRaw = getVal(p, ['pic']) || '-';
-        const name = escapeJS(nameRaw); 
-        const pic = escapeJS(picRaw);
-        
-        const progress = getCalcProgress(p);
-        const targetHeight = Math.max(progress, 5); 
-        const barColor = progress === 100 ? 'bg-emerald-400' : 'bg-sky-400';
-
-        return `
-        <div class="flex flex-col items-center justify-end h-full w-[38px] shrink-0 group cursor-default animate-in fade-in slide-in-from-bottom-4 duration-500" style="animation-delay: ${idx * 30}ms; animation-fill-mode: both;">
-            <span class="text-[9px] font-black text-indigo-600 mb-1 opacity-0 group-hover:opacity-100 transition-opacity translate-y-1 group-hover:translate-y-0 duration-300">${progress}%</span>
-            
-            <div class="w-8 bg-slate-100/80 rounded-t-md h-[130px] flex items-end overflow-hidden relative shadow-inner border border-slate-200/50 border-b-0 group-hover:bg-slate-200 transition-colors">
-                <div class="animated-bar w-full ${barColor} rounded-t-md transition-all duration-1000 ease-out relative" style="height: 0%" data-height="${targetHeight}%">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
-                </div>
-                <span class="absolute bottom-1 w-full text-center text-[8px] font-black ${progress < 15 ? 'text-slate-500' : 'text-white'} drop-shadow-sm transition-colors duration-500">${progress}%</span>
+  $id('detailPanel').innerHTML = `<div class="flex gap-2.5 items-end h-full min-w-max px-4 pb-2 pt-4">` + fil.map((p, i) => {
+    const n = escapeJS(getVal(p, KEY_MAP.name));
+    const pic = escapeJS(getVal(p, ['pic']) || '-');
+    const pg = getCalcProgress(p);
+    const th = Math.max(pg, 5);
+    const c = pg === 100 ? 'bg-emerald-400' : 'bg-sky-400';
+    
+    return `<div class="flex flex-col items-center justify-end h-full w-[38px] shrink-0 group animate-in fade-in slide-in-from-bottom-4 duration-500" style="animation-delay:${i * 30}ms;animation-fill-mode:both;">
+        <span class="text-[9px] font-black text-indigo-600 mb-1 opacity-0 group-hover:opacity-100 transition-opacity translate-y-1 group-hover:translate-y-0 duration-300">${pg}%</span>
+        <div class="w-8 bg-slate-100/80 rounded-t-md h-[130px] flex items-end overflow-hidden relative shadow-inner border-b-0 group-hover:bg-slate-200">
+            <div class="animated-bar w-full ${c} rounded-t-md transition-all duration-1000 relative" style="height:0%" data-height="${th}%">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
             </div>
-            
-            <div class="mt-2 h-[75px] relative w-[2px]">
-                <div class="absolute top-1 right-1 origin-top-right -rotate-45 w-[100px] text-right">
-                    <p class="text-[8px] font-extrabold text-slate-700 truncate w-full uppercase" title="${name}">${name}</p>
-                    <p class="text-[6.5px] font-bold text-slate-400 truncate w-full uppercase mt-0.5" title="${pic}">${pic}</p>
-                </div>
+            <span class="absolute bottom-1 w-full text-center text-[8px] font-black ${pg < 15 ? 'text-slate-500' : 'text-white'} drop-shadow-sm">${pg}%</span>
+        </div>
+        <div class="mt-2 h-[75px] relative w-[2px]">
+            <div class="absolute top-1 right-1 origin-top-right -rotate-45 w-[100px] text-right">
+                <p class="text-[8px] font-extrabold text-slate-700 truncate w-full uppercase">${n}</p>
+                <p class="text-[6.5px] font-bold text-slate-400 truncate w-full uppercase mt-0.5">${pic}</p>
             </div>
-        </div>`;
-    }).join('') + `</div>`;
+        </div>
+    </div>`;
+  }).join('') + `</div>`;
 
-    setTimeout(() => {
-        const bars = panel.querySelectorAll('.animated-bar');
-        bars.forEach(bar => {
-            bar.style.height = bar.getAttribute('data-height');
-        });
-    }, 50);
-}
+  setTimeout(() => {
+      $id('detailPanel').querySelectorAll('.animated-bar').forEach(b => b.style.height = b.getAttribute('data-height'));
+  }, 50);
+};
 
-function makePie(id, labels, data, colors, type){
-  if(charts[id]) charts[id].destroy();
-  charts[id] = new Chart(document.getElementById(id), {
-    type: 'pie',
-    data: { labels, datasets: [{ 
-        data, 
-        backgroundColor: colors, 
-        borderWidth: 2, 
-        borderColor: '#ffffff',
-        hoverOffset: 6 
-    }] },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      onClick: (e, el) => { if(el.length) renderFilteredList(type, labels[el[0].index]); },
-      plugins: { legend: { display: false }, datalabels: { color: '#fff', font: { weight: 'bold', size: 10 }, formatter: (v, ctx) => { let sum = ctx.dataset.data.reduce((a, b) => a + b, 0); return (v / sum) * 100 > 5 ? v : ''; } } }
-    }
+window.makePie = function(id, labels, data, colors, type) {
+  if (charts[id]) charts[id].destroy();
+  
+  charts[id] = new Chart($id(id), {
+      type: 'pie',
+      data: {
+          labels,
+          datasets: [{ data, backgroundColor: colors, borderWidth: 2, borderColor: '#ffffff', hoverOffset: 6 }]
+      },
+      options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          onClick: (e, el) => { if(el.length) renderFilteredList(type, labels[el[0].index]); },
+          plugins: {
+              legend: { display: false },
+              datalabels: {
+                  color: '#fff',
+                  font: { weight: 'bold', size: 10 },
+                  formatter: (v, ctx) => {
+                      let s = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                      return (v / s) * 100 > 5 ? v : '';
+                  }
+              }
+          }
+      }
   });
   
-  const legendCont = document.getElementById('l' + id.substring(1));
-  legendCont.innerHTML = labels.map((l, i) => `
-    <div onclick="renderFilteredList('${type}', '${l}')" class="flex items-center gap-2 px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-full cursor-pointer transition-colors text-[10px] font-bold text-slate-600 shadow-sm">
+  $id('l' + id.substring(1)).innerHTML = labels.map((l, i) => `
+    <div onclick="renderFilteredList('${type}','${l}')" class="flex items-center gap-2 px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 border rounded-full cursor-pointer text-[10px] font-bold text-slate-600 shadow-sm">
         <span class="w-2.5 h-2.5 rounded-full" style="background:${colors[i]}"></span>
         ${l} <span class="text-slate-800 ml-1.5">${data[i]}</span>
     </div>
   `).join('');
-}
+};
 
-window.setExecFilter = function(filterId) {
-    curExecFilter = filterId;
+window.setExecFilter = function(id) {
+    curExecFilter = id;
     renderExecutiveGrid();
 };
 
-function renderExecutiveGrid() {
-    const grid = document.getElementById('executiveGrid');
-    const filterContainer = document.getElementById('execFilters');
-    
-    if (filterContainer) {
-        filterContainer.innerHTML = execFiltersConfig.map(f => `
-            <button onclick="setExecFilter('${f.id}')" class="px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border ${curExecFilter === f.id ? f.color + ' text-white border-transparent shadow-md scale-[1.02]' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50 hover:text-slate-700'}">
-                ${f.label}
-            </button>
-        `).join('');
-    }
+window.renderExecutiveGrid = function() {
+    $id('execFilters').innerHTML = execFiltersConfig.map(f => `
+        <button onclick="setExecFilter('${f.id}')" class="px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border ${curExecFilter === f.id ? f.color + ' text-white border-transparent shadow-md scale-[1.02]' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}">
+            ${f.label}
+        </button>
+    `).join('');
 
-    const filteredData = allData.filter(p => {
-        const statusVal = getVal(p, KEY_MAP.status).toLowerCase();
-        const pType = (p.Type || (getVal(p, KEY_MAP.name).includes('PBG') ? 'PBG' : 'SLF')).toUpperCase();
-        const client = getVal(p, KEY_MAP.client).toUpperCase();
+    const fil = allData.filter(p => {
+        const sv = getVal(p, KEY_MAP.status).toLowerCase();
+        const pt = (p.Type || (getVal(p, KEY_MAP.name).includes('PBG') ? 'PBG' : 'SLF')).toUpperCase();
+        const c = getVal(p, KEY_MAP.client).toUpperCase();
         const prRaw = getVal(p, KEY_MAP.priority).toUpperCase();
-        const priority = prRaw.includes('HIGH') || prRaw.includes('HIGHT') ? 'HIGH' : (prRaw.includes('MEDIUM') ? 'MEDIUM' : 'LOW');
-
-        if(curExecFilter === 'ACTIVE') return statusVal.includes('active');
-        if(curExecFilter === 'CLOSED') return statusVal.includes('closed');
-        if(curExecFilter === 'COMPLETE') return statusVal.includes('complete');
+        const pr = prRaw.includes('HIGH') || prRaw.includes('HIGHT') ? 'HIGH' : (prRaw.includes('MEDIUM') ? 'MEDIUM' : 'LOW');
         
-        if(curExecFilter === 'SLF') return pType === 'SLF';
-        if(curExecFilter === 'PBG') return pType === 'PBG';
-        
-        if(curExecFilter === 'VALE') return client.includes('VALE') || client.includes('PTVI');
-        if(curExecFilter === 'CLM') return client.includes('CLM') || client.includes('CITRA LAMPIA');
-        if(curExecFilter === 'PERORANGAN') return !client.includes('VALE') && !client.includes('PTVI') && !client.includes('CLM') && !client.includes('CITRA LAMPIA');
-        
-        if(curExecFilter === 'HIGH') return priority === 'HIGH';
-        if(curExecFilter === 'MEDIUM') return priority === 'MEDIUM';
-        if(curExecFilter === 'LOW') return priority === 'LOW';
-
+        if (curExecFilter === 'ACTIVE') return sv.includes('active');
+        if (curExecFilter === 'CLOSED') return sv.includes('closed');
+        if (curExecFilter === 'COMPLETE') return sv.includes('complete');
+        if (curExecFilter === 'SLF') return pt === 'SLF';
+        if (curExecFilter === 'PBG') return pt === 'PBG';
+        if (curExecFilter === 'VALE') return c.includes('VALE') || c.includes('PTVI');
+        if (curExecFilter === 'CLM') return c.includes('CLM') || c.includes('CITRA LAMPIA');
+        if (curExecFilter === 'PERORANGAN') return !c.includes('VALE') && !c.includes('PTVI') && !c.includes('CLM') && !c.includes('CITRA LAMPIA');
+        if (curExecFilter === 'HIGH') return pr === 'HIGH';
+        if (curExecFilter === 'MEDIUM') return pr === 'MEDIUM';
+        if (curExecFilter === 'LOW') return pr === 'LOW';
         return true;
     });
+    
+    window.currentExecutiveData = fil;
 
-    window.currentExecutiveData = filteredData;
-
-    if (filteredData.length === 0) {
-        grid.innerHTML = `<div class="col-span-full py-16 flex flex-col items-center justify-center text-slate-400 text-[11px] font-bold uppercase tracking-widest bg-white rounded-3xl border border-dashed border-slate-200"><i data-lucide="inbox" class="w-8 h-8 mb-3 opacity-20"></i> Tidak ada data di kategori ini.</div>`;
-        lucide.createIcons();
-        return;
-    }
-
-    grid.innerHTML = filteredData.map((p, pIdx) => {
-        const progress = getCalcProgress(p);
-        const tasks = p.Tasks || [];
-        const priorityRaw = getVal(p, KEY_MAP.priority).toUpperCase();
-        const priority = priorityRaw.includes('HIGH') || priorityRaw.includes('HIGHT') ? 'HIGH' : (priorityRaw.includes('MEDIUM') ? 'MEDIUM' : 'LOW');
+    if (fil.length === 0) return $id('executiveGrid').innerHTML = `<div class="col-span-full py-16 text-center text-slate-400 text-[11px] font-bold uppercase bg-white rounded-3xl border border-dashed">Kosong</div>`;
+    
+    $id('executiveGrid').innerHTML = fil.map((p, i) => {
+        const pg = getCalcProgress(p);
+        const prRaw = getVal(p, KEY_MAP.priority).toUpperCase();
+        const pr = prRaw.includes('HIGH') || prRaw.includes('HIGHT') ? 'HIGH' : (prRaw.includes('MEDIUM') ? 'MEDIUM' : 'LOW');
         
-        let phaseMap = {};
-        tasks.forEach(t => {
-            let g = t.group && t.group.trim() !== "" ? t.group : "TAHAPAN UMUM"; 
-            if(!phaseMap[g]) phaseMap[g] = { sum:0, count:0, tasks:[] };
-            phaseMap[g].sum += (parseInt(t.progress) || 0); 
-            phaseMap[g].count++; 
-            phaseMap[g].tasks.push(t);
+        let phM = {};
+        (p.Tasks || []).forEach(t => {
+            let g = t.group && t.group.trim() !== "" ? t.group : "UMUM";
+            if (!phM[g]) phM[g] = { s: 0, c: 0, t: [] };
+            phM[g].s += (parseInt(t.progress) || 0);
+            phM[g].c++;
+            phM[g].t.push(t);
         });
-        const phases = Object.keys(phaseMap).map(k => ({ name: k, avg: Math.round(phaseMap[k].sum / Math.max(1, phaseMap[k].count)), tasks: phaseMap[k].tasks }));
+        const ph = Object.keys(phM).map(k => ({ name: k, avg: Math.round(phM[k].s / Math.max(1, phM[k].c)), t: phM[k].t }));
 
         return `
-        <div class="bg-[#FEF08A] rounded-[20px] p-4 flex flex-col shadow-sm border border-[#FDE047] relative overflow-hidden hover:shadow-md transition-all h-[400px]">
+        <div class="bg-[#FEF08A] rounded-[20px] p-4 flex flex-col shadow-sm border border-[#FDE047] hover:shadow-md transition-all h-[400px]">
             <div class="mb-3">
-                <h2 class="text-lg font-extrabold text-slate-700 tracking-tight uppercase leading-none">${p.Type || (getVal(p, KEY_MAP.name).includes('PBG') ? 'PBG' : 'SLF')}</h2>
-                <p class="text-[10px] font-bold text-slate-800 mt-1 leading-snug line-clamp-2 min-h-[28px] uppercase">${getVal(p, KEY_MAP.name)}</p>
+                <h2 class="text-lg font-extrabold text-slate-700 uppercase leading-none">${p.Type || (getVal(p, KEY_MAP.name).includes('PBG') ? 'PBG' : 'SLF')}</h2>
+                <p class="text-[10px] font-bold text-slate-800 mt-1 line-clamp-2 uppercase">${getVal(p, KEY_MAP.name)}</p>
             </div>
-            
-            <div class="bg-white/60 rounded-xl p-3 mb-3 border border-white/50 shadow-sm shrink-0">
+            <div class="bg-white/60 rounded-xl p-3 mb-3 shrink-0">
                 <div class="flex justify-between items-center mb-3">
                     <div class="relative w-10 h-10 shrink-0">
                         <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
-                            <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="4" />
-                            <circle cx="18" cy="18" r="15.9" fill="none" stroke="#0ea5e9" stroke-width="4" stroke-dasharray="${progress}, 100" stroke-linecap="round" />
+                            <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="4"/>
+                            <circle cx="18" cy="18" r="15.9" fill="none" stroke="#0ea5e9" stroke-width="4" stroke-dasharray="${pg},100" stroke-linecap="round"/>
                         </svg>
-                        <div class="absolute inset-0 flex items-center justify-center text-[9px] font-black text-slate-900">${progress}%</div>
+                        <div class="absolute inset-0 flex items-center justify-center text-[9px] font-black text-slate-900">${pg}%</div>
                     </div>
-                    <span class="bg-white text-rose-500 text-[8px] font-bold px-2 py-1 rounded border border-rose-100 shadow-sm uppercase">${priority}</span>
+                    <span class="bg-white text-rose-500 text-[8px] font-bold px-2 py-1 rounded border shadow-sm uppercase">${pr}</span>
                 </div>
                 <table class="w-full text-[8px] font-bold text-slate-700 uppercase tracking-widest leading-relaxed">
                     <tr><td class="pb-0.5 w-10">START</td><td class="pb-0.5">: ${getVal(p, ['start date', 'mulai']) || '-'}</td></tr>
                     <tr><td class="pb-0.5">END</td><td class="pb-0.5">: ${getVal(p, ['date end', 'selesai']) || '-'}</td></tr>
-                    <tr><td class="align-top">PIC</td><td class="truncate max-w-[120px]">: ${getVal(p, ['pic']) || 'Belum Diset'}</td></tr>
+                    <tr><td class="align-top">PIC</td><td class="truncate max-w-[120px]">: ${getVal(p, ['pic']) || '-'}</td></tr>
                 </table>
             </div>
-
             <p class="text-[9px] font-black uppercase tracking-widest mb-2 text-slate-800 shrink-0">TOTAL TASK (TAHAPAN)</p>
             <div class="flex flex-col gap-1.5 overflow-y-auto no-scrollbar pb-2">
-                ${phases.map((ph, phIdx) => `
-                    <div onclick="openBodModal(${pIdx}, ${phIdx})" class="bg-white p-2.5 rounded-xl flex justify-between items-center cursor-pointer hover:bg-slate-50 transition-colors shadow-sm border border-transparent hover:border-sky-300 group">
-                        <span class="text-[8px] font-black text-slate-800 uppercase truncate pr-2 tracking-widest group-hover:text-sky-600 transition-colors">${ph.name}</span>
-                        <div class="flex items-center gap-1.5">
-                            <span class="text-[9px] font-black text-slate-900 bg-slate-50 px-1.5 py-0.5 rounded-md border border-slate-100">${ph.avg}%</span>
-                            <i data-lucide="chevron-right" class="w-3 h-3 text-slate-300 group-hover:text-sky-500 transition-colors"></i>
-                        </div>
-                    </div>`).join('')}
+                ${ph.map((h, hi) => `
+                <div onclick="openBodModal(${i},${hi})" class="bg-white p-2.5 rounded-xl flex justify-between items-center cursor-pointer hover:bg-slate-50 hover:border-sky-300 group">
+                    <span class="text-[8px] font-black text-slate-800 uppercase truncate pr-2 group-hover:text-sky-600">${h.name}</span>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-[9px] font-black text-slate-900 bg-slate-50 px-1.5 py-0.5 rounded-md border">${h.avg}%</span>
+                        <i data-lucide="chevron-right" class="w-3 h-3 text-slate-300 group-hover:text-sky-500"></i>
+                    </div>
+                </div>`).join('')}
             </div>
         </div>`;
     }).join('');
+    
     lucide.createIcons();
-}
+};
 
-function renderExecutive() {
-    const stats = allData.reduce((a,p) => {
-        const s = getVal(p, KEY_MAP.status).toLowerCase();
-        if(s.includes('complete')) a.comp++; else if(s.includes('hold')) a.hold++; else if(s.includes('closed')) a.closed++; else if(s === 'new') a.new++; else if(s.includes('active')) a.act++;
+window.renderExecutive = function() {
+    const s = allData.reduce((a, p) => {
+        const v = getVal(p, KEY_MAP.status).toLowerCase();
+        if (v.includes('complete')) a.comp++;
+        else if (v.includes('hold')) a.hold++;
+        else if (v.includes('closed')) a.closed++;
+        else if (v === 'new') a.new++;
+        else if (v.includes('active')) a.act++;
         return a;
-    }, { act:0, new:0, comp:0, hold:0, closed:0 });
+    }, { act: 0, new: 0, comp: 0, hold: 0, closed: 0 });
 
-    document.getElementById('k0').textContent = allData.length;
-    document.getElementById('k1').textContent = stats.act;
-    document.getElementById('k2').textContent = stats.new;
-    document.getElementById('k3').textContent = stats.comp;
-    document.getElementById('k4').textContent = stats.hold;
-    document.getElementById('k5').textContent = stats.closed;
+    $id('k0').textContent = allData.length;
+    $id('k1').textContent = s.act;
+    $id('k2').textContent = s.new;
+    $id('k3').textContent = s.comp;
+    $id('k4').textContent = s.hold;
+    $id('k5').textContent = s.closed;
 
-    makePie('cProjType', ['Active', 'Closed', 'Complete'], [stats.act, stats.closed, stats.comp], ['#0ea5e9', '#94a3b8', '#22c55e'], 'status');
+    makePie('cProjType', ['Active', 'Closed', 'Complete'], [s.act, s.closed, s.comp], ['#0ea5e9', '#94a3b8', '#22c55e'], 'status');
 
-    const pCounts = allData.reduce((a,p) => {
-        const prRaw = getVal(p, KEY_MAP.priority).toUpperCase();
-        if(prRaw.includes('HIGH') || prRaw.includes('HIGHT')) a.High++;
-        else if(prRaw.includes('MEDIUM')) a.Medium++;
-        else if(prRaw.includes('LOW')) a.Low++;
+    const pc = allData.reduce((a, p) => {
+        const v = getVal(p, KEY_MAP.priority).toUpperCase();
+        if (v.includes('HIGH') || v.includes('HIGHT')) a.High++;
+        else if (v.includes('MEDIUM')) a.Medium++;
+        else if (v.includes('LOW')) a.Low++;
         return a;
     }, { High: 0, Medium: 0, Low: 0 });
-    makePie('cPriority', ['High', 'Medium', 'Low'], [pCounts.High, pCounts.Medium, pCounts.Low], ['#ef4444', '#f97316', '#22c55e'], 'priority');
 
+    makePie('cPriority', ['High', 'Medium', 'Low'], [pc.High, pc.Medium, pc.Low], ['#ef4444', '#f97316', '#22c55e'], 'priority');
     renderExecutiveGrid();
-}
+};
 
-window.openBodModal = function(pIdx, phIdx) {
-    const proj = window.currentExecutiveData[pIdx];
-    const tasks = proj.Tasks || [];
-    let phaseMap = {};
-    tasks.forEach(t => { 
-        let g = t.group && t.group.trim() !== "" ? t.group : "TAHAPAN UMUM"; 
-        if(!phaseMap[g]) phaseMap[g] = { tasks:[] }; 
-        phaseMap[g].tasks.push(t); 
+window.openBodModal = function(i, hi) {
+    const p = window.currentExecutiveData[i];
+    let phM = {};
+    (p.Tasks || []).forEach(t => {
+        let g = t.group && t.group.trim() !== "" ? t.group : "UMUM";
+        if (!phM[g]) phM[g] = { t: [] };
+        phM[g].t.push(t);
     });
     
-    const phaseName = Object.keys(phaseMap)[phIdx];
-    const phaseTasks = phaseMap[phaseName].tasks;
+    const pn = Object.keys(phM)[hi];
+    $id('bodProjType').textContent = p.Type || (getVal(p, KEY_MAP.name).includes('PBG') ? 'PBG' : 'SLF');
+    $id('bodProjName').textContent = getVal(p, KEY_MAP.name);
+    $id('bodPhaseName').textContent = pn;
     
-    document.getElementById('bodProjType').textContent = proj.Type || (getVal(proj, KEY_MAP.name).includes('PBG') ? 'PBG' : 'SLF');
-    document.getElementById('bodProjName').textContent = getVal(proj, KEY_MAP.name);
-    document.getElementById('bodPhaseName').textContent = phaseName;
-    
-    document.getElementById('bodTaskList').innerHTML = phaseTasks.map(t => `
-        <div class="bg-white border border-slate-200 rounded-2xl p-4 lg:p-5 shadow-sm text-left relative shrink-0 overflow-hidden group hover:border-indigo-200 transition-colors">
-            <div class="absolute top-0 left-0 w-1.5 h-full bg-slate-200 group-hover:bg-indigo-500 transition-colors"></div>
+    $id('bodTaskList').innerHTML = phM[pn].t.map(t => `
+        <div class="bg-white border rounded-2xl p-4 lg:p-5 shadow-sm text-left relative overflow-hidden group hover:border-indigo-200">
+            <div class="absolute top-0 left-0 w-1.5 h-full bg-slate-200 group-hover:bg-indigo-500"></div>
             <div class="flex justify-between items-center mb-2">
-                <span class="text-[8px] font-black bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-md border border-indigo-100 uppercase tracking-widest">${t.dept || 'UMUM'}</span>
-                <span class="text-2xl font-black ${t.progress === 100 ? 'text-emerald-500' : 'text-slate-900'} leading-none">${t.progress}%</span>
+                <span class="text-[8px] font-black bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-md border uppercase tracking-widest">${t.dept || 'UMUM'}</span>
+                <span class="text-2xl font-black ${t.progress === 100 ? 'text-emerald-500' : 'text-slate-900'}">${t.progress}%</span>
             </div>
-            <h5 class="text-[11px] font-bold text-slate-800 uppercase leading-snug mb-2.5">${t.name}</h5>
-            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                <p class="text-[9px] text-slate-600 italic font-medium leading-relaxed">"${t.keterangan || 'Belum ada rincian/progress lapangan.'}"</p>
+            <h5 class="text-[11px] font-bold text-slate-800 uppercase mb-2.5">${t.name}</h5>
+            <div class="bg-slate-50 rounded-xl p-3 border">
+                <p class="text-[9px] text-slate-600 italic">"${t.keterangan || 'Belum ada rincian.'}"</p>
             </div>
-            <div class="mt-3 flex items-center justify-between text-[8px] font-bold text-slate-400 uppercase tracking-widest pt-3 border-t border-slate-100">
+            <div class="mt-3 flex items-center justify-between text-[8px] font-bold text-slate-400 uppercase tracking-widest pt-3 border-t">
                 <span class="flex items-center gap-1.5"><i data-lucide="user" class="w-3 h-3"></i> Update: ${t.updatedBy || '-'}</span>
             </div>
-        </div>`).join('');
+        </div>
+    `).join('');
     
-    document.getElementById('bodModal').classList.replace('hidden', 'flex');
+    $id('bodModal').classList.replace('hidden', 'flex');
     document.body.style.overflow = 'hidden';
     lucide.createIcons();
 };
 
-window.closeBodModal = function() { 
-    document.getElementById('bodModal').classList.replace('flex', 'hidden'); 
-    document.body.style.overflow = ''; 
+window.closeBodModal = function() {
+    $id('bodModal').classList.replace('flex', 'hidden');
+    document.body.style.overflow = '';
 };
 
-function handlePasswordChange(e) {
+window.handlePasswordChange = function(e) {
     e.preventDefault();
-    const p1 = document.getElementById('newPass').value;
-    const p2 = document.getElementById('confirmPass').value;
-    if(p1 !== p2) return alert('Password tidak cocok!');
     alert('Fitur ganti password sedang dalam pengembangan.');
-    closePasswordModal();
-}
-
-function openPasswordModal() { document.getElementById('passwordModal').classList.replace('hidden', 'flex'); }
-function closePasswordModal() { document.getElementById('passwordModal').classList.replace('flex', 'hidden'); }
+    $id('passwordModal').classList.replace('flex', 'hidden');
+};
 
 // ==========================================
-// ENGINE DATA
+// REPORT GENERATOR - PERBAIKAN PENCARIAN FLEKSIBEL (ANTI-TYPO)
 // ==========================================
-async function init(isAuto = false) {
+window.formatTanggalHari = function(ts) {
+    if (!ts) return "-";
+    try {
+        const d = new Date(ts);
+        if (isNaN(d.getTime())) return ts;
+        const dN = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        return `${dN[d.getDay()]}, ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+    } catch(e) {
+        return ts;
+    }
+};
+
+window.renderTimesheetControls = function() {
+    $id('repTeam').innerHTML = '<option value="">-- Pilih Tim --</option>' + teamsData.map((t, idx) => {
+        const kode = getTeamProp(t, 'KODE');
+        const nama = getTeamProp(t, 'NAMA');
+        const displayLabel = kode !== '---' ? `${kode} - ${nama}` : nama;
+        return `<option value="${idx}">${displayLabel}</option>`;
+    }).join('');
+    
+    const t = new Date().toISOString().split('T')[0];
+    const lw = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
+    
+    $id('repStart').value = lw;
+    $id('repEnd').value = t;
+    
+    $id('quickSelectGrid').innerHTML = teamsData.map((tm, idx) => {
+        const kode = getTeamProp(tm, 'KODE');
+        const nama = getTeamProp(tm, 'NAMA');
+        const dept = getTeamProp(tm, 'DEPT');
+        const initials = kode !== '---' ? kode.substring(0, 3) : (nama.length >= 3 ? nama.substring(0, 3).toUpperCase() : 'TIM');
+        
+        return `
+        <div onclick="generateReport(${idx})" class="cursor-pointer p-3 rounded-xl bg-white border hover:border-indigo-400 hover:shadow-md flex items-center gap-3 group shadow-sm">
+            <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center font-bold text-xs text-indigo-600 border group-hover:bg-indigo-600 group-hover:text-white shrink-0">
+                ${initials}
+            </div>
+            <div class="overflow-hidden">
+                <h4 class="font-bold text-[11px] text-slate-800 group-hover:text-indigo-600 truncate leading-tight">${nama}</h4>
+                <p class="text-[8px] uppercase tracking-widest text-slate-400 mt-0.5">${dept}</p>
+            </div>
+        </div>
+        `;
+    }).join('');
+};
+
+window.generateReport = function(overrideIndex) {
+    const selectedVal = overrideIndex !== undefined ? overrideIndex : $id('repTeam').value;
+    const sd = $id('repStart').value;
+    const ed = $id('repEnd').value;
+    
+    if (selectedVal === "" || selectedVal === undefined) return alert("Pilih Tim / Engineer!");
+    if (!sd || !ed) return alert("Pilih rentang tanggal!");
+    
+    const rawTP = teamsData[parseInt(selectedVal)];
+    if (!rawTP) return alert("Data Tim tidak ditemukan!");
+    
+    const tP = {
+        NAMA: getTeamProp(rawTP, 'NAMA'),
+        KODE: getTeamProp(rawTP, 'KODE'),
+        DEPARTEMEN: getTeamProp(rawTP, 'DEPT')
+    };
+
+    const tpName = tP.NAMA.toUpperCase().trim();
+    const tpCode = tP.KODE.toUpperCase().trim();
+    
+    const fR = timesheetsData.filter(r => {
+        const rowStr = Object.values(r).join(' | ').toUpperCase();
+        
+        let isMatch = false;
+        if (tpName !== 'TANPA NAMA' && rowStr.includes(tpName)) isMatch = true;
+        if (tpCode !== '---' && rowStr.includes(tpCode)) isMatch = true;
+        
+        if (!isMatch) return false;
+        
+        let dateStr = getVal(r, ['TANGGAL', 'DATE', 'WAKTU', 'HARI']);
+        if (!dateStr) dateStr = getVal(r, ['TIMESTAMP', 'TS']);
+        if (!dateStr) return false;
+
+        let rD = new Date(dateStr); 
+        if (isNaN(rD.getTime())) {
+            const pts = dateStr.split(/[\/\-]/);
+            if (pts.length >= 3) {
+                if (pts[2].length === 4) rD = new Date(`${pts[2]}-${pts[1].padStart(2,'0')}-${pts[0].padStart(2,'0')}T00:00:00`);
+                else if (pts[0].length === 4) rD = new Date(`${pts[0]}-${pts[1].padStart(2,'0')}-${pts[2].padStart(2,'0')}T00:00:00`);
+            }
+        }
+        
+        if (isNaN(rD.getTime())) return false; 
+
+        const sDate = new Date(sd);
+        const eDate = new Date(ed);
+        rD.setHours(0, 0, 0, 0); sDate.setHours(0, 0, 0, 0); eDate.setHours(0, 0, 0, 0);
+        return rD >= sDate && rD <= eDate;
+    });
+    
+    const g = {};
+    fR.forEach(r => {
+        let keyTgl = getVal(r, ['TANGGAL', 'DATE', 'WAKTU']);
+        if (!keyTgl) keyTgl = 'Data Tanggal Kosong';
+        if (!g[keyTgl]) g[keyTgl] = [];
+        g[keyTgl].push(r);
+    });
+    
+    currentReportData = { profile: tP, start: sd, end: ed, grouped: g };
+    
+    $id('repModalName').textContent = tP.NAMA;
+    $id('repModalDept').textContent = `${tP.KODE} • ${tP.DEPARTEMEN}`;
+    $id('repModalDate').innerHTML = `${formatTanggalHari(sd)} <span class="text-slate-300 mx-1">-</span> ${formatTanggalHari(ed)}`;
+    
+    const mobDateEl = $id('repModalDateMobile');
+    if (mobDateEl) mobDateEl.innerHTML = `${formatTanggalHari(sd)} - ${formatTanggalHari(ed)}`;
+    
+    const tb = $id('reportTableBody');
+    let rh = '';
+    const dts = Object.keys(g).sort((a, b) => (a.includes('/') ? new Date(a.split('/').reverse().join('-')) : new Date(a)) - (b.includes('/') ? new Date(b.split('/').reverse().join('-')) : new Date(b)));
+    
+    if (dts.length === 0) {
+        rh = `
+        <tr>
+          <td colspan="6" class="p-12 text-center text-slate-500 border-b border-slate-200">
+             <i data-lucide="file-text" class="w-10 h-10 mx-auto mb-3 text-slate-300"></i>
+             <p class="font-bold text-base">Belum ada laporan harian pada rentang tanggal ini.</p>
+          </td>
+        </tr>`;
+        tb.innerHTML = rh;
+        $id('reportModal').classList.replace('hidden', 'flex');
+        lucide.createIcons();
+        return;
+    } 
+    
+    dts.forEach(d => {
+        let actsRaw = g[d];
+        let hourlyLogs = [];
+        
+        actsRaw.forEach(a => {
+            let fullDesc = getVal(a, ['DESKRIPSI', 'DESKRIPSI PEKERJAAN', 'AKTIVITAS']);
+            let lokasi = "KANTOR";
+            let descClean = fullDesc;
+
+            if (fullDesc.startsWith('[')) {
+                const endBr = fullDesc.indexOf(']');
+                if (endBr > -1) {
+                    const locTag = fullDesc.substring(1, endBr);
+                    if (locTag.startsWith('LOC:')) {
+                        lokasi = locTag.substring(4).trim();
+                    }
+                    descClean = fullDesc.substring(endBr + 1).trim();
+                }
+            }
+
+            hourlyLogs.push({ 
+                jam: `${getVal(a, ['JAM MULAI', 'MULAI', 'WAKTU MULAI'])} - ${getVal(a, ['JAM SELESAI', 'SELESAI', 'WAKTU SELESAI'])}`, 
+                proj: getVal(a, ['NAMA PROYEK', 'PROYEK', 'PROJECT', 'NAMA_PROYEK']), 
+                desc: descClean,
+                lokasi: lokasi, 
+                ken: getVal(a, ['KENDALA', 'ISSUE', 'MASALAH']), 
+                isBreak: false 
+            });
+        });
+        
+        if (!hourlyLogs.some(l => l.jam.includes("12:00") && l.jam.includes("13:00")) && hourlyLogs.length > 0) {
+            hourlyLogs.push({ jam: "12:00 - 13:00", proj: "-", desc: "ISTIRAHAT", lokasi: "-", ken: "-", isBreak: true });
+        }
+        if (!hourlyLogs.some(l => l.jam.includes("15:30") && l.jam.includes("16:00")) && hourlyLogs.length > 0) {
+            hourlyLogs.push({ jam: "15:30 - 16:00", proj: "-", desc: "SHOLAT ASHAR", lokasi: "-", ken: "-", isBreak: true });
+        }
+        
+        hourlyLogs.sort((a, b) => parseTimeMin(a.jam.split('-')[0].trim()) - parseTimeMin(b.jam.split('-')[0].trim()));
+        
+        let th = 0;
+        g[d].forEach(a => {
+            const df = parseTimeMin(getVal(a, ['JAM SELESAI', 'SELESAI', 'WAKTU SELESAI'])) - parseTimeMin(getVal(a, ['JAM MULAI', 'MULAI', 'WAKTU MULAI']));
+            if (df > 0) th += (df / 60);
+        });
+        
+        rh += `<tbody style="page-break-inside: avoid;" class="border-b-2 border-slate-300">`;
+        hourlyLogs.forEach((l, i) => {
+            const borderClass = i === hourlyLogs.length - 1 ? '' : 'border-b border-slate-100';
+            const bgClass = l.isBreak ? 'bg-slate-50/80' : 'bg-white hover:bg-slate-50 transition-colors';
+            
+            rh += `<tr class="${bgClass} group">`;
+            if (i === 0) {
+                rh += `<td rowspan="${hourlyLogs.length}" class="py-4 px-5 align-top border-r border-slate-100 bg-slate-50/40">
+                    <div class="font-bold text-[12px] text-slate-800 whitespace-pre-wrap leading-snug">${formatTanggalHari(d)}</div>
+                    <div class="mt-3 text-[9px] font-black bg-white border border-slate-200 px-2 py-1 rounded text-slate-600 inline-block shadow-sm">TOTAL: ${Math.round(th * 10) / 10} JAM</div>
+                </td>`;
+            }
+            rh += `
+                <td class="py-3 px-4 align-top ${borderClass}">
+                    <div class="text-[11px] font-semibold whitespace-nowrap ${l.isBreak ? 'text-rose-500 font-bold' : 'text-slate-700'}">${l.jam}</div>
+                </td>
+                <td class="py-3 px-4 align-top border-l border-slate-100 ${borderClass}">
+                    <p class="text-[11px] leading-relaxed ${l.isBreak ? 'font-bold text-rose-500 tracking-widest uppercase' : 'font-medium text-slate-700'}">${l.desc}</p>
+                </td>
+                <td class="py-3 px-4 align-top border-l border-slate-100 ${borderClass}">
+                    <span class="text-[10px] font-bold text-[#003366] uppercase">${l.isBreak ? '' : l.proj}</span>
+                </td>
+                <td class="py-3 px-4 align-top border-l border-slate-100 ${borderClass}">
+                    ${l.isBreak ? '' : (l.ken && l.ken !== '-' ? `<span class="text-[10px] text-rose-500 uppercase font-bold">${l.ken}</span>` : `<span class="text-[10px] text-slate-400 italic">Tidak ada.</span>`)}
+                </td>
+                <td class="py-3 px-4 align-top border-l border-slate-100 text-center ${borderClass}">
+                    ${l.isBreak ? '' : `<span class="inline-flex items-center gap-1 bg-slate-50 border border-slate-200 text-slate-600 rounded-full px-2.5 py-1 text-[9px] font-bold uppercase w-max mx-auto shadow-sm"><i data-lucide="map-pin" class="w-3 h-3 -mt-0.5 shrink-0"></i> ${l.lokasi}</span>`}
+                </td>
+            </tr>`;
+        });
+        rh += `</tbody>`;
+    });
+    
+    tb.innerHTML = rh;
+    $id('reportModal').classList.replace('hidden', 'flex');
+    lucide.createIcons();
+};
+
+window.closeReportModal = function() {
+    $id('reportModal').classList.replace('flex', 'hidden');
+    currentReportData = null;
+};
+
+window.exportToCSV = function() {
+    if (!currentReportData) return;
+    let csv = "TANGGAL,JAM,DESKRIPSI PEKERJAAN,NAMA PROYEK,KENDALA,LOKASI KERJA\n";
+    
+    Object.keys(currentReportData.grouped).sort().forEach(d => {
+        let actsRaw = currentReportData.grouped[d];
+        let hourlyLogs = [];
+        
+        actsRaw.forEach(a => {
+            let fullDesc = getVal(a, ['DESKRIPSI', 'DESKRIPSI PEKERJAAN', 'AKTIVITAS']);
+            let lokasi = "KANTOR";
+            let descClean = fullDesc;
+
+            if (fullDesc.startsWith('[')) {
+                const endBr = fullDesc.indexOf(']');
+                if (endBr > -1) {
+                    const locTag = fullDesc.substring(1, endBr);
+                    if (locTag.startsWith('LOC:')) lokasi = locTag.substring(4).trim();
+                    descClean = fullDesc.substring(endBr + 1).trim();
+                }
+            }
+
+            hourlyLogs.push({ 
+                jam: `${getVal(a, ['JAM MULAI', 'MULAI', 'WAKTU MULAI'])} - ${getVal(a, ['JAM SELESAI', 'SELESAI', 'WAKTU SELESAI'])}`, 
+                proj: getVal(a, ['NAMA PROYEK', 'PROYEK', 'PROJECT']), 
+                desc: descClean,
+                lokasi: lokasi,
+                ken: getVal(a, ['KENDALA', 'ISSUE']) 
+            });
+        });
+        
+        hourlyLogs.sort((a, b) => parseTimeMin(a.jam.split('-')[0].trim()) - parseTimeMin(b.jam.split('-')[0].trim()));
+        
+        hourlyLogs.forEach(l => {
+            csv += `"${d}","${l.jam}","${l.desc.replace(/"/g, '""')}","${l.proj.replace(/"/g, '""')}","${l.ken.replace(/"/g, '""')}","${l.lokasi.replace(/"/g, '""')}"\n`;
+        });
+    });
+    
+    const b = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const l = document.createElement("a");
+    l.href = URL.createObjectURL(b);
+    l.download = `TimeSheet_${currentReportData.profile.KODE}_${currentReportData.start}.csv`;
+    document.body.appendChild(l);
+    l.click();
+    document.body.removeChild(l);
+};
+
+window.handlePrintPDF = function() {
+    if (!currentReportData) return;
+    const pW = window.open('', '_blank');
+    if (!pW) return alert("Izinkan pop-up untuk mencetak PDF!");
+    
+    let tR = '';
+    Object.keys(currentReportData.grouped).sort().forEach(d => {
+        let actsRaw = currentReportData.grouped[d];
+        let hourlyLogs = [];
+        
+        actsRaw.forEach(a => {
+            let fullDesc = getVal(a, ['DESKRIPSI', 'DESKRIPSI PEKERJAAN', 'AKTIVITAS']);
+            let lokasi = "KANTOR";
+            let descClean = fullDesc;
+
+            if (fullDesc.startsWith('[')) {
+                const endBr = fullDesc.indexOf(']');
+                if (endBr > -1) {
+                    const locTag = fullDesc.substring(1, endBr);
+                    if (locTag.startsWith('LOC:')) lokasi = locTag.substring(4).trim();
+                    descClean = fullDesc.substring(endBr + 1).trim();
+                }
+            }
+
+            hourlyLogs.push({ 
+                j: `${getVal(a, ['JAM MULAI', 'MULAI', 'WAKTU MULAI'])} - ${getVal(a, ['JAM SELESAI', 'SELESAI', 'WAKTU SELESAI'])}`, 
+                p: getVal(a, ['NAMA PROYEK', 'PROYEK', 'PROJECT']), 
+                ds: descClean,
+                lokasi: lokasi,
+                k: getVal(a, ['KENDALA', 'ISSUE']), 
+                b: false 
+            });
+        });
+        
+        if (!hourlyLogs.some(l => l.j.includes("12:00") && l.j.includes("13:00")) && hourlyLogs.length > 0) {
+            hourlyLogs.push({ j: "12:00 - 13:00", p: "-", ds: "ISTIRAHAT", lokasi: "-", k: "-", b: true });
+        }
+        if (!hourlyLogs.some(l => l.j.includes("15:30") && l.j.includes("16:00")) && hourlyLogs.length > 0) {
+            hourlyLogs.push({ j: "15:30 - 16:00", p: "-", ds: "SHOLAT ASHAR", lokasi: "-", k: "-", b: true });
+        }
+        
+        hourlyLogs.sort((a, b) => parseTimeMin(a.j.split('-')[0].trim()) - parseTimeMin(b.j.split('-')[0].trim()));
+        
+        let th = 0;
+        currentReportData.grouped[d].forEach(a => {
+            const df = parseTimeMin(getVal(a, ['JAM SELESAI', 'SELESAI', 'WAKTU SELESAI'])) - parseTimeMin(getVal(a, ['JAM MULAI', 'MULAI', 'WAKTU MULAI']));
+            if (df > 0) th += (df / 60);
+        });
+        
+        tR += `<tbody style="page-break-inside:avoid;border-bottom:2px solid #cbd5e1;">`;
+        hourlyLogs.forEach((l, i) => {
+            tR += `<tr style="${l.b ? 'background:#f8fafc;' : 'background:#fff;'}">`;
+            if (i === 0) {
+                tR += `<td rowspan="${hourlyLogs.length}" style="border-right:1px solid #e2e8f0;vertical-align:top;width:16%;padding:12px;">
+                    <div style="font-weight:700;font-size:13px;color:#1e293b;white-space: pre-wrap;">${formatTanggalHari(d).replace('\n',' ')}</div>
+                    <div style="margin-top:12px;font-size:9px;font-weight:700;background:#f1f5f9;padding:6px;border-radius:6px;display:inline-block;border:1px solid #cbd5e1;">TOTAL: ${Math.round(th * 10) / 10} JAM</div>
+                </td>`;
+            }
+            tR += `<td style="border-bottom:1px solid #e2e8f0;vertical-align:top;width:10%;font-size:11px;padding:12px;color:${l.b ? '#ef4444' : '#334155'};font-weight:600;">${l.j}</td>
+                <td style="border-bottom:1px solid #e2e8f0;border-left:1px solid #e2e8f0;vertical-align:top;width:34%;font-size:11px;padding:12px;${l.b ? 'font-weight:800;color:#ef4444;text-transform:uppercase;letter-spacing:1px;' : 'font-weight:500;color:#334155;line-height:1.5;'}">${l.ds}</td>
+                <td style="border-bottom:1px solid #e2e8f0;border-left:1px solid #e2e8f0;vertical-align:top;width:20%;font-size:10px;padding:12px;font-weight:700;color:#003366;text-transform:uppercase;">${l.b ? '' : l.p}</td>
+                <td style="border-bottom:1px solid #e2e8f0;border-left:1px solid #e2e8f0;vertical-align:top;width:10%;font-size:10px;padding:12px;color:${l.k && l.k !== '-' ? '#ef4444' : '#94a3b8'};font-weight:${l.k && l.k !== '-' ? '600' : 'normal'};text-transform:uppercase;">${l.b ? '' : l.k}</td>
+                <td style="border-bottom:1px solid #e2e8f0;border-left:1px solid #e2e8f0;vertical-align:top;width:10%;padding:12px;text-align:center;">
+                    ${l.b ? '' : `<span style="font-size: 9px; font-weight: 700; color: #0284c7; background-color: #f0f9ff; border: 1px solid #bae6fd; padding: 4px 8px; border-radius: 99px; text-transform: uppercase; display: inline-block;">${l.lokasi}</span>`}
+                </td>
+            </tr>`;
+        });
+        tR += `</tbody>`;
+    });
+
+    const printScript = `
+    <script>
+        window.onload=()=>{
+            setTimeout(()=>{
+                window.print();
+                window.close();
+            },500);
+        };
+    <\/script>`;
+    
+    pW.document.write(`<!DOCTYPE html><html lang="id"><head><title>Time Sheet Report - ${currentReportData.profile.NAMA}</title><style>@page{size:landscape;margin:12mm;}body{font-family:sans-serif;color:#0f172a;-webkit-print-color-adjust: exact !important;print-color-adjust: exact !important;margin:0;padding:0;}table{width:100%;border-collapse:collapse;page-break-inside: auto;}th{background:#f8fafc;padding:12px;font-size:11px;text-align:left;border-top:2px solid #cbd5e1;border-bottom:2px solid #cbd5e1;text-transform: uppercase;color:#334155;}tr{page-break-inside: avoid; page-break-after: auto;}</style></head><body><div style="border-bottom:3px solid #003366;padding-bottom:20px;margin-bottom:20px;display:flex;justify-content:space-between;"><div style="display:flex;align-items:center;gap:16px;"><div style="width:64px;height:64px;border:1px solid #e2e8f0;border-radius:12px;padding:8px;"><img src="https://rustikaconsultant.com/wp-content/uploads/2026/03/logo-rustika.png" alt="Logo" style="width:100%;height:100%;object-fit:contain;"/></div><div><h1 style="margin:0;font-size:24px;font-weight:900;color:#003366;letter-spacing:-0.5px;">TIME SHEET REPORT</h1><p style="margin:4px 0 0 0;font-size:11px;font-weight:700;color:#64748b;letter-spacing:1px;text-transform:uppercase;">Rustika Consultant - Enterprise System</p></div></div><div style="text-align:right;"><span style="display:block;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">PERIODE LAPORAN</span><span style="display:inline-block;font-size:13px;font-weight:800;color:#1e293b;background:#f8fafc;padding:6px 12px;border-radius:8px;border:1px solid #e2e8f0;">${formatTanggalHari(currentReportData.start).replace('\\n',' ')} - ${formatTanggalHari(currentReportData.end).replace('\\n',' ')}</span></div></div><div style="margin-bottom:24px;"><p style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;margin-top:0;">Profil Tim / Engineer</p><h2 style="font-size:22px;font-weight:900;color:#003366;margin:0 0 8px 0;text-transform:uppercase;letter-spacing:-0.5px;">${currentReportData.profile.NAMA}</h2><span style="display:inline-block;background-color:#f0f9ff;color:#003366;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;text-transform:uppercase;border:1px solid #bae6fd;">${currentReportData.profile.KODE} • ${currentReportData.profile.DEPARTEMEN}</span></div><table><thead><tr><th style="width:16%;">Tanggal & Waktu</th><th style="width:10%;">Jam</th><th style="width:34%;">Deskripsi Pekerjaan</th><th style="width:20%;">Nama Proyek</th><th style="width:10%;">Kendala</th><th style="width:10%;text-align:center;">Lokasi</th></tr></thead>${tR}</table>${printScript}</body></html>`);
+    pW.document.close();
+};
+
+window.init = async function(isAuto = false) {
     try {
         const cached = localStorage.getItem('rustikaData');
         if (cached) {
             const data = JSON.parse(cached);
-            allData = data.projects || []; teamsData = data.teams || [];
-            
-            if (document.getElementById('view-team-dashboard').classList.contains('active') && currentUser) {
-                currentUser = teamsData.find(t => (t['EMAIL'] || '') === currentUser['EMAIL']) || currentUser;
-                updateUI(); renderTeamWorkspace();
+            allData = data.projects || [];
+            teamsData = data.teams || [];
+            timesheetsData = data.timesheets || [];
+            if ($id('view-team-dashboard').classList.contains('active') && currentUser) {
+                currentUser = teamsData.find(t => getTeamProp(t, 'EMAIL').toLowerCase() === getTeamProp(currentUser, 'EMAIL').toLowerCase()) || currentUser;
+                updateUI();
+                renderTeamWorkspace();
             }
-            if (document.getElementById('view-executive').classList.contains('active')) {
+            if ($id('view-executive').classList.contains('active')) {
                 renderExecutive();
             }
         }
@@ -1079,23 +1727,31 @@ async function init(isAuto = false) {
     try {
         const res = await fetch(API_URL + "?nocache=" + new Date().getTime(), { cache: "no-store" });
         const data = await res.json();
-        
         localStorage.setItem('rustikaData', JSON.stringify(data));
-        allData = data.projects || []; teamsData = data.teams || [];
         
-        if (document.getElementById('view-team-dashboard').classList.contains('active') && currentUser) {
-            currentUser = teamsData.find(t => (t['EMAIL'] || '') === currentUser['EMAIL']) || currentUser;
-            updateUI(); renderTeamWorkspace();
+        allData = data.projects || [];
+        teamsData = data.teams || [];
+        timesheetsData = data.timesheets || [];
+        
+        if ($id('view-team-dashboard').classList.contains('active') && currentUser) {
+            currentUser = teamsData.find(t => getTeamProp(t, 'EMAIL').toLowerCase() === getTeamProp(currentUser, 'EMAIL').toLowerCase()) || currentUser;
+            updateUI();
+            renderTeamWorkspace();
         }
-        if (document.getElementById('view-executive').classList.contains('active')) {
+        if ($id('view-executive').classList.contains('active')) {
             renderExecutive();
+            if(!isAuto) renderTimesheetControls(); // Refresh controls without closing modals
         }
-    } catch(e) { console.error("Sync Error", e); }
-}
+    } catch(e) {
+        console.error("Sync Error", e);
+    }
+};
 
+// INITIALIZATION
 Chart.register(ChartDataLabels);
 init();
 lucide.createIcons();
+
 </script>
 </body>
 </html>
