@@ -1007,7 +1007,10 @@ window.renderTeamWorkspace = function() {
 
   cont.innerHTML = fil.map((p, i) => {
     const cl = getVal(p, KEY_MAP.client).toUpperCase();
-    const cN = cl.includes('VALE') ? 'PT VALE' : cl.includes('CLM') ? 'PT CLM' : 'PERORANGAN';
+    
+    // PERBAIKAN: Deteksi nama klien sekarang menyertakan alias PTVI dan Citra Lampia
+    const cN = (cl.includes('VALE') || cl.includes('PTVI')) ? 'PT VALE' : (cl.includes('CLM') || cl.includes('CITRA LAMPIA')) ? 'PT CLM' : 'PERORANGAN';
+    
     const tm = (p.Type || getVal(p, KEY_MAP.name).includes('PBG') ? 'PBG' : 'SLF') === 'SLF' ? '#ef4444' : '#0ea5e9';
     const gI = 'team-' + i;
     const sp = escapeJS(getVal(p, KEY_MAP.name));
@@ -1020,6 +1023,9 @@ window.renderTeamWorkspace = function() {
     });
     const ph = Object.keys(phM).map(k => ({ name: k, tasks: phM[k].tasks }));
     
+    // PERBAIKAN WARNA TAG: Vale (Oranye), CLM (Merah), Perorangan (Biru)
+    const tagColor = cN === 'PT VALE' ? 'bg-amber-50 text-amber-600 border-amber-200' : cN === 'PT CLM' ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-indigo-50 text-indigo-600 border-indigo-200';
+    
     return `<div class="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col animate-in fade-in duration-300">
         <div class="p-6 cursor-pointer hover:bg-slate-50" onclick="this.nextElementSibling.classList.toggle('hidden')">
             <div class="flex justify-between items-start gap-4">
@@ -1027,7 +1033,7 @@ window.renderTeamWorkspace = function() {
                     <h4 class="text-sm font-black uppercase leading-tight tracking-tight">${getVal(p, KEY_MAP.name)}</h4>
                     <div class="flex flex-wrap gap-1.5 mt-2.5">
                         <span class="text-[8px] font-black px-2 py-0.5 border rounded uppercase text-slate-400">${p.myTasks.length} TUGAS</span>
-                        <span class="text-[8px] font-black px-2 py-0.5 border rounded uppercase tracking-widest ${cN === 'PT VALE' ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600'}">${cN}</span>
+                        <span class="text-[8px] font-black px-2 py-0.5 border rounded uppercase tracking-widest ${tagColor}">${cN}</span>
                     </div>
                 </div>
                 <div class="text-right shrink-0">
