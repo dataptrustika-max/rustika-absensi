@@ -676,15 +676,38 @@ window.handleLogout = function() {
     switchView('view-gateway', true);
 };
 
+// ==========================================
+// AUTO-COMPRESS & DIRECT LINK GOOGLE DRIVE
+// ==========================================
+window.optimizeImageUrl = function(url) {
+    if (!url) return '';
+    // Deteksi jika ini adalah link Google Drive
+    const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (match && match[1]) {
+        const fileId = match[1];
+        // API Rahasia Google: Mengambil gambar langsung & memotong ukurannya jadi w300 (Ringan & Cepat)
+        return `https://drive.google.com/thumbnail?id=${fileId}&sz=w300-h300`;
+    }
+    return url;
+};
+
 window.updateUI = function() {
   if (!currentUser) return;
   $id('engName').textContent = getTeamProp(currentUser, 'NAMA').toUpperCase();
   $id('engMeta').textContent = `${getTeamProp(currentUser, 'DEPT')} • ${getTeamProp(currentUser, 'KODE')}`;
-  const foto = getTeamProp(currentUser, 'FOTO');
-  if (foto && foto.startsWith('http')) {
-      $id('profImg').src = foto;
+  
+  const rawFoto = getTeamProp(currentUser, 'FOTO');
+  const fotoKompres = window.optimizeImageUrl(rawFoto);
+  
+  if (fotoKompres && fotoKompres.startsWith('http')) {
+      $id('profImg').src = fotoKompres;
       $id('profImg').classList.remove('hidden');
       $id('profIcon').classList.add('hidden');
+  } else {
+      // Kembalikan ke ikon jika link foto kosong atau salah
+      $id('profImg').src = '';
+      $id('profImg').classList.add('hidden');
+      $id('profIcon').classList.remove('hidden');
   }
 };
 
