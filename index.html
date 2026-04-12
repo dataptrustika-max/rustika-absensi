@@ -467,8 +467,46 @@
 
 <div id="reportModal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4 sm:p-6 bg-slate-900/80 transition-all">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[95vh] flex flex-col overflow-hidden modal-animate-in">
-        <div class="p-6 border-b-4 border-[#003366] shrink-0 bg-white"><div class="flex justify-between items-start mb-6"><h1 class="text-xl font-black text-[#003366] uppercase">TIME SHEET REPORT</h1><button onclick="window.closeReportModal()" class="px-4 py-2 bg-slate-100 text-slate-500 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-rose-50 hover:text-rose-600 transition-colors">Tutup</button></div><div class="flex justify-between items-end"><div><h2 id="repModalName" class="text-xl font-black text-[#f5a20f] uppercase leading-none"></h2><span id="repModalDept" class="bg-indigo-50 text-indigo-700 text-[10px] font-bold px-3 py-1 rounded-md mt-1.5 uppercase border border-indigo-100 inline-block tracking-widest"></span></div><div class="flex gap-2"><button onclick="window.exportToCSV()" class="bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors px-4 py-2 rounded-xl text-xs font-bold uppercase shadow-sm">Excel</button><button onclick="window.handlePrintPDF()" class="bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition-colors px-4 py-2 rounded-xl text-xs font-bold uppercase shadow-sm">PDF</button></div></div></div>
-        <div class="p-6 overflow-y-auto flex-1 bg-slate-50/50"><div class="bg-white rounded-xl border shadow-sm overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-slate-100 text-slate-700 font-black uppercase"><tr class="border-b"><th class="p-4">Tanggal</th><th class="p-4">Jam Kerja</th><th class="p-4">Deskripsi Pekerjaan</th><th class="p-4">Nama Proyek</th><th class="p-4">Kendala</th><th class="p-4 text-center">Lokasi</th></tr></thead><tbody id="reportTableBody" class="divide-y"></tbody></table></div></div>
+        <div class="p-6 border-b-4 border-[#003366] shrink-0 bg-white">
+            <div class="flex justify-between items-start mb-6">
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 bg-white border border-slate-200 rounded-xl p-2 shadow-sm">
+                        <img src="https://rustikaconsultant.com/wp-content/uploads/2026/03/logo-rustika.png" alt="Logo" class="w-full h-full object-contain">
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-black text-[#003366] uppercase leading-tight">TIME SHEET REPORT</h1>
+                        <p class="text-[10px] font-bold text-slate-500 uppercase mt-1 tracking-widest">Rustika Consultant - Enterprise System</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4">
+                    <div class="text-right hidden md:block">
+                        <span class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Periode Laporan</span>
+                        <span id="repModalDate" class="font-bold text-xs text-slate-800 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200"></span>
+                    </div>
+                    <button onclick="window.closeReportModal()" class="px-4 py-2 bg-slate-100 text-slate-500 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-rose-50 hover:text-rose-600 transition-colors shadow-sm">Tutup</button>
+                </div>
+            </div>
+            <div class="flex justify-between items-end">
+                <div>
+                    <h2 id="repModalName" class="text-xl font-black text-[#f5a20f] uppercase leading-none"></h2>
+                    <span id="repModalDept" class="bg-indigo-50 text-indigo-700 text-[10px] font-bold px-3 py-1 rounded-md mt-1.5 uppercase border border-indigo-100 inline-block tracking-widest"></span>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="window.exportToCSV()" class="bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors px-4 py-2 rounded-xl text-xs font-bold uppercase shadow-sm">Excel</button>
+                    <button onclick="window.handlePrintPDF()" class="bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition-colors px-4 py-2 rounded-xl text-xs font-bold uppercase shadow-sm">PDF</button>
+                </div>
+            </div>
+        </div>
+        <div class="p-6 overflow-y-auto flex-1 bg-slate-50/50">
+            <div class="bg-white rounded-xl border shadow-sm overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-100 text-slate-700 font-black uppercase">
+                        <tr class="border-b"><th class="p-4">Tanggal</th><th class="p-4">Jam Kerja</th><th class="p-4">Deskripsi Pekerjaan</th><th class="p-4">Nama Proyek</th><th class="p-4">Kendala</th><th class="p-4 text-center">Lokasi</th></tr>
+                    </thead>
+                    <tbody id="reportTableBody" class="divide-y"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -1319,18 +1357,27 @@ window.renderTimeline = function() {
     const todayStr = new Date().toISOString().split('T')[0];
     let html = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">`;
     for (let m = 0; m < 12; m++) {
-        html += `<div class="bg-white border rounded-2xl p-4 shadow-sm">
+        html += `<div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
             <h3 class="text-center font-black text-slate-800 uppercase text-xs mb-3 border-b pb-2">${monthNames[m]}</h3>
-            <div class="grid grid-cols-7 gap-1 text-center mb-2 text-[9px] font-bold text-slate-400"><div>Min</div><div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div></div>
+            <div class="grid grid-cols-7 gap-1 text-center mb-2 text-[9px] font-bold text-slate-400">
+                <div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div class="text-rose-400">Sab</div><div class="text-rose-400">Min</div>
+            </div>
             <div class="grid grid-cols-7 gap-1">`;
-        let first = new Date(currentYear, m, 1).getDay(); let days = new Date(currentYear, m + 1, 0).getDate();
+        
+        // LOGIKA BARU: Menggeser hari pertama agar Senin menjadi index awal (0), dan Minggu jadi akhir (6)
+        let firstDayJS = new Date(currentYear, m, 1).getDay(); 
+        let first = firstDayJS === 0 ? 6 : firstDayJS - 1; 
+        
+        let days = new Date(currentYear, m + 1, 0).getDate();
         for (let i = 0; i < first; i++) html += `<div></div>`;
         for (let d = 1; d <= days; d++) {
             let dStr = `${currentYear}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
             let projsOnDay = window.calendarDateMap[dStr], hasA = window.calendarAgendaMap[dStr], isT = (todayStr === dStr);
-            let isSunday = new Date(currentYear, m, d).getDay() === 0;
             
-            // PEMULIHAN: Warna Box Kalender
+            // MODIFIKASI: Deteksi Hari Sabtu (6) dan Minggu (0)
+            let dayOfWeek = new Date(currentYear, m, d).getDay();
+            let isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+            
             let boxClasses = "relative cursor-pointer calendar-day-box text-[10px] font-bold w-7 h-7 mx-auto flex items-center justify-center rounded-md ";
             if (isT) boxClasses += "ring-2 ring-rose-500 ring-offset-1 z-10 ";
             
@@ -1341,18 +1388,19 @@ window.renderTimeline = function() {
             } else if (projsOnDay) {
                 boxClasses += "bg-indigo-500 text-white shadow-sm hover:bg-indigo-600 hover:scale-110 active:scale-95";
             } else {
-                boxClasses += isSunday ? "bg-slate-50 text-rose-400 hover:bg-rose-50" : "bg-slate-50 text-slate-500 hover:bg-slate-100";
+                // MODIFIKASI: Gunakan isWeekend agar Sabtu juga merah
+                boxClasses += isWeekend ? "bg-slate-50 text-rose-400 hover:bg-rose-50" : "bg-slate-50 text-slate-500 hover:bg-slate-100";
             }
 
             let tooltipText = `${projsOnDay ? projsOnDay.length : 0} Proyek, ${hasA ? hasA.length : 0} Agenda`;
 
             html += `<div onclick="window.showDateProjects('${dStr}')" class="${boxClasses}" title="${tooltipText}">
-                ${d}
+                ${d}${hasA?'<div class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 rounded-full border border-white animate-pulse z-20 shadow-sm"></div>':''}
             </div>`;
         }
         html += `</div></div>`;
     }
-    $id('calendarGridContainer').innerHTML = html + `</div>`;
+    document.getElementById('calendarGridContainer').innerHTML = html + `</div>`;
 }
 
 window.showDateProjects = function(dStr) {
@@ -1403,7 +1451,28 @@ window.renderTimesheetControls = function() {
     const t = new Date().toISOString().split('T')[0];
     const lw = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
     $id('repStart').value = lw; $id('repEnd').value = t;
-    $id('quickSelectGrid').innerHTML = teamsData.map((t,i)=>`<div onclick="window.generateReport(${i})" class="p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-indigo-400 shadow-sm transition-all flex flex-col items-center justify-center"><div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-[10px] mb-2">${getTeamProp(t,'KODE') !== '---' ? getTeamProp(t,'KODE').substring(0,3) : getTeamProp(t,'NAMA').substring(0,3).toUpperCase()}</div><div class="text-[10px] font-bold text-slate-800 text-center truncate w-full">${getTeamProp(t,'NAMA')}</div></div>`).join('');
+    
+    // PEMULIHAN: Merender daftar cepat (Quick Select) dengan Foto Kompresi Super Ringan
+    $id('quickSelectGrid').innerHTML = teamsData.map((t,i) => {
+        const rawFoto = getTeamProp(t, 'FOTO');
+        const match = rawFoto ? rawFoto.match(/\/d\/([a-zA-Z0-9_-]+)/) : null;
+        // Parameter sz=w100 akan memaksa Google membuat gambar mini (sangat ringan, < 5kb)
+        const fK = match ? `https://drive.google.com/thumbnail?id=${match[1]}&sz=w100` : '';
+        
+        let avatarHtml = '';
+        if (fK && !fK.includes('undefined')) {
+            avatarHtml = `<img src="${fK}" alt="Foto" class="w-10 h-10 rounded-full object-cover border-2 border-indigo-100 mb-2 shadow-sm bg-slate-100">`;
+        } else {
+            const init = getTeamProp(t,'KODE') !== '---' ? getTeamProp(t,'KODE').substring(0,3) : getTeamProp(t,'NAMA').substring(0,3).toUpperCase();
+            avatarHtml = `<div class="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-[10px] mb-2 border border-indigo-100 shadow-sm">${init}</div>`;
+        }
+
+        return `
+        <div onclick="window.generateReport(${i})" class="p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-indigo-400 hover:shadow-md shadow-sm transition-all flex flex-col items-center justify-center group">
+            ${avatarHtml}
+            <div class="text-[9px] font-bold text-slate-700 text-center truncate w-full uppercase group-hover:text-indigo-700 transition-colors">${getTeamProp(t,'NAMA')}</div>
+        </div>`;
+    }).join('');
 }
 
 window.generateReport = function(idx) {
@@ -1414,7 +1483,14 @@ window.generateReport = function(idx) {
 
     const fR = timesheetsData.filter(r => {
         const rs = Object.values(r).join('|').toUpperCase();
-        if ((n !== 'TANPA NAMA' && !rs.includes(n)) && (k !== '---' && !rs.includes(k))) return false;
+        
+        // PERBAIKAN LOGIKA FILTER: Pastikan data row mengandung Nama atau Kode Engineer
+        let isMatch = false;
+        if (n !== 'TANPA NAMA' && rs.includes(n)) isMatch = true;
+        if (k !== '---' && rs.includes(k)) isMatch = true;
+        
+        if (!isMatch) return false;
+
         let dStr = getVal(r, ['TANGGAL', 'DATE', 'WAKTU', 'TIMESTAMP']); if(!dStr) return false;
         let rD = new Date(dStr); if(isNaN(rD.getTime()) && dStr.includes('/')) rD = new Date(dStr.split('/').reverse().join('-'));
         if(isNaN(rD.getTime())) return false;
