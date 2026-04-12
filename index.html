@@ -36,7 +36,7 @@
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
   /* KARTU KPI DASHBOARD */
-  .kpi-card { background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; height: 110px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+  .kpi-card { background: var(--bg-card, white); border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; height: 110px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
   .kpi-card::after { content:''; position: absolute; bottom:0; left:0; right:0; height: 3px; background: var(--kc, #cbd5e1); }
   .kpi-label { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; }
   .kpi-value { font-size: 32px; font-weight: 800; color: #0f172a; line-height: 1; margin-top: 10px; }
@@ -269,12 +269,12 @@
                     <!-- SECTION 1: KPI & CHARTS -->
                     <div id="exec-overview-section" class="space-y-8 animate-in fade-in">
                         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                            <div class="kpi-card" style="--kc: #3b82f6"><i data-lucide="clipboard-list" class="kpi-icon"></i><div class="kpi-label">Total</div><div class="kpi-value" id="k0">0</div></div>
-                            <div class="kpi-card" style="--kc: #0ea5e9"><i data-lucide="play" class="kpi-icon"></i><div class="kpi-label">Active</div><div class="kpi-value" id="k1">0</div></div>
-                            <div class="kpi-card" style="--kc: #8b5cf6"><i data-lucide="plus-circle" class="kpi-icon"></i><div class="kpi-label">New</div><div class="kpi-value" id="k2">0</div></div>
-                            <div class="kpi-card" style="--kc: #22c55e"><i data-lucide="check-circle-2" class="kpi-icon"></i><div class="kpi-label">Complete</div><div class="kpi-value" id="k3">0</div></div>
-                            <div class="kpi-card" style="--kc: #eab308"><i data-lucide="pause-circle" class="kpi-icon"></i><div class="kpi-label">On Hold</div><div class="kpi-value" id="k4">0</div></div>
-                            <div class="kpi-card" style="--kc: #64748b"><i data-lucide="x-circle" class="kpi-icon"></i><div class="kpi-label">Closed</div><div class="kpi-value" id="k5">0</div></div>
+                            <div class="kpi-card" style="--kc: #3b82f6; --bg-card: #eff6ff;"><i data-lucide="clipboard-list" class="kpi-icon"></i><div class="kpi-label">Total</div><div class="kpi-value" id="k0">0</div></div>
+                            <div class="kpi-card" style="--kc: #0ea5e9; --bg-card: #f0f9ff;"><i data-lucide="play" class="kpi-icon"></i><div class="kpi-label">Active</div><div class="kpi-value" id="k1">0</div></div>
+                            <div class="kpi-card" style="--kc: #8b5cf6; --bg-card: #f5f3ff;"><i data-lucide="plus-circle" class="kpi-icon"></i><div class="kpi-label">New</div><div class="kpi-value" id="k2">0</div></div>
+                            <div class="kpi-card" style="--kc: #22c55e; --bg-card: #f0fdf4;"><i data-lucide="check-circle-2" class="kpi-icon"></i><div class="kpi-label">Complete</div><div class="kpi-value" id="k3">0</div></div>
+                            <div class="kpi-card" style="--kc: #eab308; --bg-card: #fefce8;"><i data-lucide="pause-circle" class="kpi-icon"></i><div class="kpi-label">On Hold</div><div class="kpi-value" id="k4">0</div></div>
+                            <div class="kpi-card" style="--kc: #64748b; --bg-card: #f8fafc;"><i data-lucide="x-circle" class="kpi-icon"></i><div class="kpi-label">Closed</div><div class="kpi-value" id="k5">0</div></div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
