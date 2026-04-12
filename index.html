@@ -363,12 +363,7 @@
             <button onclick="window.closeAgendaModal()" class="text-slate-400 hover:text-rose-500 transition-colors"><i data-lucide="x"></i></button>
         </div>
         <form onsubmit="window.submitAgenda(event)" class="p-6 space-y-5">
-            <div>
-                <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase">Tanggal Pelaksanaan</label>
-                <input type="date" id="agendaTanggal" required class="w-full p-3 bg-slate-50 border rounded-xl font-bold text-sm text-slate-700 outline-none focus:border-indigo-500">
-            </div>
-            
-            <!-- INPUT CUSTOM / DATALIST -->
+            <div><label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase">Tanggal Pelaksanaan</label><input type="date" id="agendaTanggal" required class="w-full p-3 bg-slate-50 border rounded-xl font-bold text-sm text-slate-700 outline-none focus:border-indigo-500"></div>
             <div>
                 <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase">Proyek / Judul Agenda</label>
                 <input type="text" id="agendaProyek" list="agendaProyekList" required placeholder="Pilih dari daftar atau ketik manual..." class="w-full p-3 bg-slate-50 border rounded-xl font-bold text-sm text-slate-700 outline-none focus:border-indigo-500">
@@ -376,22 +371,30 @@
                     <!-- Opsi akan diisi oleh JavaScript -->
                 </datalist>
             </div>
-            
-            <div>
-                <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase">Rincian Kegiatan (Planning)</label>
-                <textarea id="agendaDetail" required rows="3" class="w-full p-3 bg-slate-50 border rounded-xl text-sm resize-none outline-none focus:border-indigo-500" placeholder="Detail kegiatan yang akan dilakukan..."></textarea>
-            </div>
-            <button type="submit" id="btnSubmitAgenda" class="w-full mt-4 bg-indigo-600 text-white font-black py-4 rounded-xl shadow-lg transition-all active:scale-95 uppercase tracking-widest flex justify-center items-center gap-2">
-                <i data-lucide="send"></i> SIMPAN AGENDA
-            </button>
+            <div><label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase">Rencana Kegiatan (Planning)</label><textarea id="agendaDetail" required rows="3" class="w-full p-3 bg-slate-50 border rounded-xl text-sm resize-none outline-none focus:border-indigo-500" placeholder="Detail kegiatan yang akan dilakukan..."></textarea></div>
+            <button type="submit" id="btnSubmitAgenda" class="w-full mt-4 bg-indigo-600 text-white font-black py-4 rounded-xl shadow-lg transition-all active:scale-95 uppercase tracking-widest flex justify-center items-center gap-2"><i data-lucide="send"></i> SIMPAN AGENDA</button>
         </form>
     </div>
 </div>
 
 <div id="engProjectModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/70 p-4 transition-all">
     <div class="bg-white rounded-[2rem] w-full max-w-5xl shadow-2xl flex flex-col max-h-[95vh] overflow-hidden modal-animate-in">
-        <div class="p-6 border-b flex justify-between items-start bg-slate-50"><div class="pr-4"><span id="epmRole" class="text-[9px] font-bold bg-indigo-100 text-indigo-700 px-2 rounded uppercase tracking-widest mb-3 inline-block">Role</span><h3 id="epmTitle" class="text-xl font-bold text-[#003366] uppercase leading-tight">Project Name</h3></div><button onclick="window.closeEngProjectModal()" class="text-slate-400 hover:text-rose-500 transition-colors"><i data-lucide="x"></i></button></div>
-        <div class="p-6 overflow-y-auto flex-1 bg-white"><div id="epmTaskList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div></div>
+        <div class="p-6 border-b flex justify-between items-start bg-slate-50">
+            <div class="pr-4">
+                <span id="epmRole" class="text-[9px] font-bold bg-indigo-100 text-indigo-700 px-2 rounded uppercase tracking-widest mb-3 inline-block">Role</span>
+                <h3 id="epmTitle" class="text-xl font-bold text-[#003366] uppercase leading-tight">Project Name</h3>
+            </div>
+            <div class="flex flex-col items-end gap-2 shrink-0">
+                <button onclick="window.closeEngProjectModal()" class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"><i data-lucide="x"></i></button>
+                <div class="text-right mt-2 hidden sm:block">
+                    <span class="block text-[9px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Rata-Rata Progres</span>
+                    <span id="epmAvg" class="text-3xl font-bold leading-none text-[#f5a20f]">0%</span>
+                </div>
+            </div>
+        </div>
+        <div class="p-6 overflow-y-auto flex-1 bg-white">
+            <div id="epmTaskList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
     </div>
 </div>
 
@@ -997,88 +1000,32 @@ window.submitTimesheet = async function(e) {
 // RENDER WORKSPACE (ENGINEER)
 // ==========================================
 window.renderTeamWorkspace = function() {
-    const cont = $id('projectList'); const menu = $id('sideMenu');
-    if(!currentUser) return;
-    const uR = getTeamProp(currentUser, 'DEPT').toUpperCase().split(/[\/,]+/).map(r => r.trim());
-    const myP = allData.filter(p => {
-        const s = getVal(p, KEY_MAP.status).toLowerCase();
-        if(!s.includes('active') && s !== 'new') return false;
-        const ts = (p.Tasks||[]).filter(t => {
-            const tr = (t.dept||'').toUpperCase().split(/[\/,]+/).map(r=>r.trim());
-            return tr.length > 0 && tr.some(r => uR.includes(r));
-        });
-        p.myTasks = ts;
-        return ts.length > 0;
-    });
-    
-    myP.forEach(p => { let s=0; p.myTasks.forEach(t=>s+=(parseInt(t.progress)||0)); p.myAvg = p.myTasks.length>0?Math.round(s/p.myTasks.length):0; });
-    
-    const sI = [{id:'active_all',l:'Semua Proyek',i:'grid',c:'bg-slate-900'},{id:'client_vale',l:'PT VALE',i:'landmark',c:'bg-amber-600'},{id:'client_clm',l:'PT CLM',i:'factory',c:'bg-red-600'},{id:'completed',l:'Selesai (100%)',i:'check-circle',c:'bg-emerald-600'}];
-    menu.innerHTML = sI.map(i => `<button onclick="curTeamFilter='${i.id}';window.renderTeamWorkspace()" class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[10px] font-black uppercase border w-full transition-all ${curTeamFilter===i.id?i.c+' text-white shadow-md':'bg-white text-slate-500 hover:bg-slate-50'}"><i data-lucide="${i.i}" class="w-3.5 h-3.5"></i> ${i.l}</button>`).join('');
-    
-    let fil = myP.filter(p => {
-        if(curTeamFilter==='completed') return p.myAvg===100;
-        if(p.myAvg===100) return false;
-        const cl = getVal(p, KEY_MAP.client).toUpperCase();
-        if(curTeamFilter==='client_vale') return cl.includes('VALE')||cl.includes('PTVI');
-        if(curTeamFilter==='client_clm') return cl.includes('CLM')||cl.includes('CITRA LAMPIA');
-        return true;
-    });
-    
-    window.currentEngineerProjects = fil;
-    if(fil.length === 0) {
-        cont.innerHTML = `<div class="col-span-full py-16 text-center text-slate-400 font-bold text-[10px] uppercase border-2 border-dashed rounded-3xl">Kosong</div>`;
-        return;
-    }
-    
-    cont.innerHTML = fil.map((p, idx) => `
-    <div onclick="window.openEngProjectModal(${idx})" class="bg-white rounded-[1.5rem] border border-slate-200 p-5 shadow-sm hover:border-[#f5a20f] transition-all cursor-pointer flex justify-between group animate-in fade-in">
-        <div class="flex-1 pr-4">
-            <h4 class="font-bold text-[14px] text-slate-800 uppercase line-clamp-2 leading-tight">${getVal(p, KEY_MAP.name)}</h4>
-            <div class="flex gap-1.5 mt-2.5">
-                <span class="text-[8px] font-black px-2 py-0.5 border rounded uppercase text-slate-400">${p.myTasks.length} TUGAS</span>
-                <span class="text-[8px] font-black px-2 py-0.5 border rounded uppercase bg-indigo-50 text-indigo-600 border-indigo-200">ACTIVE</span>
-            </div>
-        </div>
-        <div class="text-right shrink-0">
-            <span class="text-2xl font-black text-slate-900 group-hover:text-[#f5a20f] transition-colors">${p.myAvg}%</span>
-        </div>
-    </div>`).join('');
-    lucide.createIcons();
-}
+  const cont = $id('projectList'); const menu = $id('sideMenu'); if(!currentUser) return;
+  const uR = getTeamProp(currentUser, 'DEPT').toUpperCase().split(/[\/,]+/).map(r => r.trim());
+  const myP = allData.filter(p => { const s = getVal(p, KEY_MAP.status).toLowerCase(); if(!s.includes('active') && s !== 'new') return false; const ts = (p.Tasks||[]).filter(t => { const tr=(t.dept||'').toUpperCase().split(/[\/,]+/).map(r=>r.trim()); return tr.length>0&&tr.some(r=>uR.includes(r)); }); p.myTasks = ts; return ts.length>0; });
+  myP.forEach(p => { let s=0; p.myTasks.forEach(t=>s+=(parseInt(t.progress)||0)); p.myAvg = p.myTasks.length>0?Math.round(s/p.myTasks.length):0; });
+  const sI = [{id:'active_all',l:'Semua',i:'grid',c:'bg-slate-900'},{id:'client_vale',l:'PT VALE',i:'landmark',c:'bg-amber-600'},{id:'client_clm',l:'PT CLM',i:'factory',c:'bg-red-600'},{id:'completed',l:'Selesai',i:'check-circle',c:'bg-emerald-600'}];
+  menu.innerHTML = sI.map(i => `<button onclick="curTeamFilter='${i.id}';window.renderTeamWorkspace()" class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[10px] font-black uppercase border w-full transition-all ${curTeamFilter===i.id?i.c+' text-white shadow-md':'bg-white text-slate-500 hover:bg-slate-50'}"><i data-lucide="${i.i}" class="w-3.5 h-3.5"></i> ${i.l}</button>`).join('');
+  let fil = myP.filter(p => { if(curTeamFilter==='completed') return p.myAvg===100; if(p.myAvg===100) return false; const cl = getVal(p, KEY_MAP.client).toUpperCase(); if(curTeamFilter==='client_vale') return cl.includes('VALE')||cl.includes('PTVI'); if(curTeamFilter==='client_clm') return cl.includes('CLM'); return true; });
+  window.currentEngineerProjects = fil;
+  if(fil.length===0) return cont.innerHTML = `<div class="col-span-full py-16 text-center text-slate-400 font-bold text-[10px] uppercase border-2 border-dashed rounded-3xl">Kosong</div>`;
+  cont.innerHTML = fil.map((p, idx) => `<div onclick="window.openEngProjectModal(${idx})" class="bg-white rounded-[1.5rem] border p-5 shadow-sm hover:border-[#f5a20f] transition-all cursor-pointer flex justify-between group animate-in fade-in"><div class="flex-1"><h4 class="font-bold text-[14px] text-slate-800 uppercase line-clamp-2">${getVal(p, KEY_MAP.name)}</h4><div class="flex gap-1.5 mt-2"><span class="text-[8px] font-black px-2 py-0.5 border rounded uppercase text-slate-400">${p.myTasks.length} TUGAS</span><span class="text-[8px] font-black px-2 py-0.5 border rounded uppercase bg-indigo-50 text-indigo-600 border-indigo-200">ACTIVE</span></div></div><div class="text-right shrink-0"><span class="text-2xl font-black text-slate-900">${p.myAvg}%</span></div></div>`).join('');
+  lucide.createIcons();
+};
 
 window.openEngProjectModal = function(idx) {
-    const p = window.currentEngineerProjects[idx];
-    if(!p) return;
-    $id('epmTitle').textContent = getVal(p, KEY_MAP.name);
-    $id('epmRole').textContent = `ROLE: ${p.myTasks[0].dept||'UMUM'}`;
-    $id('epmAvg').textContent = p.myAvg+'%';
-    $id('epmAvg').className = `text-3xl font-bold leading-none ${p.myAvg===100?'text-emerald-500':'text-[#f5a20f]'}`;
-    
-    $id('epmTaskList').innerHTML = p.myTasks.map(t => `
-    <div class="bg-white border border-slate-200 p-4 rounded-xl shadow-sm tw-task-row">
-        <div class="flex justify-between items-start mb-2">
-            <span class="text-[9px] font-black text-indigo-600 uppercase leading-snug">${t.name}</span>
-            <span class="text-[8px] text-slate-400 font-bold bg-slate-100 px-1.5 py-0.5 rounded">Upd: ${t.updatedBy||'-'}</span>
-        </div>
-        <input type="text" value="${escapeJS(t.keterangan||'')}" class="w-full px-3 py-2 text-xs bg-slate-50 border rounded-lg mb-3 outline-none focus:border-indigo-400" placeholder="Rincian progress...">
-        <div class="flex gap-2 items-center border-t pt-3">
-            <div class="relative w-20">
-                <input type="number" value="${t.progress}" class="tw-input-prog w-full pl-2 pr-6 py-2 text-xs border rounded-lg text-center font-bold outline-none">
-                <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-bold text-slate-400">%</span>
-            </div>
-            <button onclick="window.saveProgress(this, '${escapeJS(getVal(p, KEY_MAP.name))}', '${escapeJS(t.name)}', ${idx})" class="flex-1 bg-[#003366] text-white text-xs font-bold rounded-lg py-2 shadow-sm hover:bg-navy-800 transition-all active:scale-95">SAVE</button>
-        </div>
-    </div>`).join('');
-    
-    $id('engProjectModal').classList.replace('hidden', 'flex');
-    lucide.createIcons();
-}
+    const p = window.currentEngineerProjects[idx]; if(!p) return;
+    $id('epmTitle').textContent = getVal(p, KEY_MAP.name); 
+    $id('epmRole').textContent = `ROLE: ${p.myTasks[0].dept||'UMUM'}`; 
+    if ($id('epmAvg')) {
+        $id('epmAvg').textContent = p.myAvg+'%';
+        $id('epmAvg').className = `text-3xl font-bold leading-none ${p.myAvg===100?'text-emerald-500':'text-[#f5a20f]'}`;
+    }
+    $id('epmTaskList').innerHTML = p.myTasks.map(t => `<div class="bg-white border p-4 rounded-xl shadow-sm tw-task-row"><div class="flex justify-between mb-2"><span class="text-[9px] font-black text-indigo-600 uppercase leading-snug">${t.name}</span><span class="text-[8px] text-slate-400">Upd: ${t.updatedBy||'-'}</span></div><input type="text" value="${escapeJS(t.keterangan||'')}" class="w-full px-3 py-2 text-xs bg-slate-50 border rounded-lg mb-3" placeholder="Rincian progress..."><div class="flex gap-2"><input type="number" value="${t.progress}" class="tw-input-prog w-16 px-2 py-2 text-xs border rounded-lg text-center font-bold"><button onclick="window.saveProgress(this, '${escapeJS(getVal(p, KEY_MAP.name))}', '${escapeJS(t.name)}', ${idx})" class="flex-1 bg-[#003366] text-white text-xs font-bold rounded-lg shadow-sm active:scale-95 transition-all">SAVE</button></div></div>`).join('');
+    $id('engProjectModal').classList.replace('hidden', 'flex'); lucide.createIcons();
+};
 
-window.closeEngProjectModal = function() {
-    $id('engProjectModal').classList.replace('flex', 'hidden');
-    window.renderTeamWorkspace();
-}
+window.closeEngProjectModal = () => { $id('engProjectModal').classList.replace('flex', 'hidden'); window.renderTeamWorkspace(); };
 
 window.saveProgress = async function(btn, pN, tN, idx) {
     const row = btn.closest('.tw-task-row');
