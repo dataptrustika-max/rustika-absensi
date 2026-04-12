@@ -1452,7 +1452,7 @@ window.renderTimesheetControls = function() {
     const lw = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
     $id('repStart').value = lw; $id('repEnd').value = t;
     
-    // PEMULIHAN: Merender daftar cepat (Quick Select) dengan Foto Kompresi Super Ringan
+    // PEMULIHAN: Merender daftar cepat (Quick Select) dengan Foto Kompresi Super Ringan & Departemen
     $id('quickSelectGrid').innerHTML = teamsData.map((t,i) => {
         const rawFoto = getTeamProp(t, 'FOTO');
         const match = rawFoto ? rawFoto.match(/\/d\/([a-zA-Z0-9_-]+)/) : null;
@@ -1470,7 +1470,8 @@ window.renderTimesheetControls = function() {
         return `
         <div onclick="window.generateReport(${i})" class="p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-indigo-400 hover:shadow-md shadow-sm transition-all flex flex-col items-center justify-center group">
             ${avatarHtml}
-            <div class="text-[9px] font-bold text-slate-700 text-center truncate w-full uppercase group-hover:text-indigo-700 transition-colors">${getTeamProp(t,'NAMA')}</div>
+            <div class="text-[9px] font-bold text-slate-700 text-center truncate w-full uppercase group-hover:text-indigo-700 transition-colors" title="${getTeamProp(t,'NAMA')}">${getTeamProp(t,'NAMA')}</div>
+            <div class="text-[7px] font-black text-slate-400 text-center truncate w-full uppercase mt-1 tracking-widest" title="${getTeamProp(t,'DEPT')}">${getTeamProp(t,'DEPT')}</div>
         </div>`;
     }).join('');
 }
