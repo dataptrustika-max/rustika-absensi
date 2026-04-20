@@ -800,7 +800,7 @@ const KEY_MAP = {
   priority: ['active by status/priority', 'priority'] 
 };
 
-// =============== UTILITIES ===============
+// =============== UTILITIES & HELPERS ===============
 window.$id = function(id) { return document.getElementById(id); };
 
 window.escapeJS = function(str) { 
@@ -855,7 +855,34 @@ window.formatTanggalHari = function(ts) {
   } 
 };
 
-// Cek LocalStorage
+window.optimizeImageUrl = function(url) {
+    if (!url) return '';
+    // Jika link dari Google Drive, jadikan thumbnail
+    if (url.includes('drive.google.com')) {
+        const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+        if (match && match[1]) {
+            return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w300-h300`;
+        }
+    }
+    // Jika link biasa (.jpg, .png, dsb dari hosting lain), biarkan apa adanya
+    return url;
+};
+
+// Deteksi Hak Akses Direktur / Lead
+window.isLead = function() {
+    if(!currentUser) return false;
+    const dept = (currentUser['DEPARTEMEN'] || currentUser['DEPT'] || '').toUpperCase();
+    const nama = (currentUser['NAMA'] || '').toUpperCase();
+    
+    // Syarat akun Direktur / Command Center
+    return dept.includes('DIREKTUR') || 
+           dept.includes('LEAD') || 
+           dept.includes('MANAGER') || 
+           nama.includes('QADRIAH') || 
+           nama.includes('SALMAN');
+};
+
+// Cek LocalStorage Session
 try { 
   const savedUser = localStorage.getItem('rustikaUser'); 
   if (savedUser) currentUser = JSON.parse(savedUser); 
@@ -900,7 +927,7 @@ window.handleTeamLogin = async function(e) {
     timesheetsData = data.timesheets || []; 
     financeData = data.finance || []; 
     
-    // Parse Assignments
+    // Parse JSON Assignments ke memori
     allData.forEach(p => {
       p._parsedAssignments = {}; 
       const rawAssign = getVal(p, ['ASSIGNMENTS']); 
@@ -931,22 +958,54 @@ window.handleLogout = function() {
   window.switchView('view-gateway', true); 
 };
 
+// ROLE-BASED UI RENDER
 window.updateUI = function() {
   if (!currentUser) return;
   const engName = $id('engName');
   const engMeta = $id('engMeta');
+  
   if(engName) engName.textContent = (currentUser['NAMA'] || 'Tanpa Nama').toUpperCase();
   if(engMeta) engMeta.textContent = `${currentUser['DEPARTEMEN'] || '-'} • ${currentUser['KODE'] || '-'}`;
+
+  // Foto Profil
+  const rawFoto = currentUser['FOTO'] || currentUser['PHOTO'] || '';
+  const fotoUrl = window.optimizeImageUrl(rawFoto);
+  const profImg = $id('profImg');
+  const profIcon = $id('profIcon');
+  
+  if (fotoUrl && fotoUrl.trim() !== '') {
+      if (profImg) { profImg.src = fotoUrl; profImg.classList.remove('hidden'); }
+      if (profIcon) profIcon.classList.add('hidden');
+  } else {
+      if (profImg) { profImg.src = ''; profImg.classList.add('hidden'); }
+      if (profIcon) profIcon.classList.remove('hidden');
+  }
+
+  // Tampilan berdasarkan Hak Akses (Direktur vs Tim)
+  const leadWs = $id('leadWorkspace');
+  const engBtns = $id('engineerButtons');
+  const kanban = $id('engineerKanban'); // Jika punya kanban
+  
+  if (window.isLead()) {
+      if (leadWs) leadWs.classList.remove('hidden');
+      if (engBtns) engBtns.classList.add('hidden');
+      if (kanban) kanban.classList.remove('hidden'); // Direktur bisa memantau tugas juga
+  } else {
+      if (leadWs) leadWs.classList.add('hidden');
+      if (engBtns) engBtns.classList.remove('hidden');
+      if (kanban) kanban.classList.remove('hidden');
+  }
 };
 
-// =============== TEAM WORKSPACE (STRICT DELEGATION) ===============
+// =============== DELEGASI KETAT (TEAM WORKSPACE) ===============
 window.renderTeamWorkspace = function() {
-  const cont = $id('epmTaskList'); 
+  const cont = $id('projectList') || $id('engineerKanban'); 
   if (!currentUser || !cont) return;
   
   const myKode = currentUser['KODE'];
   const myNama = currentUser['NAMA'];
 
+  // Filter 1: Cek apakah user secara spesifik di-assign di array ASSIGNMENTS
   const myProjects = allData.filter(p => {
     const status = getVal(p, KEY_MAP.status).toLowerCase(); 
     if (!status.includes('active') && status !== 'new') return false;
@@ -961,6 +1020,115 @@ window.renderTeamWorkspace = function() {
   });
 
   window.currentEngineerProjects = myProjects;
+
+  // Jika tidak ada tugas sama sekali, tampilkan pesan kosong
+  if (myProjects.length === 0) {
+      cont.innerHTML = `
+      <div class="col-span-full py-16 text-center text-slate-400 font-bold uppercase tracking-widest text-[11px] border-2 border-dashed rounded-3xl border-slate-300">
+          Belum ada tugas yang didelegasikan oleh Direksi kepada Anda.
+      </div>`;
+      return;
+  }
+
+  // Render Kartu Tugas untuk Engineer
+  cont.innerHTML = myProjects.map((p, idx) => {
+      let sum = 0; p.myTasks.forEach(t => sum += (parseInt(t.progress) || 0));
+      p.myAvg = p.myTasks.length > 0 ? Math.round(sum / p.myTasks.length) : 0;
+      
+      return `
+      <div onclick="window.openEngProjectModal(${idx})" class="bg-white rounded-[1.5rem] border border-slate-200 p-5 md:p-6 shadow-sm hover:shadow-md hover:border-[#f5a20f] transition-all cursor-pointer group flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in fade-in duration-300">
+          <div class="flex flex-col gap-2.5 items-start pr-4">
+              <div class="flex items-center gap-3">
+                  <h4 class="font-bold text-[14px] md:text-[15px] text-slate-800 group-hover:text-[#f5a20f] transition-colors uppercase tracking-wide leading-tight line-clamp-2">${getVal(p, KEY_MAP.name)}</h4>
+                  <span class="text-[10px] font-bold bg-[#f5a20f]/10 text-[#f5a20f] px-2 py-0.5 rounded-md border border-[#f5a20f]/20">${p.myAvg}%</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5">
+                  <span class="text-[8px] font-black px-2 py-0.5 border border-slate-200 rounded uppercase text-slate-400">${p.myTasks.length} TUGAS ASSIGNED</span>
+              </div>
+          </div>
+          <div class="flex items-center gap-1.5 text-slate-400 group-hover:text-[#f5a20f] transition-colors shrink-0">
+              <span class="text-[9px] font-bold uppercase tracking-widest sm:block">Update Progres</span>
+              <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+          </div>
+      </div>`;
+  }).join('');
+  
+  lucide.createIcons();
+};
+
+window.openEngProjectModal = function(idx) {
+    const p = window.currentEngineerProjects[idx]; if (!p) return;
+    $id('epmTitle').textContent = getVal(p, KEY_MAP.name);
+    
+    const epmAvgEl = $id('epmAvg'); 
+    if (epmAvgEl) { 
+        epmAvgEl.textContent = `${p.myAvg}%`; 
+    }
+
+    // Tampilkan hanya tugas yang mereka miliki
+    let html = p.myTasks.map(t => {
+        return `
+        <div class="bg-white border border-slate-200 p-4 rounded-xl shadow-sm mb-3 task-row">
+            <div class="flex justify-between items-start mb-2 gap-2">
+                <h5 class="text-[12px] font-black text-slate-900 uppercase leading-snug">${escapeJS(t.name)}</h5>
+            </div>
+            <div class="flex items-center gap-3 mt-3">
+                <div class="flex items-center">
+                    <input type="number" min="0" max="100" value="${t.progress}" class="input-prog w-16 p-2 bg-slate-50 border border-slate-200 rounded-l-lg text-center font-bold text-xs outline-none focus:border-indigo-500">
+                    <span class="bg-slate-100 border border-l-0 border-slate-200 p-2 rounded-r-lg text-xs font-bold text-slate-500">%</span>
+                </div>
+                <input type="text" value="${escapeJS(t.keterangan || '')}" placeholder="Keterangan rinci..." class="input-ket flex-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium outline-none focus:border-indigo-500">
+                <button onclick="window.saveProgress(this, '${escapeJS(getVal(p, KEY_MAP.name))}', '${escapeJS(t.name)}')", class="bg-indigo-600 hover:bg-indigo-700 text-white font-black px-4 py-2 rounded-lg text-[9px] uppercase tracking-widest shadow-sm transition-all shrink-0">Simpan</button>
+            </div>
+        </div>`;
+    }).join('');
+
+    $id('epmTaskList').innerHTML = html;
+    $id('engProjectModal').classList.replace('hidden', 'flex');
+    lucide.createIcons();
+};
+
+window.closeEngProjectModal = function() { 
+    $id('engProjectModal').classList.replace('flex', 'hidden'); 
+    window.renderTeamWorkspace(); 
+};
+
+window.saveProgress = async function(btn, proj, task) {
+  const row = btn.closest('.task-row'); 
+  const prog = row.querySelector('.input-prog').value; 
+  const ket = row.querySelector('.input-ket').value; 
+  const origHTML = btn.innerHTML;
+  
+  btn.innerHTML = 'WAIT...'; 
+  btn.disabled = true;
+  
+  try {
+    const code = currentUser ? currentUser['KODE'] : 'ENG'; 
+    await fetch(API_URL, { 
+        method: 'POST', 
+        body: JSON.stringify({ action: 'UPDATE_PROGRESS', projectName: proj, taskName: task, teamCode: code, progress: prog, keterangan: ket }) 
+    });
+    
+    btn.innerHTML = 'SAVED'; 
+    btn.classList.replace('bg-indigo-600', 'bg-emerald-500');
+    
+    // Update local data
+    const pD = allData.find(p => getVal(p, KEY_MAP.name) === proj); 
+    if (pD && pD.Tasks) { 
+        const tD = pD.Tasks.find(t => t.name === task); 
+        if (tD) { tD.progress = parseInt(prog); tD.keterangan = ket; } 
+    }
+    
+    setTimeout(() => { 
+        btn.innerHTML = origHTML; 
+        btn.classList.replace('bg-emerald-500', 'bg-indigo-600'); 
+        btn.disabled = false; 
+    }, 1500);
+  } catch(e) { 
+      alert('Error saving data');
+      btn.innerHTML = origHTML; 
+      btn.disabled = false; 
+  }
 };
 
 // =============== DYNAMIC SMART TIMESHEET (TIME LOCK) ===============
@@ -1191,12 +1359,10 @@ window.renderExecutive = function() {
       if(el) el.textContent = [totalAll, actSum, statusCount.NEW, statusCount.COMPLETE, statusCount["ON HOLD"], statusCount.CLOSED][i];
   });
 
-  // TIPE GRAFIK TELAH DIUBAH MENJADI 'pie' MURNI (KUE UTUH) BUKAN 'doughnut'
   window.makePie('cProjType', ['ACTIVES', 'NEW', 'COMPLETE', 'ON HOLD', 'CLOSED'], [actSum, statusCount.NEW, statusCount.COMPLETE, statusCount["ON HOLD"], statusCount.CLOSED], ['#0ea5e9','#8b5cf6','#22c55e','#eab308','#64748b'], 'status', 'pie');
 
   const pc = allData.reduce((a,p)=>{const v=getVal(p,KEY_MAP.priority).toUpperCase(); if(v.includes('HIGH') || v.includes('HIGHT'))a.H++;else if(v.includes('MEDIUM'))a.M++;else a.L++; return a;},{H:0,M:0,L:0});
   
-  // TIPE GRAFIK TELAH DIUBAH MENJADI 'pie' MURNI (KUE UTUH)
   window.makePie('cPriority', ['High','Medium','Low'], [pc.H,pc.M,pc.L], ['#f97316','#fb923c','#22c55e'], 'priority', 'pie');
   
   window.renderFilteredList('priority', 'High');
@@ -1245,7 +1411,6 @@ window.renderExecutiveGrid = function() {
         const s = getVal(p, KEY_MAP.status).toLowerCase(); const pt = (p.Type||'').toUpperCase(); const prRaw = getVal(p, KEY_MAP.priority).toUpperCase(); const pr = prRaw.includes('HIGH')?'HIGH':(prRaw.includes('MEDIUM')?'MEDIUM':'LOW');
         const nm = getVal(p, KEY_MAP.name).toLowerCase();
         
-        // FUNGSI PENCARIAN BERDASARKAN INPUT TEXT SEARCH BAR
         if(curExecSearch && !nm.includes(curExecSearch)) return false;
 
         if(curExecFilter==='ACTIVES') return s.includes('active') || s.includes('new'); 
@@ -1597,9 +1762,20 @@ window.init = async function(isAuto = false) {
         allData = projects; teamsData=d.teams||[]; timesheetsData=d.timesheets||[]; financeData=d.finance||[]; 
         
         const dashEl = $id('view-team-dashboard');
-        if(dashEl && dashEl.classList.contains('active') && currentUser) { window.updateUI(); window.renderTeamWorkspace(); }
+        if(dashEl && dashEl.classList.contains('active') && currentUser) { 
+            window.updateUI(); 
+            window.renderTeamWorkspace(); 
+        }
+        
         const execEl = $id('view-executive');
-        if(execEl && execEl.classList.contains('active')) { window.renderExecutive(); if(!isAuto) { window.renderTimesheetControls(); window.renderFinanceTable(); window.renderTimeline(); } }
+        if(execEl && execEl.classList.contains('active')) { 
+            window.renderExecutive(); 
+            if(!isAuto) { 
+                window.renderTimesheetControls(); 
+                window.renderFinanceTable(); 
+                window.renderTimeline(); 
+            } 
+        }
     } catch(e) { console.error("Init Error", e); }
 };
 
