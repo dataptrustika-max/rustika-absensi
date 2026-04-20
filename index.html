@@ -768,9 +768,92 @@
 <!-- SELURUH HTML MODAL -->
 <div id="assignTaskModal" class="fixed inset-0 z-[10000] hidden items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 transition-all">
     <div class="bg-white rounded-[2rem] w-full max-w-md shadow-2xl flex flex-col modal-animate-in overflow-hidden max-h-[85vh]">
-        <div class="p-6 border-b border-slate-100 bg-[#003366] flex justify-between items-center shrink-0"><div><h3 class="font-black text-white uppercase tracking-widest flex items-center gap-2"><i data-lucide="users" class="w-5 h-5"></i> Tugaskan Tim</h3><p id="atmTaskName" class="text-[10px] font-bold text-blue-200 mt-1 uppercase line-clamp-1"></p></div><button onclick="window.closeAssignModal()" class="text-white/70 hover:text-white transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button></div>
+        <div class="p-6 border-b border-slate-100 bg-[#003366] flex justify-between items-center shrink-0">
+            <div>
+                <h3 class="font-black text-white uppercase tracking-widest flex items-center gap-2"><i data-lucide="users" class="w-5 h-5"></i> Tugaskan Tim</h3>
+                <p id="atmTaskName" class="text-[10px] font-bold text-blue-200 mt-1 uppercase line-clamp-1"></p>
+            </div>
+            <button onclick="window.closeAssignModal()" class="text-white/70 hover:text-white transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
         <div class="p-6 overflow-y-auto flex-1 bg-slate-50/50 flex flex-col gap-2" id="atmTeamList"></div>
-        <div class="p-6 border-t border-slate-100 bg-white shrink-0"><button id="btnSubmitAssign" onclick="window.submitAssignTask()" class="w-full bg-[#f5a20f] hover:bg-amber-600 text-white font-black py-4 rounded-xl shadow-lg transition-all active:scale-95 uppercase tracking-widest flex justify-center items-center gap-2"><i data-lucide="save" class="w-5 h-5"></i> SIMPAN PENUGASAN</button></div>
+        <div class="p-6 border-t border-slate-100 bg-white shrink-0">
+            <button id="btnSubmitAssign" onclick="window.submitAssignTask()" class="w-full bg-[#f5a20f] hover:bg-amber-600 text-white font-black py-4 rounded-xl shadow-lg transition-all active:scale-95 uppercase tracking-widest flex justify-center items-center gap-2"><i data-lucide="save" class="w-5 h-5"></i> SIMPAN PENUGASAN</button>
+        </div>
+    </div>
+</div>
+
+<div id="addJobdeskModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 transition-all">
+    <div class="bg-white rounded-[2rem] w-full max-w-lg shadow-2xl flex flex-col modal-animate-in overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-[#003366]">
+            <h3 class="font-black text-white uppercase tracking-widest flex items-center gap-2"><i data-lucide="clipboard-list" class="w-5 h-5"></i> Assign Jobdesk Tim</h3>
+            <button onclick="window.closeAddJobdeskModal()" class="text-white/70 hover:text-white transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <form onsubmit="window.submitJobdesk(event)" class="p-6 space-y-4 overflow-y-auto max-h-[75vh] bg-slate-50/50">
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-widest">Pilih Proyek</label>
+                <select id="jdProj" required class="w-full p-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-indigo-500 font-bold text-sm text-slate-800 shadow-sm"></select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-widest">Pilih Tim / Engineer</label>
+                <select id="jdTeam" required class="w-full p-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-indigo-500 font-bold text-sm text-slate-800 shadow-sm"></select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-widest">Rincian Jobdesk</label>
+                <textarea id="jdDetail" required rows="3" class="w-full p-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-indigo-500 font-medium text-sm resize-none shadow-sm"></textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-widest">Deadline</label>
+                    <input type="date" id="jdDeadline" required class="w-full p-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-indigo-500 font-bold text-sm text-slate-800 shadow-sm">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-widest">Prioritas</label>
+                    <select id="jdPriority" required class="w-full p-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-indigo-500 font-bold text-sm text-slate-800 shadow-sm">
+                        <option value="High">High</option><option value="Medium">Medium</option><option value="Low">Low</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" id="btnSubmitJd" class="w-full mt-6 bg-[#f5a20f] hover:bg-amber-600 text-white font-black py-4 rounded-xl shadow-lg transition-all active:scale-95 uppercase tracking-widest flex justify-center items-center gap-2"><i data-lucide="send" class="w-5 h-5"></i> KIRIM JOBDESK</button>
+        </form>
+    </div>
+</div>
+
+<div id="assignSopModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 transition-all">
+    <div class="bg-white rounded-[2rem] w-full max-w-2xl shadow-2xl flex flex-col modal-animate-in overflow-hidden max-h-[85vh]">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-[#003366] shrink-0">
+            <h3 class="font-black text-white uppercase tracking-widest flex items-center gap-2"><i data-lucide="list-checks" class="w-5 h-5"></i> Task Assignment</h3>
+            <button onclick="window.closeAssignSopModal()" class="text-white/70 hover:text-white transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <form onsubmit="window.submitAssignSop(event)" class="flex flex-col flex-1 overflow-hidden">
+            <div class="p-6 bg-slate-50 shrink-0 border-b border-slate-200">
+                <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-widest">Pilih Proyek</label>
+                <select id="asProj" required onchange="window.onAssignSopProjChange(this.value)" class="w-full p-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-indigo-500 font-bold text-sm text-slate-800 shadow-sm"></select>
+            </div>
+            <div id="asTaskList" class="p-6 overflow-y-auto flex-1 bg-slate-50/50">
+                <p class="text-xs text-slate-500 text-center italic">Silakan pilih proyek terlebih dahulu.</p>
+            </div>
+            <div class="p-6 border-t border-slate-100 bg-white shrink-0">
+                <button type="submit" id="btnSubmitAs" class="w-full bg-[#f5a20f] hover:bg-amber-600 text-white font-black py-4 rounded-xl shadow-lg transition-all active:scale-95 uppercase tracking-widest flex justify-center items-center gap-2"><i data-lucide="save" class="w-5 h-5"></i> SIMPAN ASSIGNMENT</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="monitorSopModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 transition-all">
+    <div class="bg-white rounded-[2rem] w-full max-w-2xl shadow-2xl flex flex-col modal-animate-in overflow-hidden max-h-[85vh]">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-indigo-50 shrink-0">
+            <h3 class="font-black text-indigo-700 uppercase tracking-widest flex items-center gap-2"><i data-lucide="monitor" class="w-5 h-5"></i> Pantau Task SOP</h3>
+            <button onclick="window.closeMonitorSopModal()" class="text-slate-400 hover:text-rose-500 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <div class="flex flex-col flex-1 overflow-hidden">
+            <div class="p-6 bg-white shrink-0 border-b border-slate-200">
+                <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-widest">Filter Proyek</label>
+                <select id="msProj" onchange="window.onMonitorSopProjChange(this.value)" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-500 font-bold text-sm text-slate-800 shadow-sm"></select>
+            </div>
+            <div id="msTaskList" class="p-6 overflow-y-auto flex-1 bg-slate-50/50">
+                <p class="text-xs text-slate-500 text-center italic">Silakan pilih proyek terlebih dahulu.</p>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -2157,6 +2240,262 @@ window.renderFinanceTable = function() {
 window.updateFin = async function(rIdx, nS, btn) { btn.parentElement.innerHTML = 'WAIT...'; try { await fetch(API_URL, {method:'POST', body:JSON.stringify({action:'UPDATE_FINANCE_STATUS', rowIdx:rIdx, newStatus:nS})}); const i=financeData.find(f=>f.rowIdx===rIdx); if(i) i.STATUS=nS; window.renderFinanceTable(); } catch(e){ alert("Error"); window.renderFinanceTable(); } };
 
 // =============== INIT ===============
+  // =============== FITUR PENUGASAN (DIRECTOR & TEAM VISIBILITY) ===============
+
+// 1. FILTER STRICT DELEGATION
+window.isUserAssigned = function(taskName, projectObj, currentUserObj) {
+    if (!projectObj._parsedAssignments) return false;
+    const assignedArr = projectObj._parsedAssignments[taskName] || [];
+    const myKode = getTeamProp(currentUserObj, 'KODE');
+    const myNama = getTeamProp(currentUserObj, 'NAMA');
+    return assignedArr.includes(myKode) || assignedArr.includes(myNama);
+};
+
+// Override renderTeamWorkspace untuk menggunakan isUserAssigned
+window.renderTeamWorkspace = function() {
+    const cont = $id('projectList'); 
+    if (!currentUser || !cont) return;
+    
+    const myProjects = allData.filter(p => {
+        const status = getVal(p, KEY_MAP.status).toLowerCase(); 
+        if (!status.includes('active') && status !== 'new') return false;
+        
+        // Strict Delegation applied
+        const assignedTasks = (p.Tasks || []).filter(t => window.isUserAssigned(t.name, p, currentUser));
+        p.myTasks = assignedTasks; 
+        return assignedTasks.length > 0;
+    });
+
+    window.currentEngineerProjects = myProjects;
+
+    const emptyMessage = `<div class="col-span-full py-16 bg-white border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-[11px]">Belum ada tugas yang didelegasikan oleh Direksi kepada Anda.</div>`;
+
+    if (myProjects.length === 0) {
+        cont.innerHTML = emptyMessage;
+        lucide.createIcons();
+        return;
+    }
+
+    cont.innerHTML = myProjects.map((p, idx) => {
+        let sum = 0; p.myTasks.forEach(t => sum += (parseInt(t.progress) || 0));
+        p.myAvg = p.myTasks.length > 0 ? Math.round(sum / p.myTasks.length) : 0;
+        
+        return `
+        <div onclick="window.openEngProjectModal(${idx})" class="bg-white rounded-[1.5rem] border border-slate-200 p-5 shadow-sm hover:shadow-md hover:border-[#f5a20f] transition-all cursor-pointer group flex items-center justify-between">
+            <div class="flex flex-col gap-2.5 items-start pr-4">
+                <div class="flex items-center gap-3">
+                    <h4 class="font-bold text-[13px] text-slate-800 group-hover:text-[#f5a20f] transition-colors uppercase line-clamp-2">${getVal(p, KEY_MAP.name)}</h4>
+                    <span class="text-[10px] font-bold bg-[#f5a20f]/10 text-[#f5a20f] px-2 py-0.5 rounded-md border border-[#f5a20f]/20">${p.myAvg}%</span>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                    <span class="text-[8px] font-black px-2 py-0.5 border border-slate-200 rounded uppercase text-slate-400">${p.myTasks.length} TUGAS</span>
+                </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform"></i>
+        </div>`;
+    }).join('');
+    
+    lucide.createIcons();
+};
+
+// Override Render Jobdesk untuk Empty State
+window.renderJobdesk = function() {
+    if (!currentUser) return; 
+    
+    let filteredJd = jobdeskData;
+    const myKode = getTeamProp(currentUser, 'KODE').toUpperCase();
+    const isDirector = window.isLead();
+    const listCont = isDirector ? $id('dirJobdeskList') : $id('engJobdeskList');
+    
+    if (!listCont) return;
+
+    if (!isDirector) { 
+        filteredJd = jobdeskData.filter(j => (j['TEAM CODE'] || '').toUpperCase() === myKode); 
+    }
+
+    const emptyMessage = `<div class="py-10 bg-white border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Belum ada tugas yang didelegasikan oleh Direksi kepada Anda.</div>`;
+
+    if (filteredJd.length === 0) { 
+        listCont.innerHTML = emptyMessage; 
+        return; 
+    }
+
+    listCont.className = isDirector ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" : "flex flex-col gap-4";
+    listCont.innerHTML = filteredJd.map(j => {
+        const s = (j.STATUS || 'OPEN').toUpperCase(); 
+        const sColor = s === 'OPEN' ? 'bg-sky-100 text-sky-700' : (s === 'PROGRESS' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700');
+        const canEdit = isDirector || (j['TEAM CODE'] || '').toUpperCase() === myKode;
+        let statusUI = `<span class="px-2.5 py-1 rounded-md border text-[9px] font-black uppercase tracking-widest ${sColor}">${s}</span>`;
+        
+        if (canEdit) { 
+            statusUI = `<select onchange="window.updateJdStatus(${j.rowIdx}, this)" class="bg-slate-50 border border-slate-200 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded outline-none focus:border-indigo-400 text-slate-700 cursor-pointer hover:bg-slate-100 transition-colors"><option value="OPEN" ${s==='OPEN'?'selected':''}>OPEN</option><option value="PROGRESS" ${s==='PROGRESS'?'selected':''}>PROGRESS</option><option value="DONE" ${s==='DONE'?'selected':''}>DONE</option></select>`; 
+        }
+
+        return `<div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col"><div class="flex justify-between items-start mb-4 gap-2"><div class="flex flex-wrap gap-1.5"><span class="text-[9px] font-black bg-indigo-50 text-indigo-600 px-2 py-1 rounded-md border uppercase"><i data-lucide="folder" class="w-3 h-3 inline pb-0.5 mr-0.5"></i> ${j['PROJECT NAME'] || '-'}</span></div><div class="shrink-0">${statusUI}</div></div><h4 class="text-sm font-bold text-slate-800 leading-relaxed mb-4 flex-1 whitespace-pre-wrap">${j.JOBDESK || '-'}</h4></div>`;
+    }).join('');
+    lucide.createIcons();
+};
+
+// 2. FITUR JOBDESK
+window.openAddJobdeskModal = function() {
+    let pOpts = `<option value="">-- Pilih Proyek --</option><option value="NON-PROYEK / UMUM">NON-PROYEK / UMUM</option>`;
+    allData.forEach(p => { const nm = getVal(p, KEY_MAP.name); if(nm) pOpts += `<option value="${escapeJS(nm)}">${escapeJS(nm)}</option>`; });
+    $id('jdProj').innerHTML = pOpts;
+    
+    let tOpts = `<option value="">-- Pilih Tim --</option>`;
+    teamsData.forEach(t => { 
+        const n = getTeamProp(t, 'NAMA'); const k = getTeamProp(t, 'KODE'); 
+        if(n !== 'Tanpa Nama' && n !== '') tOpts += `<option value="${k}">${k} - ${n}</option>`; 
+    }); 
+    $id('jdTeam').innerHTML = tOpts;
+    
+    $id('jdDetail').value = ''; $id('jdDeadline').valueAsDate = new Date();
+    const m = $id('addJobdeskModal'); if(m) m.classList.replace('hidden', 'flex'); 
+};
+window.closeAddJobdeskModal = function() { $id('addJobdeskModal').classList.replace('flex', 'hidden'); };
+
+window.submitJobdesk = async function(e) {
+    e.preventDefault(); 
+    const btn = $id('btnSubmitJd'); const orig = btn.innerHTML; btn.innerHTML = 'MEMPROSES...'; btn.disabled = true;
+    try {
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'ADD_JOBDESK', projectName: $id('jdProj').value, teamCode: $id('jdTeam').value, jobdesk: $id('jdDetail').value, deadline: $id('jdDeadline').value, priority: $id('jdPriority').value, createdBy: getTeamProp(currentUser, 'NAMA') }) });
+        btn.innerHTML = '✓ TERSIMPAN';
+        setTimeout(() => { window.closeAddJobdeskModal(); btn.innerHTML = orig; btn.disabled = false; window.init(true); }, 2000);
+    } catch(err) { alert('Gagal assign jobdesk.'); btn.innerHTML = orig; btn.disabled = false; }
+};
+
+window.updateJdStatus = async function(rowIdx, selectEl) {
+    const nS = selectEl.value; selectEl.disabled = true; selectEl.classList.add('opacity-50', 'animate-pulse');
+    try {
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'UPDATE_JOBDESK_STATUS', rowIdx: rowIdx, newStatus: nS }) });
+        const i = jobdeskData.find(j => j.rowIdx === rowIdx); if(i) i.STATUS = nS;
+        selectEl.disabled = false; selectEl.classList.remove('opacity-50', 'animate-pulse'); selectEl.classList.replace('text-slate-700', 'text-emerald-600');
+        setTimeout(() => selectEl.classList.replace('text-emerald-600', 'text-slate-700'), 1500);
+    } catch(e) { alert("Error update status."); selectEl.disabled = false; selectEl.classList.remove('opacity-50', 'animate-pulse'); window.renderJobdesk(); }
+};
+
+// 3. FITUR TASK ASSIGNMENT (SOP)
+window.openAssignSopModal = function() {
+    let pOpts = `<option value="">-- Pilih Proyek --</option>`; 
+    allData.forEach(p => { pOpts += `<option value="${escapeJS(getVal(p, KEY_MAP.name))}">${escapeJS(getVal(p, KEY_MAP.name))}</option>`; });
+    $id('asProj').innerHTML = pOpts; 
+    $id('asTaskList').innerHTML = '<p class="text-xs text-slate-500 text-center italic">Silakan pilih proyek terlebih dahulu.</p>';
+    const m = $id('assignSopModal'); if(m) m.classList.replace('hidden', 'flex');
+};
+window.closeAssignSopModal = function() { $id('assignSopModal').classList.replace('flex', 'hidden'); };
+
+window.onAssignSopProjChange = function(projName) {
+    if(!projName) return $id('asTaskList').innerHTML = '<p class="text-xs text-slate-500 text-center italic">Silakan pilih proyek terlebih dahulu.</p>';
+    const p = allData.find(x => getVal(x, KEY_MAP.name) === projName); if(!p) return;
+    
+    let tOpts = `<option value="">-- Pilih Tim --</option>`;
+    teamsData.forEach(t => { 
+        const n = getTeamProp(t, 'NAMA'); const k = getTeamProp(t, 'KODE'); 
+        if(n !== 'Tanpa Nama') tOpts += `<option value="${k}">${k} - ${n}</option>`; 
+    });
+
+    let html = p.Tasks.map(t => {
+        const existingAssign = p._parsedAssignments[t.name] || [];
+        const currTeam = existingAssign.length > 0 ? existingAssign[0] : '';
+        return `<div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-3 task-assign-row" data-task="${escapeJS(t.name)}"><p class="text-xs font-black text-slate-800 uppercase mb-2">${escapeJS(t.name)}</p><select class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 font-bold text-xs text-slate-700 team-select">${tOpts.replace(`value="${currTeam}"`, `value="${currTeam}" selected`)}</select></div>`;
+    }).join('');
+    $id('asTaskList').innerHTML = html;
+};
+
+window.submitAssignSop = async function(e) {
+    e.preventDefault(); 
+    const projName = $id('asProj').value; if(!projName) return alert('Pilih proyek!');
+    const btn = $id('btnSubmitAs'); const orig = btn.innerHTML; btn.innerHTML = 'MEMPROSES...'; btn.disabled = true;
+    
+    let assignments = {};
+    document.querySelectorAll('.task-assign-row').forEach(row => {
+        const tName = row.getAttribute('data-task');
+        const tCode = row.querySelector('.team-select').value;
+        if(tCode) {
+            assignments[tName] = [tCode]; // Update ASSIGNMENTS Array
+        }
+    });
+
+    try {
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'ASSIGN_MULTIPLE_TASKS', projectName: projName, assignments: assignments }) });
+        btn.innerHTML = '✓ TERSIMPAN';
+        setTimeout(() => { window.closeAssignSopModal(); btn.innerHTML = orig; btn.disabled = false; window.init(true); }, 1500);
+    } catch(err) { alert('Gagal assign task.'); btn.innerHTML = orig; btn.disabled = false; }
+};
+
+// 4. FITUR MONITOR SOP
+window.openMonitorSopModal = function() {
+    let pOpts = `<option value="">-- Semua Proyek --</option>`; 
+    allData.forEach(p => { pOpts += `<option value="${escapeJS(getVal(p, KEY_MAP.name))}">${escapeJS(getVal(p, KEY_MAP.name))}</option>`; });
+    $id('msProj').innerHTML = pOpts; 
+    window.onMonitorSopProjChange(''); // Load all initially
+    const m = $id('monitorSopModal'); if(m) m.classList.replace('hidden', 'flex');
+};
+window.closeMonitorSopModal = function() { $id('monitorSopModal').classList.replace('flex', 'hidden'); };
+
+window.onMonitorSopProjChange = function(projFilter) {
+    const list = $id('msTaskList');
+    let html = '';
+
+    const projectsToRender = projFilter ? allData.filter(p => getVal(p, KEY_MAP.name) === projFilter) : allData;
+
+    projectsToRender.forEach(p => {
+        if(!p._parsedAssignments || Object.keys(p._parsedAssignments).length === 0) return;
+        
+        let hasTask = false;
+        let taskHtml = '';
+        
+        p.Tasks.forEach(t => {
+            const assignedArr = p._parsedAssignments[t.name] || [];
+            if (assignedArr.length > 0) {
+                hasTask = true;
+                const names = assignedArr.map(k => { 
+                    let tm = teamsData.find(x => (x['KODE'] || x['NAMA']) === k); 
+                    return tm ? (tm['NAMA'] || k).split(' ')[0] : k; 
+                }).join(', ');
+                
+                taskHtml += `
+                <div class="bg-white border border-slate-200 p-3 rounded-xl shadow-sm flex justify-between items-center mb-2">
+                    <div>
+                        <p class="text-[11px] font-black text-slate-800 uppercase">${escapeJS(t.name)}</p>
+                        <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1"><i data-lucide="user" class="w-3 h-3 inline pb-0.5"></i> ${names}</p>
+                    </div>
+                    <span class="text-lg font-black text-indigo-600">${t.progress}%</span>
+                </div>`;
+            }
+        });
+
+        if (hasTask) {
+            html += `<div class="mb-4"><h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 border-b pb-1"><i data-lucide="folder" class="w-3 h-3 inline pb-0.5"></i> ${escapeJS(getVal(p, KEY_MAP.name))}</h4>${taskHtml}</div>`;
+        }
+    });
+
+    list.innerHTML = html || '<p class="text-xs text-slate-500 text-center italic">Tidak ada tugas SOP yang diassign.</p>';
+    lucide.createIcons();
+};
+
+// 5. UPDATE SUBMIT ASSIGN TASK (Modal Direktur pada Action Board)
+window.submitAssignTask = async function() {
+    const btn = $id('btnSubmitAssign'); const orig = btn.innerHTML; btn.innerHTML = 'MENYIMPAN...'; btn.disabled = true;
+    const checkboxes = document.querySelectorAll('.atm-checkbox:checked'); const selectedKodes = Array.from(checkboxes).map(cb => cb.value);
+
+    try {
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'ASSIGN_TASK', projectName: curAssignProjName, taskName: curAssignTaskName, assignees: selectedKodes }) });
+        const p = allData.find(x => getVal(x, KEY_MAP.name) === curAssignProjName);
+        if (p) {
+            if (!p._parsedAssignments) p._parsedAssignments = {};
+            p._parsedAssignments[curAssignTaskName] = selectedKodes;
+        }
+        btn.innerHTML = '✓ TERSIMPAN'; 
+        setTimeout(() => { 
+            window.closeAssignModal(); btn.innerHTML = orig; btn.disabled = false; window.init(true); 
+            // Refresh modal BOD jika sedang terbuka
+            if (!$id('bodModal').classList.contains('hidden') && window.curBodProjIdx !== undefined) {
+                window.openBodModal(window.curBodProjIdx, window.curBodPhaseIdx);
+            }
+        }, 1500);
+    } catch(e) { alert('Error saat menyimpan.'); btn.innerHTML = orig; btn.disabled = false; }
+};
 window.init = async function(isAuto = false) {
     try {
         const r = await fetch(API_URL + "?nocache=" + new Date().getTime()); 
