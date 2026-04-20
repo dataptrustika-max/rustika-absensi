@@ -1042,7 +1042,6 @@ window.renderTeamWorkspace = function() {
   });
 
   window.currentEngineerProjects = myProjects;
-  // Fungsi render project list khusus portal engineer bisa ditambahkan di sini jika UI membutuhkan.
 };
 
 // =============== DYNAMIC SMART TIMESHEET (TIME LOCK) ===============
@@ -1335,16 +1334,29 @@ window.renderExecutiveGrid = function() {
         
         let taskListHtml = '';
         if(p.Tasks && p.Tasks.length > 0) {
-            taskListHtml = p.Tasks.map((t, ti) => {
-                 return `
-                 <div onclick="window.openBodModal(${i},${ti})" class="bg-white px-4 py-3 rounded-lg flex justify-between items-center cursor-pointer shadow-sm hover:shadow-md transition-shadow group mb-2">
-                    <span class="text-[10px] font-bold text-slate-700 uppercase truncate pr-2 group-hover:text-sky-600">${escapeJS(t.name)}</span>
+            let phaseMap = {};
+            p.Tasks.forEach(t => {
+                let g = t.group || "TAHAPAN UMUM";
+                if (!phaseMap[g]) phaseMap[g] = { sum: 0, count: 0 };
+                phaseMap[g].sum += (parseInt(t.progress) || 0);
+                phaseMap[g].count++;
+            });
+            
+            let phaseIndex = 0;
+            for (let phaseName in phaseMap) {
+                 let avg = Math.round(phaseMap[phaseName].sum / phaseMap[phaseName].count);
+                 taskListHtml += `
+                 <div onclick="window.openBodModal(${i}, ${phaseIndex})" class="bg-white px-4 py-3 rounded-lg flex justify-between items-center cursor-pointer shadow-sm hover:shadow-md transition-shadow group mb-2 border border-slate-100 hover:border-sky-200">
+                    <span class="text-[10px] font-bold text-slate-700 uppercase truncate pr-2 group-hover:text-sky-600 flex items-center gap-1.5"><i data-lucide="layers" class="w-3 h-3 text-slate-400"></i> ${escapeJS(phaseName)}</span>
                     <div class="flex items-center gap-2">
-                        <span class="text-[10px] font-black text-slate-800">${parseInt(t.progress) || 0}%</span>
+                        <span class="text-[10px] font-black text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded">${avg}%</span>
                         <i data-lucide="chevron-right" class="w-3 h-3 text-slate-400 group-hover:text-sky-500"></i>
                     </div>
                  </div>`;
-            }).join('');
+                 phaseIndex++;
+            }
+        } else {
+            taskListHtml = `<div class="text-[10px] italic text-slate-500 text-center py-4">Tidak ada data task.</div>`;
         }
         
         let priorityRaw = getVal(p, KEY_MAP.priority).toUpperCase();
@@ -1377,38 +1389,68 @@ window.renderExecutiveGrid = function() {
                 </table>
             </div>
             
-            <p class="text-[10px] font-black uppercase tracking-[0.1em] mb-3 text-slate-700 shrink-0">ACTION BOARD</p>
+            <p class="text-[10px] font-black uppercase tracking-[0.1em] mb-3 text-slate-700 shrink-0">ACTION BOARD (PHASES)</p>
             <div class="flex flex-col pb-2">${taskListHtml}</div>
         </div>`;
     }).join('');
     lucide.createIcons();
 };
 
-window.openBodModal = function(pI, tI) {
+window.openBodModal = function(pI, phI) {
     const p = window.currentExecutiveData[pI]; if(!p) return;
     const bpj = $id('bodProjName'); if(bpj) bpj.textContent = getVal(p, KEY_MAP.name);
     
-    let t = p.Tasks[tI];
-    const bpn = $id('bodPhaseName'); if(bpn) bpn.textContent = t.name;
+    let phaseMap = {};
+    let phaseNames = [];
+    (p.Tasks || []).forEach(t => {
+        let g = t.group || "TAHAPAN UMUM";
+        if (!phaseMap[g]) {
+            phaseMap[g] = [];
+            phaseNames.push(g);
+        }
+        phaseMap[g].push(t);
+    });
+
+    let selectedPhaseName = phaseNames[phI];
+    let tasksToRender = phaseMap[selectedPhaseName] || [];
+    
+    const bpn = $id('bodPhaseName'); if(bpn) bpn.textContent = selectedPhaseName;
     
     const btl = $id('bodTaskList'); 
     if(btl) {
-        let assignBtn = `<button onclick="window.openAssignModal('${escapeJS(getVal(p, KEY_MAP.name))}', '${escapeJS(t.name)}')" class="text-[10px] bg-[#f5a20f] hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg font-black uppercase tracking-widest shadow-md transition-all active:scale-95 flex items-center gap-1.5 shrink-0 border border-amber-500"><i data-lucide="user-plus" class="w-4 h-4"></i> TUGASKAN TIM</button>`;
-        
-        btl.innerHTML = `
-        <div class="bg-white border border-slate-200 p-4 rounded-xl shadow-sm flex flex-col mb-3">
-            <div class="flex justify-between items-start mb-3 gap-2">
-                <div class="flex flex-col gap-2 flex-1 overflow-hidden">
-                    <h5 class="text-[12px] font-black text-slate-900 uppercase leading-snug">${escapeJS(t.name)}</h5>
-                    <div class="flex items-center gap-2 flex-wrap mt-1">${assignBtn}</div>
+        btl.innerHTML = tasksToRender.map(t => {
+            let assignBtn = `<button onclick="window.openAssignModal('${escapeJS(getVal(p, KEY_MAP.name))}', '${escapeJS(t.name)}')" class="text-[10px] bg-[#f5a20f] hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg font-black uppercase tracking-widest shadow-md transition-all active:scale-95 flex items-center gap-1.5 shrink-0 border border-amber-500"><i data-lucide="user-plus" class="w-4 h-4"></i> TUGASKAN TIM</button>`;
+            
+            let assignBadge = ''; 
+            const assignedKodes = p._parsedAssignments ? p._parsedAssignments[t.name] : null;
+            if (assignedKodes && Array.isArray(assignedKodes) && assignedKodes.length > 0) {
+                const names = assignedKodes.map(k => { 
+                    let tm = teamsData.find(x => (x['KODE'] || x['NAMA']) === k); 
+                    return tm ? (tm['NAMA'] || k).split(' ')[0] : k; 
+                }).join(', ');
+                assignBadge = `<span class="text-[9px] bg-purple-50 text-purple-600 border border-purple-200 px-2 py-1 rounded font-black uppercase truncate max-w-[200px]" title="${names}"><i data-lucide="users" class="w-3 h-3 inline pb-0.5 mr-0.5"></i>KERJA: ${names}</span>`;
+            } else {
+                assignBadge = `<span class="text-[9px] bg-slate-100 text-slate-500 border border-slate-200 px-2 py-1 rounded font-black uppercase truncate max-w-[150px]"><i data-lucide="tag" class="w-3 h-3 inline pb-0.5 mr-0.5"></i>UNASSIGNED</span>`;
+            }
+
+            return `
+            <div class="bg-white border border-slate-200 p-4 rounded-xl shadow-sm flex flex-col mb-3">
+                <div class="flex justify-between items-start mb-3 gap-2">
+                    <div class="flex flex-col gap-2 flex-1 overflow-hidden">
+                        <h5 class="text-[12px] font-black text-slate-900 uppercase leading-snug">${escapeJS(t.name)}</h5>
+                        <div class="flex items-center gap-2 flex-wrap mt-1">
+                            ${assignBtn}
+                            ${assignBadge}
+                        </div>
+                    </div>
+                    <span class="text-2xl font-black text-indigo-600 shrink-0">${t.progress}%</span>
                 </div>
-                <span class="text-2xl font-black text-indigo-600 shrink-0">${t.progress}%</span>
-            </div>
-            <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
-                <p class="text-[10px] text-slate-500 italic font-medium flex-1 truncate pr-2">"${escapeJS(t.keterangan || 'Belum ada rincian.')}"</p>
-                <span class="text-[8px] font-bold text-slate-400 uppercase bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200 shrink-0">Upd: ${escapeJS(t.updatedBy||'-')}</span>
-            </div>
-        </div>`;
+                <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
+                    <p class="text-[10px] text-slate-500 italic font-medium flex-1 truncate pr-2">"${escapeJS(t.keterangan || 'Belum ada rincian.')}"</p>
+                    <span class="text-[8px] font-bold text-slate-400 uppercase bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200 shrink-0">Upd: ${escapeJS(t.updatedBy||'-')}</span>
+                </div>
+            </div>`;
+        }).join('');
     }
     
     const m = $id('bodModal'); if(m) m.classList.replace('hidden','flex'); lucide.createIcons();
