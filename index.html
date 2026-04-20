@@ -386,7 +386,6 @@
             <h2 id="engName" class="text-3xl font-black uppercase tracking-tight text-slate-800">-</h2>
             <p id="engMeta" class="text-sm font-bold text-indigo-600 uppercase tracking-widest mt-1">-</p>
          </div>
-         <button onclick="window.openPasswordModal()" class="z-10 bg-[#5046e5] hover:bg-[#4338ca] text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase shadow-lg shadow-indigo-500/20 transition-all">Ubah Sandi</button>
       </div>
 
       <div id="engineerButtons" class="grid grid-cols-1 md:grid-cols-2 gap-6 hidden animate-in fade-in">
@@ -399,85 +398,6 @@
              <button onclick="window.openFinanceModal()" class="w-full md:w-auto bg-[#f5a20f] hover:bg-amber-600 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center justify-center gap-2 transition-colors"><i data-lucide="receipt" class="w-5 h-5"></i> Ajukan Dana</button>
           </div>
       </div>
-
-      <div id="leadWorkspace" class="hidden animate-in fade-in mt-8">
-          <div class="flex items-center gap-3 mb-6 border-b border-slate-200 pb-4">
-              <div class="w-12 h-12 bg-[#003366] text-white rounded-xl flex items-center justify-center shadow-lg"><i data-lucide="command" class="w-6 h-6"></i></div>
-              <div><h2 class="text-2xl font-black text-[#003366] uppercase tracking-tight leading-none">Command Center</h2><p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1.5">Pusat Kendali Direksi & Komisaris</p></div>
-          </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              <div onclick="window.openAddProjectModal()" class="bg-[#003366] p-6 rounded-[2rem] border border-[#002244] shadow-md hover:shadow-xl hover:bg-[#002244] cursor-pointer transition-all group flex flex-col items-center text-center gap-4">
-                  <div class="w-16 h-16 bg-white/10 text-white rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform border border-white/20"><i data-lucide="folder-plus" class="w-8 h-8"></i></div>
-                  <div><h3 class="font-black text-white uppercase">Tambah Proyek</h3><p class="text-[10px] text-blue-200 font-medium mt-1.5">Database Otomatis</p></div>
-              </div>
-              <div onclick="window.openAddJobdeskModal()" id="btnDirJobdesk" class="hidden bg-[#003366] p-6 rounded-[2rem] border border-[#002244] shadow-md hover:shadow-xl hover:bg-[#002244] cursor-pointer transition-all group flex-col items-center text-center gap-4">
-                  <div class="w-16 h-16 bg-white/10 text-white rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform border border-white/20"><i data-lucide="clipboard-list" class="w-8 h-8"></i></div>
-                  <div><h3 class="font-black text-white uppercase">Assign Jobdesk</h3><p class="text-[10px] text-blue-200 font-medium mt-1.5">Bebas & Fleksibel</p></div>
-              </div>
-              <div onclick="window.openAssignSopModal()" id="btnDirAssignSop" class="hidden bg-[#003366] p-6 rounded-[2rem] border border-[#002244] shadow-md hover:shadow-xl hover:bg-[#002244] cursor-pointer transition-all group flex-col items-center text-center gap-4">
-                  <div class="w-16 h-16 bg-white/10 text-white rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform border border-white/20"><i data-lucide="list-checks" class="w-8 h-8"></i></div>
-                  <div><h3 class="font-black text-white uppercase">Task Assignment</h3><p class="text-[10px] text-blue-200 font-medium mt-1.5">Tugas Standard Proyek</p></div>
-              </div>
-              <div onclick="window.openMonitorSopModal()" id="btnDirMonitorSop" class="hidden bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-400 cursor-pointer transition-all group flex-col items-center text-center gap-4">
-                  <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform border border-indigo-100"><i data-lucide="monitor" class="w-8 h-8"></i></div>
-                  <div><h3 class="font-black text-slate-800 uppercase">Monitor SOP</h3><p class="text-[10px] text-slate-500 font-medium mt-1.5">Pantau PIC & Status Task</p></div>
-              </div>
-              <div onclick="window.switchView('view-executive'); window.switchExecTab('timesheet')" class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-400 cursor-pointer transition-all group flex flex-col items-center text-center gap-4">
-                  <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform border border-blue-100"><i data-lucide="file-check-2" class="w-8 h-8"></i></div>
-                  <div><h3 class="font-black text-slate-800 uppercase">Review Laporan</h3><p class="text-[10px] text-slate-500 font-medium mt-1.5">Periksa Timesheet Tim</p></div>
-              </div>
-              <div onclick="window.switchView('view-executive'); window.switchExecTab('finance')" class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 cursor-pointer transition-all group flex flex-col items-center text-center gap-4 relative">
-                  <span id="badgePendingFin" class="absolute top-4 right-4 bg-rose-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md hidden animate-pulse border border-white">0</span>
-                  <div class="w-16 h-16 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform border border-amber-100"><i data-lucide="wallet" class="w-8 h-8"></i></div>
-                  <div><h3 class="font-black text-slate-800 uppercase">Persetujuan Dana</h3><p class="text-[10px] text-slate-500 font-medium mt-1.5">Approval Petty Cash</p></div>
-              </div>
-              <div onclick="window.openAgendaModal()" class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-400 cursor-pointer transition-all group flex flex-col items-center text-center gap-4">
-                  <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform border border-emerald-100"><i data-lucide="calendar-plus" class="w-8 h-8"></i></div>
-                  <div><h3 class="font-black text-slate-800 uppercase">Buat Agenda</h3><p class="text-[10px] text-slate-500 font-medium mt-1.5">Delegasi & Planning</p></div>
-              </div>
-              <div onclick="window.switchView('view-executive'); window.switchExecTab('overview')" class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 cursor-pointer transition-all group flex flex-col items-center text-center gap-4">
-                  <div class="w-16 h-16 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform border border-purple-100"><i data-lucide="pie-chart" class="w-8 h-8"></i></div>
-                  <div><h3 class="font-black text-slate-800 uppercase">Dashboard Utama</h3><p class="text-[10px] text-slate-500 font-medium mt-1.5">Monitoring KPI Proyek</p></div>
-              </div>
-          </div>
-          
-          <div class="bg-white rounded-[2rem] border border-slate-200 p-6 lg:p-8 shadow-sm mt-8">
-              <div class="flex justify-between items-center mb-6">
-                  <h3 class="font-black text-[#003366] uppercase flex items-center gap-2"><i data-lucide="radar" class="w-5 h-5 text-rose-500"></i> Radar Kinerja Tim (Hari Ini)</h3>
-                  <span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 uppercase tracking-widest" id="radarDate">-</span>
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div class="border border-emerald-200 bg-emerald-50/50 rounded-2xl p-5"><h4 class="text-xs font-black text-emerald-700 uppercase tracking-widest mb-4 flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4"></i> Sudah Lapor Timesheet</h4><div id="radarDone" class="flex flex-wrap gap-2"></div></div>
-                  <div class="border border-rose-200 bg-rose-50/50 rounded-2xl p-5"><h4 class="text-xs font-black text-rose-700 uppercase tracking-widest mb-4 flex items-center gap-2"><i data-lucide="alert-circle" class="w-4 h-4"></i> Belum Lapor / Nunggak</h4><div id="radarPending" class="flex flex-wrap gap-2"></div></div>
-              </div>
-          </div>
-      </div>
-
-      <div id="engineerKanban" class="flex flex-col lg:flex-row gap-8 mt-10 hidden animate-in fade-in">
-         <aside class="w-full lg:w-48 shrink-0">
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-3 mb-3">Filter Kategori</p>
-            <nav id="sideMenu" class="flex flex-row lg:flex-col gap-1.5 overflow-x-auto pb-2 no-scrollbar lg:sticky lg:top-24"></nav>
-         </aside>
-         <div id="projectList" class="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-start"></div>
-      </div>
-      
-      <div id="jobdeskSection" class="hidden animate-in fade-in mt-8">
-          <div class="flex items-center gap-3 mb-6 border-b border-slate-200 pb-4">
-              <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center shadow-sm border border-indigo-100"><i data-lucide="clipboard-check" class="w-6 h-6"></i></div>
-              <div><h2 class="text-2xl font-black text-slate-800 uppercase tracking-tight leading-none" id="jdSectionTitle">Jobdesk Saya</h2><p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1.5">Daftar Tugas & Target</p></div>
-          </div>
-          <div id="jobdeskList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
-      </div>
-
-      <div id="sopTaskSection" class="hidden animate-in fade-in mt-8">
-          <div class="flex items-center gap-3 mb-6 border-b border-slate-200 pb-4">
-              <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center shadow-sm border border-emerald-100"><i data-lucide="check-square" class="w-6 h-6"></i></div>
-              <div><h2 class="text-2xl font-black text-slate-800 uppercase tracking-tight leading-none">Task Saya</h2><p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1.5">Update Progres SOP Proyek</p></div>
-          </div>
-          <div id="sopTaskList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
-      </div>
-
    </main>
 </div>
 
@@ -533,14 +453,12 @@
                     
                     <div id="exec-overview-section" class="space-y-8 animate-in fade-in">
                         
-                        <!-- Top Action Buttons -->
-                        <div class="flex gap-4 items-center">
-                            <button onclick="window.openAddProjectModal()" class="bg-[#003366] hover:bg-[#002244] text-white rounded-full px-6 py-2.5 text-xs font-black uppercase flex items-center gap-2 shadow-md transition-transform active:scale-95">
-                                <i data-lucide="plus" class="w-4 h-4"></i> TAMBAH PROYEK
-                            </button>
-                            <button onclick="window.openAgendaModal()" class="bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-full px-6 py-2.5 text-xs font-black uppercase flex items-center gap-2 shadow-md transition-transform active:scale-95">
-                                <i data-lucide="calendar-plus" class="w-4 h-4"></i> BUAT AGENDA
-                            </button>
+                        <!-- Search Bar Proyek (Menggantikan Tombol Aksi) -->
+                        <div class="flex w-full max-w-md relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i data-lucide="search" class="w-5 h-5 text-slate-400"></i>
+                            </div>
+                            <input type="text" id="searchProjectInput" onkeyup="window.handleSearchProject(this.value)" placeholder="Cari Nama Proyek..." class="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-full outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 font-bold text-sm text-slate-800 shadow-sm transition-all">
                         </div>
 
                         <!-- 6 KPI Cards -->
