@@ -1821,59 +1821,28 @@ window.makePie = function(id, labels, data, colors, type, chartType = 'pie') {
 
 window.renderExecutiveGrid = function() {
     const efEl = $id('execFilters');
-    if(efEl) {
-        efEl.innerHTML = execFiltersConfig.map(f => `<button onclick="curExecFilter='${f.id}';window.renderExecutiveGrid()" class="px-5 py-2.5 rounded-full text-[10px] font-black uppercase border transition-colors shrink-0 ${curExecFilter===f.id ? f.color+' text-white border-transparent' : 'bg-white text-slate-500 hover:bg-slate-50'}">${f.label}</button>`).join('');
-    }
+    if(efEl) efEl.innerHTML = execFiltersConfig.map(f => `<button onclick="curExecFilter='${f.id}';window.renderExecutiveGrid()" class="px-5 py-2.5 rounded-full text-[10px] font-black uppercase border transition-colors ${curExecFilter===f.id?f.color+' text-white border-transparent':'bg-white text-slate-500 hover:bg-slate-50'}">${f.label}</button>`).join('');
     
     const fil = allData.filter(p => {
-        const s = window.getVal(p, KEY_MAP.status).toLowerCase(); 
-        const pt = (p.Type||'').toUpperCase(); 
-        const prRaw = window.getVal(p, KEY_MAP.priority).toUpperCase(); 
-        const pr = prRaw.includes('HIGH')?'HIGH':(prRaw.includes('MEDIUM')?'MEDIUM':'LOW');
+        const s = window.getVal(p, KEY_MAP.status).toLowerCase(); const pt = (p.Type||'').toUpperCase(); const prRaw = window.getVal(p, KEY_MAP.priority).toUpperCase(); const pr = prRaw.includes('HIGH')?'HIGH':(prRaw.includes('MEDIUM')?'MEDIUM':'LOW');
         const nm = window.getVal(p, KEY_MAP.name).toLowerCase();
         
         if(curExecSearch && !nm.includes(curExecSearch)) return false;
-
         if(curExecFilter==='ACTIVES') return s.includes('active') || s.includes('new'); 
         if(curExecFilter==='CLOSED') return s.includes('closed'); 
         if(curExecFilter==='COMPLETE') return s.includes('complete');
-        if(curExecFilter==='SLF') return pt==='SLF'; 
-        if(curExecFilter==='PBG') return pt==='PBG'; 
-        if(curExecFilter==='HIGH') return pr==='HIGH'; 
-        if(curExecFilter==='MEDIUM') return pr==='MEDIUM'; 
-        if(curExecFilter==='LOW') return pr==='LOW'; 
-        
+        if(curExecFilter==='SLF') return pt==='SLF'; if(curExecFilter==='PBG') return pt==='PBG'; 
+        if(curExecFilter==='HIGH') return pr==='HIGH'; if(curExecFilter==='MEDIUM') return pr==='MEDIUM'; if(curExecFilter==='LOW') return pr==='LOW'; 
         return true;
     });
     
-    window.currentExecutiveData = fil; 
-    const grid = $id('executiveGrid'); 
-    if(!grid) return;
-    
-    if(fil.length===0) { 
-        grid.innerHTML = `<div class="col-span-full py-16 text-center text-slate-400 font-bold uppercase border-2 border-dashed border-slate-200 rounded-3xl">Proyek Tidak Ditemukan</div>`; 
-        return; 
-    }
+    window.currentExecutiveData = fil; const grid = $id('executiveGrid'); if(!grid) return;
+    if(fil.length===0) { grid.innerHTML = `<div class="col-span-full py-16 text-center text-slate-400 font-bold uppercase border-2 border-dashed rounded-3xl">Proyek Tidak Ditemukan</div>`; return; }
     
     const today = new Date().getTime();
-    
     grid.innerHTML = fil.map((p, i) => {
-        const pg = window.getCalcProgress(p); 
-        
-        // Perluasan array pencarian kolom dari Google Sheets
-        const sStr = window.getVal(p, ['start date', 'date start', 'mulai', 'start', 'tgl mulai', 'tanggal mulai']); 
-        const eStr = window.getVal(p, ['date end', 'end date', 'selesai', 'end', 'tgl selesai', 'tanggal selesai']); 
-        const picName = window.getVal(p, ['pic', 'nama pic', 'penanggung jawab', 'p.i.c']);
-        
-        let oTag = '';
-        if(eStr && pg<100) { 
-            let eD = new Date(eStr).getTime(); 
-            if(isNaN(eD) && eStr.includes('/')) eD=new Date(eStr.split('/').reverse().join('-')).getTime(); 
-            if(!isNaN(eD) && today>eD) { 
-                const diffDays = Math.ceil(Math.abs(today - eD) / (1000 * 60 * 60 * 24)); 
-                oTag=`<div class="absolute -top-3 -right-3 bg-rose-600 text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg border-2 border-white animate-pulse z-10">OVERDUE ${diffDays} HARI</div>`; 
-            } 
-        }
+        const pg = window.getCalcProgress(p); const sStr = window.getVal(p, ['start date', 'date start', 'mulai', 'start']); const eStr = window.getVal(p, ['date end', 'end date', 'selesai', 'end']); let oTag = '';
+        if(eStr && pg<100) { let eD = new Date(eStr).getTime(); if(isNaN(eD)&&eStr.includes('/')) eD=new Date(eStr.split('/').reverse().join('-')).getTime(); if(!isNaN(eD) && today>eD) { const diffDays = Math.ceil(Math.abs(today - eD) / (1000 * 60 * 60 * 24)); oTag=`<div class="absolute -top-3 -right-3 bg-rose-600 text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg border-2 border-white animate-pulse z-10">OVERDUE ${diffDays} HARI</div>`; } }
         
         let taskListHtml = '';
         if(p.Tasks && p.Tasks.length > 0) {
@@ -1928,7 +1897,7 @@ window.renderExecutiveGrid = function() {
                 <table class="w-full text-[9px] font-bold text-slate-600 uppercase tracking-widest leading-relaxed">
                     <tr><td class="pb-1 w-10 text-slate-500">START</td><td class="pb-1">: ${sStr || '-'}</td></tr>
                     <tr><td class="pb-1 text-slate-500">END</td><td class="pb-1">: ${eStr || '-'}</td></tr>
-                    <tr><td class="align-top text-slate-500">PIC</td><td class="truncate max-w-[120px]">: ${picName || '-'}</td></tr>
+                    <tr><td class="align-top text-slate-500">PIC</td><td class="truncate max-w-[120px]">: ${window.getVal(p, ['pic']) || '-'}</td></tr>
                 </table>
             </div>
             
@@ -1936,10 +1905,8 @@ window.renderExecutiveGrid = function() {
             <div class="flex flex-col pb-2">${taskListHtml}</div>
         </div>`;
     }).join('');
-    
     lucide.createIcons();
 };
-
 window.openBodModal = function(pI, phI) {
     const p = window.currentExecutiveData[pI]; if(!p) return;
     const bpj = $id('bodProjName'); if(bpj) bpj.textContent = window.getVal(p, KEY_MAP.name);
