@@ -367,40 +367,218 @@
 <!-- PORTAL ENGINEER -->
 <div id="view-team-dashboard" class="view-section bg-slate-50">
    <header class="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-40 shadow-sm">
-     <div class="flex items-center gap-4"><img src="logo512.png" class="h-10 object-contain" onerror="this.style.display='none'"><h1 class="text-base font-black text-slate-900 uppercase">Rustika Dashboard</h1></div>
+     <div class="flex items-center gap-4">
+        <img src="logo512.png" class="h-10 object-contain" onerror="this.style.display='none'">
+        <h1 class="text-base font-black text-slate-900 uppercase">Rustika Dashboard</h1>
+     </div>
      <div class="flex items-center gap-3">
-        <button onclick="window.init(false)" class="p-2.5 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
-        <button onclick="window.handleLogout()" class="px-4 py-2 bg-rose-50 text-rose-600 font-bold text-xs rounded-xl hover:bg-rose-100 uppercase transition-colors">Logout</button>
+        <button onclick="window.init(false)" class="p-2.5 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">
+            <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+        </button>
+        <button onclick="window.handleLogout()" class="px-4 py-2 bg-rose-50 text-rose-600 font-bold text-xs rounded-xl hover:bg-rose-100 uppercase transition-colors">
+            Logout
+        </button>
      </div>
    </header>
 
    <main class="max-w-[1400px] mx-auto p-6 lg:p-8 space-y-6 pb-20">
+      <!-- HEADER PROFIL -->
       <div class="bg-white rounded-[2.5rem] border border-slate-200 p-8 flex flex-col md:flex-row items-center gap-8 relative overflow-hidden shadow-sm">
          <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
          <div class="w-32 h-32 rounded-full border-4 border-white shadow-md bg-slate-100 flex items-center justify-center overflow-hidden ring-4 ring-indigo-50 shrink-0 relative z-10">
-            <div id="profIcon" class="flex items-center justify-center w-full h-full"><i data-lucide="user-round" class="w-12 h-12 text-slate-300"></i></div>
+            <div id="profIcon" class="flex items-center justify-center w-full h-full">
+                <i data-lucide="user-round" class="w-12 h-12 text-slate-300"></i>
+            </div>
             <img id="profImg" src="" class="w-full h-full object-cover hidden">
          </div>
          <div class="flex-1 text-center md:text-left z-10">
-            <div class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest mb-3"><i data-lucide="shield-check" class="w-3.5 h-3.5"></i> AKSES AKTIF</div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest mb-3">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> AKSES AKTIF
+            </div>
             <h2 id="engName" class="text-3xl font-black uppercase tracking-tight text-slate-800">-</h2>
             <p id="engMeta" class="text-sm font-bold text-indigo-600 uppercase tracking-widest mt-1">-</p>
          </div>
       </div>
 
-      <div id="engineerButtons" class="grid grid-cols-1 md:grid-cols-2 gap-6 hidden animate-in fade-in">
+      <!-- TAMPILAN ENGINEER (TOMBOL KASBON & TIMESHEET) -->
+      <div id="engineerButtons" class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in">
           <div class="bg-white rounded-[2rem] border border-slate-200 p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm hover:shadow-md transition-shadow">
-             <div class="flex items-center gap-5"><div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shrink-0 border border-emerald-100"><i data-lucide="file-text" class="w-7 h-7"></i></div><div><h3 class="text-lg font-black text-slate-800 uppercase leading-none">Time Sheet Harian</h3><p class="text-[10px] text-slate-500 font-medium mt-1.5 leading-relaxed">Wajib diisi setiap hari sebelum pulang.</p></div></div>
-             <button onclick="window.openTimesheetModal()" class="w-full md:w-auto bg-[#10b981] hover:bg-emerald-600 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center justify-center gap-2 transition-colors"><i data-lucide="list-todo" class="w-5 h-5"></i> Isi Time Sheet</button>
+             <div class="flex items-center gap-5">
+                 <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shrink-0 border border-emerald-100">
+                     <i data-lucide="file-text" class="w-7 h-7"></i>
+                 </div>
+                 <div>
+                     <h3 class="text-lg font-black text-slate-800 uppercase leading-none">Time Sheet Harian</h3>
+                     <p class="text-[10px] text-slate-500 font-medium mt-1.5 leading-relaxed">Wajib diisi setiap hari.</p>
+                 </div>
+             </div>
+             <button onclick="window.openTimesheetModal()" class="w-full md:w-auto bg-[#10b981] hover:bg-emerald-600 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center justify-center gap-2 transition-colors">
+                 <i data-lucide="list-todo" class="w-5 h-5"></i> Isi Time Sheet
+             </button>
           </div>
           <div class="bg-white rounded-[2rem] border border-slate-200 p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm hover:shadow-md transition-shadow">
-             <div class="flex items-center gap-5"><div class="w-14 h-14 bg-amber-50 text-[#f5a20f] rounded-2xl flex items-center justify-center shrink-0 border border-amber-100"><i data-lucide="wallet" class="w-7 h-7"></i></div><div><h3 class="text-lg font-black text-slate-800 uppercase leading-none">Petty Cash / Kasbon</h3><p class="text-[10px] text-slate-500 font-medium mt-1.5 leading-relaxed">Pengajuan dana operasional.</p></div></div>
-             <button onclick="window.openFinanceModal()" class="w-full md:w-auto bg-[#f5a20f] hover:bg-amber-600 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center justify-center gap-2 transition-colors"><i data-lucide="receipt" class="w-5 h-5"></i> Ajukan Dana</button>
+             <div class="flex items-center gap-5">
+                 <div class="w-14 h-14 bg-amber-50 text-[#f5a20f] rounded-2xl flex items-center justify-center shrink-0 border border-amber-100">
+                     <i data-lucide="wallet" class="w-7 h-7"></i>
+                 </div>
+                 <div>
+                     <h3 class="text-lg font-black text-slate-800 uppercase leading-none">Petty Cash / Kasbon</h3>
+                     <p class="text-[10px] text-slate-500 font-medium mt-1.5 leading-relaxed">Pengajuan dana operasional.</p>
+                 </div>
+             </div>
+             <button onclick="window.openFinanceModal()" class="w-full md:w-auto bg-[#f5a20f] hover:bg-amber-600 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center justify-center gap-2 transition-colors">
+                 <i data-lucide="receipt" class="w-5 h-5"></i> Ajukan Dana
+             </button>
           </div>
       </div>
+
+      <!-- TAMPILAN DIREKTUR (COMMAND CENTER) -->
+      <div id="leadWorkspace" class="hidden animate-in fade-in mt-8">
+          <div class="flex items-center gap-3 mb-6 border-b border-slate-200 pb-4">
+              <div class="w-12 h-12 bg-[#003366] text-white rounded-xl flex items-center justify-center shadow-lg">
+                  <i data-lucide="command" class="w-6 h-6"></i>
+              </div>
+              <div>
+                  <h2 class="text-2xl font-black text-[#003366] uppercase tracking-tight leading-none">Command Center</h2>
+                  <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1.5">Pusat Kendali Direksi</p>
+              </div>
+          </div>
+          
+          <!-- GRID 8 TOMBOL (4 Kolom x 2 Baris) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              <!-- BARIS 1 -->
+              <div onclick="window.openAddProjectModal()" class="bg-[#003366] p-6 rounded-[2rem] border border-[#002244] shadow-md hover:shadow-xl hover:bg-[#002244] cursor-pointer transition-all group flex flex-col items-center text-center gap-4">
+                  <div class="w-14 h-14 bg-white/10 text-white rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <i data-lucide="folder-plus" class="w-7 h-7"></i>
+                  </div>
+                  <h3 class="font-black text-white uppercase text-sm">Tambah Proyek</h3>
+              </div>
+              
+              <div onclick="window.openAddJobdeskModal()" class="bg-[#003366] p-6 rounded-[2rem] border border-[#002244] shadow-md hover:shadow-xl hover:bg-[#002244] cursor-pointer transition-all group flex flex-col items-center text-center gap-4">
+                  <div class="w-14 h-14 bg-white/10 text-white rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <i data-lucide="clipboard-list" class="w-7 h-7"></i>
+                  </div>
+                  <h3 class="font-black text-white uppercase text-sm">Assign Jobdesk</h3>
+              </div>
+              
+              <div onclick="window.openAssignSopModal()" class="bg-[#003366] p-6 rounded-[2rem] border border-[#002244] shadow-md hover:shadow-xl hover:bg-[#002244] cursor-pointer transition-all group flex flex-col items-center text-center gap-4">
+                  <div class="w-14 h-14 bg-white/10 text-white rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <i data-lucide="list-checks" class="w-7 h-7"></i>
+                  </div>
+                  <h3 class="font-black text-white uppercase text-sm">Task Assignment</h3>
+              </div>
+
+              <div onclick="window.openMonitorSopModal()" class="bg-white p-6 rounded-[2rem] border-2 border-[#003366] shadow-sm hover:shadow-md cursor-pointer transition-all group flex flex-col items-center text-center gap-4">
+                  <div class="w-14 h-14 bg-indigo-50 text-[#003366] rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <i data-lucide="monitor" class="w-7 h-7"></i>
+                  </div>
+                  <h3 class="font-black text-[#003366] uppercase text-sm">Monitor SOP</h3>
+              </div>
+
+              <!-- BARIS 2 -->
+              <div onclick="window.switchView('view-executive'); window.switchExecTab('timesheet')" class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-400 cursor-pointer transition-all group flex flex-col items-center text-center gap-4">
+                  <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <i data-lucide="file-check-2" class="w-7 h-7"></i>
+                  </div>
+                  <h3 class="font-black text-slate-800 uppercase text-sm">Review Laporan</h3>
+              </div>
+
+              <div onclick="window.switchView('view-executive'); window.switchExecTab('finance')" class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-400 cursor-pointer transition-all group flex flex-col items-center text-center gap-4 relative">
+                  <span id="badgePendingFin" class="absolute top-4 right-4 bg-rose-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md hidden animate-pulse border border-white">0</span>
+                  <div class="w-14 h-14 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <i data-lucide="wallet" class="w-7 h-7"></i>
+                  </div>
+                  <h3 class="font-black text-slate-800 uppercase text-sm">Persetujuan Dana</h3>
+              </div>
+
+              <div onclick="window.openAgendaModal()" class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-400 cursor-pointer transition-all group flex flex-col items-center text-center gap-4">
+                  <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <i data-lucide="calendar-plus" class="w-7 h-7"></i>
+                  </div>
+                  <h3 class="font-black text-slate-800 uppercase text-sm">Buat Agenda</h3>
+              </div>
+
+              <div onclick="window.switchView('view-executive'); window.switchExecTab('overview')" class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-400 cursor-pointer transition-all group flex flex-col items-center text-center gap-4">
+                  <div class="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <i data-lucide="pie-chart" class="w-7 h-7"></i>
+                  </div>
+                  <h3 class="font-black text-slate-800 uppercase text-sm">Dashboard Utama</h3>
+              </div>
+          </div>
+          
+          <!-- RADAR KINERJA TIM -->
+          <div class="bg-white rounded-[2rem] border border-slate-200 p-6 lg:p-8 shadow-sm mt-8">
+              <div class="flex justify-between items-center mb-6">
+                  <h3 class="font-black text-[#003366] uppercase flex items-center gap-2">
+                      <i data-lucide="radar" class="w-5 h-5 text-rose-500"></i> Radar Kinerja Tim
+                  </h3>
+                  <span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 uppercase" id="radarDate">-</span>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="border border-emerald-200 bg-emerald-50/50 rounded-2xl p-5">
+                      <h4 class="text-xs font-black text-emerald-700 uppercase tracking-widest mb-4 flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4"></i> Sudah Lapor Timesheet</h4>
+                      <div id="radarDone" class="flex flex-wrap gap-2"></div>
+                  </div>
+                  <div class="border border-rose-200 bg-rose-50/50 rounded-2xl p-5">
+                      <h4 class="text-xs font-black text-rose-700 uppercase tracking-widest mb-4 flex items-center gap-2"><i data-lucide="alert-circle" class="w-4 h-4"></i> Belum Lapor / Nunggak</h4>
+                      <div id="radarPending" class="flex flex-wrap gap-2"></div>
+                  </div>
+              </div>
+          </div>
+
+          <!-- SECTION BARU: PANTAU JOBDESK TIM -->
+          <div class="bg-white rounded-[2rem] border border-slate-200 p-6 lg:p-8 shadow-sm mt-8">
+              <h3 class="font-black text-[#003366] uppercase flex items-center gap-2 mb-6">
+                  <i data-lucide="clipboard-list" class="w-5 h-5"></i> PANTAU JOBDESK TIM
+              </h3>
+              <div id="dirJobdeskList" class="flex flex-col gap-4">
+                  <div class="py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-300 flex items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">BELUM ADA JOBDESK</div>
+              </div>
+          </div>
+      </div>
+
+      <!-- TAMPILAN ENGINEER (KANBAN SAYA) -->
+      <div id="engineerKanban" class="flex flex-col lg:flex-row gap-8 mt-10 animate-in fade-in">
+         <aside class="w-full lg:w-48 shrink-0">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-3 mb-3">Filter Kategori</p>
+            <nav id="sideMenu" class="flex flex-row lg:flex-col gap-1.5 overflow-x-auto pb-2 no-scrollbar lg:sticky lg:top-24"></nav>
+         </aside>
+         
+         <div class="flex-1 flex flex-col gap-10">
+             <!-- PROYEK SAYA -->
+             <div>
+                 <h3 class="font-black text-slate-800 uppercase flex items-center gap-2 mb-4">
+                     <i data-lucide="folder-open" class="w-5 h-5 text-[#f5a20f]"></i> PROYEK SAYA
+                 </h3>
+                 <div id="projectList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-start">
+                     <div class="col-span-full py-16 bg-white border-2 border-dashed border-slate-200 rounded-3xl flex items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">DATA KOSONG</div>
+                 </div>
+             </div>
+
+             <!-- JOBDESK SAYA -->
+             <div>
+                 <h3 class="font-black text-slate-800 uppercase flex items-center gap-2 mb-4">
+                     <i data-lucide="clipboard-check" class="w-5 h-5 text-indigo-600"></i> JOBDESK SAYA
+                 </h3>
+                 <div id="engJobdeskList" class="flex flex-col gap-4">
+                     <div class="py-10 bg-white border-2 border-dashed border-slate-200 rounded-3xl flex items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">BELUM ADA JOBDESK</div>
+                 </div>
+             </div>
+
+             <!-- TASK SAYA -->
+             <div>
+                 <h3 class="font-black text-slate-800 uppercase flex items-center gap-2 mb-4">
+                     <i data-lucide="check-square" class="w-5 h-5 text-emerald-600"></i> TASK SAYA
+                 </h3>
+                 <div id="engSopTaskList" class="flex flex-col gap-4">
+                     <div class="py-10 bg-white border-2 border-dashed border-slate-200 rounded-3xl flex items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">BELUM ADA TASK SOP YANG DIASSIGN</div>
+                 </div>
+             </div>
+         </div>
+      </div>
+
    </main>
 </div>
-
 <!-- BOD PANEL (EXECUTIVE) - 100% VISUAL FIDELITY REPLICA -->
 <div id="view-executive" class="view-section bg-slate-50">
     <div class="flex h-screen overflow-hidden">
@@ -787,11 +965,14 @@ let allData = [];
 let teamsData = [];
 let timesheetsData = [];
 let financeData = [];
+let jobdeskData = [];
+let taskAssignmentsData = [];
 let currentUser = null;
 let charts = {};
 let tsRows = [];
 let currentReportData = null;
 let curExecSearch = '';
+let curTeamFilter = 'active_all';
 
 const KEY_MAP = { 
   name: ['nama pekerjaan', 'project name', 'nama proyek'], 
@@ -855,16 +1036,34 @@ window.formatTanggalHari = function(ts) {
   } 
 };
 
+window.formatTglMini = function(str) { 
+    if(!str) return '-'; 
+    const pts = str.split(' ')[0].split('/'); 
+    if(pts.length === 3) return `${pts[0]}/${pts[1]}/${pts[2].substring(2)}`; 
+    return str.split(' ')[0]; 
+};
+
+window.getTeamProp = function(teamObj, propType) {
+    if (!teamObj) return '-';
+    if (propType === 'KODE') { let k = window.getVal(teamObj, ['KODE', 'ID', 'TIM', 'INISIAL']); if (!k) k = window.getVal(teamObj, ['NAMA', 'NAME', 'NAMA LENGKAP', 'NAMA ENGINEER']); return k || '---'; }
+    if (propType === 'NAMA') return window.getVal(teamObj, ['NAMA', 'NAME', 'NAMA LENGKAP', 'NAMA ENGINEER']) || 'Tanpa Nama';
+    if (propType === 'DEPT') return window.getVal(teamObj, ['DEPARTEMEN', 'DIVISI', 'DEVISI', 'JABATAN']) || '-';
+    if (propType === 'EMAIL') return window.getVal(teamObj, ['EMAIL']) || '';
+    if (propType === 'FOTO') return window.getVal(teamObj, ['FOTO', 'PHOTO', 'GAMBAR']) || '';
+    return '-';
+};
+
+// URL OPTIMIZER DENGAN ATURAN BARU
 window.optimizeImageUrl = function(url) {
     if (!url) return '';
-    // Jika link dari Google Drive, jadikan thumbnail
+    // Jika link Google Drive, ubah ke format thumbnail
     if (url.includes('drive.google.com')) {
         const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
         if (match && match[1]) {
             return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w300-h300`;
         }
     }
-    // Jika link biasa (.jpg, .png, dsb dari hosting lain), biarkan apa adanya
+    // Jika link gambar direct biasa, kembalikan apa adanya (biar bisa termuat)
     return url;
 };
 
@@ -874,7 +1073,6 @@ window.isLead = function() {
     const dept = (currentUser['DEPARTEMEN'] || currentUser['DEPT'] || '').toUpperCase();
     const nama = (currentUser['NAMA'] || '').toUpperCase();
     
-    // Syarat akun Direktur / Command Center
     return dept.includes('DIREKTUR') || 
            dept.includes('LEAD') || 
            dept.includes('MANAGER') || 
@@ -902,6 +1100,8 @@ window.checkLoginAndGo = function() {
     window.updateUI(); 
     window.switchView('view-team-dashboard', true); 
     window.renderTeamWorkspace(); 
+    window.renderJobdesk();
+    window.renderSopTasks();
   } else { 
     window.switchView('view-team-login', true); 
   } 
@@ -926,8 +1126,9 @@ window.handleTeamLogin = async function(e) {
     teamsData = data.teams || []; 
     timesheetsData = data.timesheets || []; 
     financeData = data.finance || []; 
+    jobdeskData = data.jobdesks || []; 
+    taskAssignmentsData = data.taskAssignments || [];
     
-    // Parse JSON Assignments ke memori
     allData.forEach(p => {
       p._parsedAssignments = {}; 
       const rawAssign = getVal(p, ['ASSIGNMENTS']); 
@@ -942,6 +1143,8 @@ window.handleTeamLogin = async function(e) {
       window.updateUI(); 
       window.switchView('view-team-dashboard', true); 
       window.renderTeamWorkspace(); 
+      window.renderJobdesk();
+      window.renderSopTasks();
     } else { 
       if(msg) { msg.innerHTML = "Email atau Password salah!"; msg.classList.remove('hidden'); } 
     }
@@ -958,7 +1161,7 @@ window.handleLogout = function() {
   window.switchView('view-gateway', true); 
 };
 
-// ROLE-BASED UI RENDER
+// ROLE-BASED UI RENDER & FOTO PROFIL FIX
 window.updateUI = function() {
   if (!currentUser) return;
   const engName = $id('engName');
@@ -967,29 +1170,35 @@ window.updateUI = function() {
   if(engName) engName.textContent = (currentUser['NAMA'] || 'Tanpa Nama').toUpperCase();
   if(engMeta) engMeta.textContent = `${currentUser['DEPARTEMEN'] || '-'} • ${currentUser['KODE'] || '-'}`;
 
-  // Foto Profil
+  // Perbaikan Eksekusi Logika Foto Profil
   const rawFoto = currentUser['FOTO'] || currentUser['PHOTO'] || '';
   const fotoUrl = window.optimizeImageUrl(rawFoto);
   const profImg = $id('profImg');
   const profIcon = $id('profIcon');
   
   if (fotoUrl && fotoUrl.trim() !== '') {
-      if (profImg) { profImg.src = fotoUrl; profImg.classList.remove('hidden'); }
+      if (profImg) { 
+          profImg.src = fotoUrl; 
+          profImg.classList.remove('hidden'); 
+      }
       if (profIcon) profIcon.classList.add('hidden');
   } else {
-      if (profImg) { profImg.src = ''; profImg.classList.add('hidden'); }
+      if (profImg) { 
+          profImg.src = ''; 
+          profImg.classList.add('hidden'); 
+      }
       if (profIcon) profIcon.classList.remove('hidden');
   }
 
-  // Tampilan berdasarkan Hak Akses (Direktur vs Tim)
+  // Pengaturan View Role (Direktur vs Engineer)
   const leadWs = $id('leadWorkspace');
   const engBtns = $id('engineerButtons');
-  const kanban = $id('engineerKanban'); // Jika punya kanban
+  const kanban = $id('engineerKanban');
   
   if (window.isLead()) {
       if (leadWs) leadWs.classList.remove('hidden');
       if (engBtns) engBtns.classList.add('hidden');
-      if (kanban) kanban.classList.remove('hidden'); // Direktur bisa memantau tugas juga
+      if (kanban) kanban.classList.add('hidden'); 
   } else {
       if (leadWs) leadWs.classList.add('hidden');
       if (engBtns) engBtns.classList.remove('hidden');
@@ -997,15 +1206,59 @@ window.updateUI = function() {
   }
 };
 
+window.renderLeadWorkspace = function() {
+    const todayStr = new Date().toISOString().split('T')[0]; 
+    const radarDateEl = $id('radarDate'); 
+    if(radarDateEl) radarDateEl.textContent = window.formatTanggalHari(todayStr);
+    
+    let pendingCount = financeData.filter(f => (f.STATUS||'').toUpperCase() === 'PENDING').length; 
+    const badge = $id('badgePendingFin');
+    if (badge) { 
+        if (pendingCount > 0) { badge.textContent = pendingCount; badge.classList.remove('hidden'); } 
+        else { badge.classList.add('hidden'); } 
+    }
+    
+    let submittedNames = new Set(); 
+    timesheetsData.forEach(t => { 
+        let dStr = window.getVal(t, ['TANGGAL', 'DATE', 'WAKTU', 'TIMESTAMP']); 
+        if (dStr) { 
+            let rD = new Date(dStr); 
+            if (isNaN(rD.getTime()) && dStr.includes('/')) rD = new Date(dStr.split('/').reverse().join('-')); 
+            if (!isNaN(rD.getTime())) { 
+                if (rD.toISOString().split('T')[0] === todayStr) { 
+                    submittedNames.add(window.getVal(t, ['NAMA ENGINEER', 'NAMA']).toUpperCase().trim()); 
+                } 
+            } 
+        } 
+    });
+    
+    let doneHtml = ''; let pendingHtml = '';
+    teamsData.forEach(t => { 
+        const nama = window.getTeamProp(t, 'NAMA'); 
+        if (!nama || nama === 'Tanpa Nama' || nama.toUpperCase().includes('QADRIAH') || nama.toUpperCase().includes('SALMAN')) return; 
+        if (submittedNames.has(nama.toUpperCase().trim())) { 
+            doneHtml += `<span class="bg-emerald-100 text-emerald-700 border border-emerald-200 px-2 py-1 rounded text-[9px] font-black uppercase shadow-sm flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> ${nama.substring(0, 15)}</span>`; 
+        } else { 
+            pendingHtml += `<span class="bg-rose-100 text-rose-700 border border-rose-200 px-2 py-1 rounded text-[9px] font-black uppercase shadow-sm flex items-center gap-1"><i data-lucide="x" class="w-3 h-3"></i> ${nama.substring(0, 15)}</span>`; 
+        } 
+    });
+    
+    const rD = $id('radarDone'); const rP = $id('radarPending');
+    if(rD) rD.innerHTML = doneHtml || '<span class="text-[10px] text-emerald-600/50 italic font-bold">Belum ada data.</span>';
+    if(rP) rP.innerHTML = pendingHtml || '<span class="text-[10px] text-emerald-600 italic font-bold">Semua sudah lapor. 🎉</span>';
+    lucide.createIcons();
+};
+
 // =============== DELEGASI KETAT (TEAM WORKSPACE) ===============
 window.renderTeamWorkspace = function() {
-  const cont = $id('projectList') || $id('engineerKanban'); 
-  if (!currentUser || !cont) return;
+  const cont = $id('projectList'); 
+  const m = $id('sideMenu');
+  if (!currentUser || !cont || !m) return;
   
   const myKode = currentUser['KODE'];
   const myNama = currentUser['NAMA'];
 
-  // Filter 1: Cek apakah user secara spesifik di-assign di array ASSIGNMENTS
+  // STRICT FILTER: Cek spesifik array JSON ASSIGNMENTS
   const myProjects = allData.filter(p => {
     const status = getVal(p, KEY_MAP.status).toLowerCase(); 
     if (!status.includes('active') && status !== 'new') return false;
@@ -1019,35 +1272,60 @@ window.renderTeamWorkspace = function() {
     return assignedTasks.length > 0;
   });
 
-  window.currentEngineerProjects = myProjects;
+  const sb = [
+      { id: 'active_all', label: 'Semua Proyek', icon: 'grid', c: 'bg-slate-900' }, 
+      { id: 'active_slf', label: 'Kategori SLF', icon: 'file-text', c: 'bg-rose-600' }, 
+      { id: 'active_pbg', label: 'Kategori PBG', icon: 'home', c: 'bg-sky-600' }, 
+      { id: 'client_vale', label: 'PT VALE', icon: 'landmark', c: 'bg-amber-600' }, 
+      { id: 'client_clm', label: 'PT CLM', icon: 'factory', c: 'bg-red-600' }, 
+      { id: 'client_perorangan', label: 'PERORANGAN', icon: 'user', c: 'bg-indigo-600' }, 
+      { id: 'completed', label: 'Selesai (100%)', icon: 'check-circle', c: 'bg-emerald-600' }
+  ];
+  
+  m.innerHTML = sb.map(i => `<button onclick="curTeamFilter='${i.id}';window.renderTeamWorkspace()" class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[10px] font-black uppercase border whitespace-nowrap lg:w-full transition-all ${curTeamFilter === i.id ? i.c + ' text-white border-transparent shadow-md scale-[1.02]' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}"><i data-lucide="${i.icon}" class="w-3.5 h-3.5"></i> ${i.label}</button>`).join('');
 
-  // Jika tidak ada tugas sama sekali, tampilkan pesan kosong
-  if (myProjects.length === 0) {
+  const fil = myProjects.filter(p => {
+    if (curTeamFilter === 'completed') return p.myAvg === 100; if (p.myAvg === 100) return false;
+    const t = (p.Type || '').toUpperCase(); const n = getVal(p, KEY_MAP.name).toUpperCase(); const cl = getVal(p, KEY_MAP.client).toUpperCase();
+    const isVale = cl.includes('VALE') || cl.includes('PTVI') || n.includes('VALE') || n.includes('PTVI'); const isClm = cl.includes('CLM') || cl.includes('CITRA LAMPIA') || n.includes('CLM') || n.includes('CITRA LAMPIA');
+    if (curTeamFilter === 'active_slf') return t === 'SLF' || n.includes('SLF'); if (curTeamFilter === 'active_pbg') return t === 'PBG' || n.includes('PBG'); if (curTeamFilter === 'client_vale') return isVale; if (curTeamFilter === 'client_clm') return isClm; if (curTeamFilter === 'client_perorangan') return !isVale && !isClm;
+    return true;
+  });
+
+  window.currentEngineerProjects = fil;
+
+  // Jika Kosong, Tampilkan Teks Elegan Sesuai Permintaan
+  if (fil.length === 0) {
       cont.innerHTML = `
-      <div class="col-span-full py-16 text-center text-slate-400 font-bold uppercase tracking-widest text-[11px] border-2 border-dashed rounded-3xl border-slate-300">
-          Belum ada tugas yang didelegasikan oleh Direksi kepada Anda.
+      <div class="col-span-full py-16 bg-white border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-[11px]">
+          DATA KOSONG
       </div>`;
+      lucide.createIcons();
       return;
   }
 
-  // Render Kartu Tugas untuk Engineer
-  cont.innerHTML = myProjects.map((p, idx) => {
+  // Render Jika Ada
+  cont.innerHTML = fil.map((p, idx) => {
       let sum = 0; p.myTasks.forEach(t => sum += (parseInt(t.progress) || 0));
       p.myAvg = p.myTasks.length > 0 ? Math.round(sum / p.myTasks.length) : 0;
       
+      const n = getVal(p, KEY_MAP.name).toUpperCase(); const cl = getVal(p, KEY_MAP.client).toUpperCase();
+      const isVale = cl.includes('VALE') || cl.includes('PTVI') || n.includes('VALE') || n.includes('PTVI'); const isClm = cl.includes('CLM') || cl.includes('CITRA LAMPIA') || n.includes('CLM') || n.includes('CITRA LAMPIA');
+      const cN = isVale ? 'PT VALE' : isClm ? 'PT CLM' : 'PERORANGAN'; const tagColor = cN === 'PT VALE' ? 'bg-amber-50 text-amber-600 border-amber-200' : cN === 'PT CLM' ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-indigo-50 text-indigo-600 border-indigo-200';
+
       return `
-      <div onclick="window.openEngProjectModal(${idx})" class="bg-white rounded-[1.5rem] border border-slate-200 p-5 md:p-6 shadow-sm hover:shadow-md hover:border-[#f5a20f] transition-all cursor-pointer group flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in fade-in duration-300">
+      <div onclick="window.openEngProjectModal(${idx})" class="bg-white rounded-[1.5rem] border border-slate-200 p-5 shadow-sm hover:shadow-md hover:border-[#f5a20f] transition-all cursor-pointer group flex items-center justify-between">
           <div class="flex flex-col gap-2.5 items-start pr-4">
               <div class="flex items-center gap-3">
-                  <h4 class="font-bold text-[14px] md:text-[15px] text-slate-800 group-hover:text-[#f5a20f] transition-colors uppercase tracking-wide leading-tight line-clamp-2">${getVal(p, KEY_MAP.name)}</h4>
+                  <h4 class="font-bold text-[13px] text-slate-800 group-hover:text-[#f5a20f] transition-colors uppercase line-clamp-2">${getVal(p, KEY_MAP.name)}</h4>
                   <span class="text-[10px] font-bold bg-[#f5a20f]/10 text-[#f5a20f] px-2 py-0.5 rounded-md border border-[#f5a20f]/20">${p.myAvg}%</span>
               </div>
               <div class="flex flex-wrap gap-1.5">
-                  <span class="text-[8px] font-black px-2 py-0.5 border border-slate-200 rounded uppercase text-slate-400">${p.myTasks.length} TUGAS ASSIGNED</span>
+                  <span class="text-[8px] font-black px-2 py-0.5 border border-slate-200 rounded uppercase text-slate-400">${p.myTasks.length} TUGAS</span>
+                  <span class="text-[8px] font-black px-2 py-0.5 border rounded uppercase tracking-widest ${tagColor}">${cN}</span>
               </div>
           </div>
           <div class="flex items-center gap-1.5 text-slate-400 group-hover:text-[#f5a20f] transition-colors shrink-0">
-              <span class="text-[9px] font-bold uppercase tracking-widest sm:block">Update Progres</span>
               <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
           </div>
       </div>`;
@@ -1059,13 +1337,9 @@ window.renderTeamWorkspace = function() {
 window.openEngProjectModal = function(idx) {
     const p = window.currentEngineerProjects[idx]; if (!p) return;
     $id('epmTitle').textContent = getVal(p, KEY_MAP.name);
-    
     const epmAvgEl = $id('epmAvg'); 
-    if (epmAvgEl) { 
-        epmAvgEl.textContent = `${p.myAvg}%`; 
-    }
+    if (epmAvgEl) epmAvgEl.textContent = `${p.myAvg}%`; 
 
-    // Tampilkan hanya tugas yang mereka miliki
     let html = p.myTasks.map(t => {
         return `
         <div class="bg-white border border-slate-200 p-4 rounded-xl shadow-sm mb-3 task-row">
@@ -1112,7 +1386,6 @@ window.saveProgress = async function(btn, proj, task) {
     btn.innerHTML = 'SAVED'; 
     btn.classList.replace('bg-indigo-600', 'bg-emerald-500');
     
-    // Update local data
     const pD = allData.find(p => getVal(p, KEY_MAP.name) === proj); 
     if (pD && pD.Tasks) { 
         const tD = pD.Tasks.find(t => t.name === task); 
@@ -1130,6 +1403,140 @@ window.saveProgress = async function(btn, proj, task) {
       btn.disabled = false; 
   }
 };
+
+window.renderJobdesk = function() {
+    if (!currentUser) return; 
+    
+    let filteredJd = jobdeskData;
+    const myKode = getTeamProp(currentUser, 'KODE').toUpperCase();
+    
+    // Tentukan target list berdasarkan Role
+    const isDirector = window.isLead();
+    const listCont = isDirector ? $id('dirJobdeskList') : $id('engJobdeskList');
+    
+    if (!listCont) return;
+
+    if (!isDirector) { 
+        filteredJd = jobdeskData.filter(j => (j['TEAM CODE'] || '').toUpperCase() === myKode); 
+    }
+
+    if (filteredJd.length === 0) { 
+        listCont.innerHTML = `<div class="py-10 bg-white rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">BELUM ADA JOBDESK</div>`; 
+        return; 
+    }
+
+    listCont.className = isDirector ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" : "flex flex-col gap-4";
+
+    listCont.innerHTML = filteredJd.map(j => {
+        const s = (j.STATUS || 'OPEN').toUpperCase(); let sColor = s === 'OPEN' ? 'bg-sky-100 text-sky-700 border-sky-200' : (s === 'PROGRESS' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200');
+        const canEdit = isDirector || (j['TEAM CODE'] || '').toUpperCase() === myKode;
+        let statusUI = `<span class="px-2.5 py-1 rounded-md border text-[9px] font-black uppercase tracking-widest ${sColor}">${s}</span>`;
+        
+        if (canEdit) { 
+            statusUI = `<select onchange="window.updateJdStatus(${j.rowIdx}, this)" class="bg-slate-50 border border-slate-200 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded outline-none focus:border-indigo-400 text-slate-700 cursor-pointer hover:bg-slate-100 transition-colors"><option value="OPEN" ${s==='OPEN'?'selected':''}>OPEN</option><option value="PROGRESS" ${s==='PROGRESS'?'selected':''}>PROGRESS</option><option value="DONE" ${s==='DONE'?'selected':''}>DONE</option></select>`; 
+        }
+
+        return `
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all relative group flex flex-col">
+            <div class="flex justify-between items-start mb-4 gap-2">
+                <div class="flex flex-wrap gap-1.5"><span class="text-[9px] font-black bg-indigo-50 text-indigo-600 px-2 py-1 rounded-md border border-indigo-100 uppercase tracking-widest"><i data-lucide="folder" class="w-3 h-3 inline pb-0.5 mr-0.5"></i> ${j['PROJECT NAME'] || '-'}</span>${isDirector ? `<span class="text-[9px] font-black bg-purple-50 text-purple-600 px-2 py-1 rounded-md border border-purple-100 uppercase tracking-widest"><i data-lucide="user" class="w-3 h-3 inline pb-0.5 mr-0.5"></i> ${j['TEAM CODE']}</span>` : ''}</div>
+                <div class="shrink-0">${statusUI}</div>
+            </div>
+            <h4 class="text-sm font-bold text-slate-800 leading-relaxed mb-4 flex-1 whitespace-pre-wrap">${j.JOBDESK || '-'}</h4>
+            <div class="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100 bg-slate-50/50 -mx-5 -mb-5 px-5 py-4 rounded-b-2xl mt-auto">
+                <div><p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] mb-1">Deadline</p><p class="text-xs font-bold text-rose-600 flex items-center gap-1.5"><i data-lucide="calendar-clock" class="w-3.5 h-3.5"></i> ${formatTglMini(j.DEADLINE)}</p></div>
+                <div class="text-right"><p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] mb-1">Prioritas</p><p class="text-xs font-black uppercase tracking-widest ${j.PRIORITY==='High'?'text-rose-600':(j.PRIORITY==='Medium'?'text-amber-500':'text-emerald-500')}">${j.PRIORITY || '-'}</p></div>
+            </div>
+        </div>`;
+    }).join('');
+    lucide.createIcons();
+};
+
+window.renderSopTasks = function() {
+    if (!currentUser) return;
+    const list = $id('engSopTaskList'); if (!list) return;
+    
+    if (window.isLead()) return; // Cuma tim yang render SOP task di kanbannya
+
+    const userEmail = (currentUser?.EMAIL || '').toLowerCase().trim();
+    const myTasks = taskAssignmentsData.filter(ta => (ta['ASSIGNEE_EMAIL'] || '').toLowerCase().trim() === userEmail);
+    
+    if(myTasks.length === 0) {
+        list.innerHTML = `<div class="py-10 bg-white border-2 border-dashed border-slate-200 rounded-3xl flex items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">BELUM ADA TASK SOP YANG DIASSIGN</div>`;
+        return;
+    }
+
+    const grouped = {};
+    myTasks.forEach(t => {
+        const pName = escapeJS(t['PROJECT'] || t['PROJECT NAME']);
+        if(!grouped[pName]) grouped[pName] = [];
+        grouped[pName].push(t);
+    });
+
+    let html = '';
+    for(let pName in grouped) {
+        html += `<div class="mb-2 mt-4 flex items-center gap-2 w-full"><i data-lucide="folder-open" class="w-5 h-5 text-emerald-600"></i><h3 class="text-sm font-black text-slate-800 uppercase tracking-wide">${pName}</h3></div>`;
+        
+        grouped[pName].forEach(t => {
+            const tName = escapeJS(t['TASK'] || t['TASK NAME']);
+            let currentProgress = 0;
+            const projObj = allData.find(p => getVal(p, KEY_MAP.name) === (t['PROJECT'] || t['PROJECT NAME']));
+            if(projObj && projObj.Tasks) {
+                const taskObj = projObj.Tasks.find(x => x.name === (t['TASK'] || t['TASK NAME']));
+                if(taskObj) currentProgress = parseInt(taskObj.progress) || 0;
+            }
+
+            html += `
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-3 group hover:border-emerald-300 transition-all tw-sop-row">
+                <div class="flex justify-between items-start gap-2">
+                    <h4 class="text-sm font-bold text-slate-800 leading-snug">${tName}</h4>
+                    <span class="text-[9px] font-black bg-emerald-50 text-emerald-600 px-2 py-1 rounded-md border border-emerald-100 uppercase tracking-widest shrink-0"><i data-lucide="activity" class="w-3 h-3 inline pb-0.5 mr-0.5"></i> ${currentProgress}%</span>
+                </div>
+                <div class="mt-auto pt-3 border-t border-slate-100 flex flex-col gap-3">
+                    <div class="flex items-center gap-2">
+                        <input type="number" min="0" max="100" class="tw-sop-prog w-20 p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-emerald-500 font-black text-center shadow-inner" value="${currentProgress}" placeholder="%">
+                        <input type="text" class="tw-sop-note flex-1 p-2.5 text-[10px] bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-emerald-500 font-medium shadow-inner" placeholder="Tulis catatan..." value="${escapeJS(t.NOTE || '')}">
+                    </div>
+                    <button onclick="window.saveSopProgress(this, '${pName}', '${tName}')" class="w-full bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 hover:text-emerald-700 text-[10px] font-black uppercase tracking-widest py-3 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-1.5"><i data-lucide="save" class="w-4 h-4"></i> Simpan Progres</button>
+                </div>
+            </div>`;
+        });
+    }
+    list.innerHTML = html;
+    lucide.createIcons();
+};
+
+window.saveSopProgress = async function(btn, proj, task) {
+    const row = btn.closest('.tw-sop-row');
+    const prog = row.querySelector('.tw-sop-prog').value;
+    const ket = row.querySelector('.tw-sop-note').value;
+    const origHTML = btn.innerHTML;
+    
+    btn.innerHTML = '<span class="animate-pulse">WAIT...</span>';
+    btn.disabled = true;
+
+    try {
+        const code = currentUser ? getTeamProp(currentUser, 'KODE') : 'ENG';
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'UPDATE_PROGRESS', projectName: proj, taskName: task, teamCode: code, progress: prog, keterangan: ket }) });
+        
+        btn.innerHTML = '<i data-lucide="check-circle-2" class="w-4 h-4"></i> SAVED';
+        btn.classList.replace('text-emerald-600', 'text-white');
+        btn.classList.replace('bg-emerald-50', 'bg-emerald-500');
+        
+        setTimeout(() => {
+            btn.innerHTML = origHTML;
+            btn.disabled = false;
+            btn.classList.replace('text-white', 'text-emerald-600');
+            btn.classList.replace('bg-emerald-500', 'bg-emerald-50');
+            lucide.createIcons();
+        }, 1500);
+    } catch (error) {
+        alert('Gagal update.');
+        btn.innerHTML = origHTML;
+        btn.disabled = false;
+    }
+};
+
 
 // =============== DYNAMIC SMART TIMESHEET (TIME LOCK) ===============
 window.openTimesheetModal = function() {
@@ -1730,7 +2137,6 @@ window.handlePrintPDF = function() {
         }); tR += `</tbody>`;
     });
 
-    // TRICK: String separation to avoid HTML parser breaking the <script> block
     const printScript = "<scr" + "ipt>setTimeout(()=>{window.print();}, 800);window.onafterprint=()=>{window.close();};</scr" + "ipt>";
     
     const h1 = `<!DOCTYPE html><html lang="id"><head><title>Time Sheet</title><style>body{font-family:sans-serif;}table{width:100%;border-collapse:collapse;}th{background:#f8fafc;padding:12px;text-align:left;border-bottom:2px solid #cbd5e1;}</style></head><body><h2>TIME SHEET REPORT</h2><p>${currentReportData.profile.NAMA}</p><table><thead><tr><th>Tanggal</th><th>Jam</th><th>Deskripsi</th><th>Proyek</th></tr></thead>${tR}</table>${printScript}</body></html>`;
@@ -1759,12 +2165,15 @@ window.init = async function(isAuto = false) {
         projects.forEach(p => {
             p._parsedAssignments = {}; const rawAssign = getVal(p, ['ASSIGNMENTS']); if (rawAssign) { try { p._parsedAssignments = JSON.parse(rawAssign); } catch(err) {} }
         });
-        allData = projects; teamsData=d.teams||[]; timesheetsData=d.timesheets||[]; financeData=d.finance||[]; 
+        allData = projects; teamsData=d.teams||[]; timesheetsData=d.timesheets||[]; financeData=d.finance||[]; jobdeskData = d.jobdesks || []; taskAssignmentsData = d.taskAssignments || [];
         
         const dashEl = $id('view-team-dashboard');
         if(dashEl && dashEl.classList.contains('active') && currentUser) { 
             window.updateUI(); 
-            window.renderTeamWorkspace(); 
+            if(window.isLead()) window.renderLeadWorkspace();
+            window.renderTeamWorkspace();
+            window.renderJobdesk();
+            window.renderSopTasks();
         }
         
         const execEl = $id('view-executive');
