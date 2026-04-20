@@ -1819,47 +1819,61 @@ window.makePie = function(id, labels, data, colors, type, chartType = 'pie') {
   if(lCont) { lCont.innerHTML = labels.map((l, i) => `<div onclick="window.renderFilteredList('${type}','${l}')" class="flex items-center gap-2 px-3.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-full cursor-pointer text-[10px] font-bold text-slate-600 shadow-sm transition-colors"><span class="w-2.5 h-2.5 rounded-full shadow-sm" style="background:${colors[i]}"></span>${l} <span class="text-slate-800 ml-1.5 font-black">${data[i]}</span></div>`).join(''); }
 };
 
-window.renderFilteredList = function(type, val) {
-  const tEl = $id('detailTitle'); if(tEl) tEl.textContent = `DAFTAR: ${val.toUpperCase()}`;
-  const fil = allData.filter(p => {
-    const sv = window.getVal(p, KEY_MAP.status).toLowerCase();
-    if (type === 'status') { const v = val.toUpperCase(); if (v === 'ACTIVES') return sv.includes('active') || sv === 'new'; if (v === 'NEW') return sv === 'new'; if (v === 'COMPLETE') return sv.includes('complete'); if (v === 'ON HOLD') return sv.includes('hold'); if (v === 'CLOSED') return sv.includes('closed'); return false; }
-    if (type === 'priority') { const pr = window.getVal(p, KEY_MAP.priority).toUpperCase(); return (pr.includes('HIGH') || pr.includes('HIGHT') ? 'High' : (pr.includes('MEDIUM') ? 'Medium' : (pr.includes('LOW') ? 'Low' : ''))) === val; } return false;
-  });
-  const panel = $id('detailPanel'); if(!panel) return;
-  if (fil.length === 0) return panel.innerHTML = `<div class="w-full h-full flex flex-col items-center justify-center text-slate-400 text-[11px] italic">Kosong</div>`;
-  
-  panel.innerHTML = `<div class="flex gap-6 items-end h-full min-w-max px-6 pb-20 pt-8">` + fil.map((p, i) => {
-    const pg = window.getCalcProgress(p); const nm = window.escapeJS(window.getVal(p, KEY_MAP.name)); const barHeight = Math.max(pg, 5); const delay = i * 50; 
-    return `<div class="flex flex-col items-center justify-end h-full w-[44px] shrink-0 group"><span class="text-[10px] font-black text-[#003366] mb-1.5 transition-all duration-500 opacity-0 translate-y-2 animated-text" style="transition-delay: ${delay + 300}ms">${pg}%</span><div class="w-10 bg-[#38bdf8] rounded-t-lg transition-all duration-1000 ease-out animated-bar hover:bg-[#0ea5e9] cursor-pointer" style="height: 0%; transition-delay: ${delay}ms" data-height="${barHeight}%"></div><div class="mt-4 relative w-[2px]"><div class="absolute top-0 right-2 origin-top-right -rotate-45 w-[140px] text-right"><p class="text-[9px] font-bold text-slate-500 truncate uppercase hover:text-[#0ea5e9] cursor-default transition-colors" title="${nm}">${nm}</p></div></div></div>`;
-  }).join('') + `</div>`;
-  setTimeout(() => { panel.querySelectorAll('.animated-bar').forEach(b => b.style.height = b.getAttribute('data-height')); panel.querySelectorAll('.animated-text').forEach(t => t.classList.remove('opacity-0', 'translate-y-2')); }, 50);
-};
-
 window.renderExecutiveGrid = function() {
     const efEl = $id('execFilters');
-    if(efEl) efEl.innerHTML = execFiltersConfig.map(f => `<button onclick="curExecFilter='${f.id}';window.renderExecutiveGrid()" class="px-5 py-2.5 rounded-full text-[10px] font-black uppercase border transition-colors ${curExecFilter===f.id?f.color+' text-white border-transparent':'bg-white text-slate-500 hover:bg-slate-50'}">${f.label}</button>`).join('');
+    if(efEl) {
+        efEl.innerHTML = execFiltersConfig.map(f => `<button onclick="curExecFilter='${f.id}';window.renderExecutiveGrid()" class="px-5 py-2.5 rounded-full text-[10px] font-black uppercase border transition-colors shrink-0 ${curExecFilter===f.id ? f.color+' text-white border-transparent' : 'bg-white text-slate-500 hover:bg-slate-50'}">${f.label}</button>`).join('');
+    }
     
     const fil = allData.filter(p => {
-        const s = window.getVal(p, KEY_MAP.status).toLowerCase(); const pt = (p.Type||'').toUpperCase(); const prRaw = window.getVal(p, KEY_MAP.priority).toUpperCase(); const pr = prRaw.includes('HIGH')?'HIGH':(prRaw.includes('MEDIUM')?'MEDIUM':'LOW');
+        const s = window.getVal(p, KEY_MAP.status).toLowerCase(); 
+        const pt = (p.Type||'').toUpperCase(); 
+        const prRaw = window.getVal(p, KEY_MAP.priority).toUpperCase(); 
+        const pr = prRaw.includes('HIGH')?'HIGH':(prRaw.includes('MEDIUM')?'MEDIUM':'LOW');
         const nm = window.getVal(p, KEY_MAP.name).toLowerCase();
         
         if(curExecSearch && !nm.includes(curExecSearch)) return false;
+
         if(curExecFilter==='ACTIVES') return s.includes('active') || s.includes('new'); 
         if(curExecFilter==='CLOSED') return s.includes('closed'); 
         if(curExecFilter==='COMPLETE') return s.includes('complete');
-        if(curExecFilter==='SLF') return pt==='SLF'; if(curExecFilter==='PBG') return pt==='PBG'; 
-        if(curExecFilter==='HIGH') return pr==='HIGH'; if(curExecFilter==='MEDIUM') return pr==='MEDIUM'; if(curExecFilter==='LOW') return pr==='LOW'; 
+        if(curExecFilter==='SLF') return pt==='SLF'; 
+        if(curExecFilter==='PBG') return pt==='PBG'; 
+        if(curExecFilter==='HIGH') return pr==='HIGH'; 
+        if(curExecFilter==='MEDIUM') return pr==='MEDIUM'; 
+        if(curExecFilter==='LOW') return pr==='LOW'; 
+        
         return true;
     });
     
-    window.currentExecutiveData = fil; const grid = $id('executiveGrid'); if(!grid) return;
-    if(fil.length===0) { grid.innerHTML = `<div class="col-span-full py-16 text-center text-slate-400 font-bold uppercase border-2 border-dashed rounded-3xl">Proyek Tidak Ditemukan</div>`; return; }
+    window.currentExecutiveData = fil; 
+    const grid = $id('executiveGrid'); 
+    if(!grid) return;
+    
+    if(fil.length===0) { 
+        grid.innerHTML = `<div class="col-span-full py-16 text-center text-slate-400 font-bold uppercase border-2 border-dashed border-slate-200 rounded-3xl">Proyek Tidak Ditemukan</div>`; 
+        return; 
+    }
     
     const today = new Date().getTime();
+    
     grid.innerHTML = fil.map((p, i) => {
-        const pg = window.getCalcProgress(p); const sStr = window.getVal(p, ['start date', 'date start', 'mulai', 'start']); const eStr = window.getVal(p, ['date end', 'end date', 'selesai', 'end']); let oTag = '';
-        if(eStr && pg<100) { let eD = new Date(eStr).getTime(); if(isNaN(eD)&&eStr.includes('/')) eD=new Date(eStr.split('/').reverse().join('-')).getTime(); if(!isNaN(eD) && today>eD) { const diffDays = Math.ceil(Math.abs(today - eD) / (1000 * 60 * 60 * 24)); oTag=`<div class="absolute -top-3 -right-3 bg-rose-600 text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg border-2 border-white animate-pulse z-10">OVERDUE ${diffDays} HARI</div>`; } }
+        const pg = window.getCalcProgress(p); 
+        
+        // Perluasan array pencarian kolom dari Google Sheets
+        const sStr = window.getVal(p, ['start date', 'date start', 'mulai', 'start', 'tgl mulai', 'tanggal mulai']); 
+        const eStr = window.getVal(p, ['date end', 'end date', 'selesai', 'end', 'tgl selesai', 'tanggal selesai']); 
+        const picName = window.getVal(p, ['pic', 'nama pic', 'penanggung jawab', 'p.i.c']);
+        
+        let oTag = '';
+        if(eStr && pg<100) { 
+            let eD = new Date(eStr).getTime(); 
+            if(isNaN(eD) && eStr.includes('/')) eD=new Date(eStr.split('/').reverse().join('-')).getTime(); 
+            if(!isNaN(eD) && today>eD) { 
+                const diffDays = Math.ceil(Math.abs(today - eD) / (1000 * 60 * 60 * 24)); 
+                oTag=`<div class="absolute -top-3 -right-3 bg-rose-600 text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg border-2 border-white animate-pulse z-10">OVERDUE ${diffDays} HARI</div>`; 
+            } 
+        }
         
         let taskListHtml = '';
         if(p.Tasks && p.Tasks.length > 0) {
@@ -1914,7 +1928,7 @@ window.renderExecutiveGrid = function() {
                 <table class="w-full text-[9px] font-bold text-slate-600 uppercase tracking-widest leading-relaxed">
                     <tr><td class="pb-1 w-10 text-slate-500">START</td><td class="pb-1">: ${sStr || '-'}</td></tr>
                     <tr><td class="pb-1 text-slate-500">END</td><td class="pb-1">: ${eStr || '-'}</td></tr>
-                    <tr><td class="align-top text-slate-500">PIC</td><td class="truncate max-w-[120px]">: ${window.getVal(p, ['pic']) || '-'}</td></tr>
+                    <tr><td class="align-top text-slate-500">PIC</td><td class="truncate max-w-[120px]">: ${picName || '-'}</td></tr>
                 </table>
             </div>
             
@@ -1922,6 +1936,7 @@ window.renderExecutiveGrid = function() {
             <div class="flex flex-col pb-2">${taskListHtml}</div>
         </div>`;
     }).join('');
+    
     lucide.createIcons();
 };
 
