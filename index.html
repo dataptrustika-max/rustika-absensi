@@ -1041,7 +1041,9 @@
 </div>
 <!--PART 4-->
 <script>
-// =============== CONFIG & STATE ===============
+// =========================================================
+// 1. CONFIG & STATE (JANGAN DIHAPUS)
+// =========================================================
 const API_URL = 'https://script.google.com/macros/s/AKfycbwsrw3LWLuHK8e5X1ABtOqbVaMfGwHFiFoG9kJ3lcNUPte3Ssf88hEwrkJoMBnt1zysTw/exec';
 
 let allData = [];
@@ -1054,8 +1056,10 @@ let currentUser = null;
 let charts = {};
 let tsRows = [];
 let currentReportData = null;
+
 let curExecSearch = '';
 let curTeamFilter = 'active_all';
+let curExecFilter = 'ACTIVES';
 
 const KEY_MAP = { 
   name: ['nama pekerjaan', 'project name', 'nama proyek'], 
@@ -1064,7 +1068,19 @@ const KEY_MAP = {
   priority: ['active by status/priority', 'priority'] 
 };
 
-// =============== UTILITIES & HELPERS ===============
+const execFiltersConfig = [
+    { id: 'ACTIVES', label: 'ACTIVES', color: 'bg-[#0ea5e9]' },
+    { id: 'SLF', label: 'SLF', color: 'bg-slate-800' },
+    { id: 'PBG', label: 'PBG', color: 'bg-slate-800' },
+    { id: 'HIGH', label: 'High', color: 'bg-rose-500' },
+    { id: 'MEDIUM', label: 'Medium', color: 'bg-amber-500' },
+    { id: 'LOW', label: 'Low', color: 'bg-emerald-500' },
+    { id: 'COMPLETE', label: 'Complete', color: 'bg-emerald-600' }
+];
+
+// =========================================================
+// 2. UTILITIES & HELPERS
+// =========================================================
 window.$id = function(id) { return document.getElementById(id); };
 
 window.escapeJS = function(str) { 
@@ -1136,40 +1152,40 @@ window.getTeamProp = function(teamObj, propType) {
     return '-';
 };
 
-// URL OPTIMIZER DENGAN ATURAN BARU
 window.optimizeImageUrl = function(url) {
     if (!url) return '';
-    // Jika link Google Drive, ubah ke format thumbnail
     if (url.includes('drive.google.com')) {
         const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
-        if (match && match[1]) {
-            return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w300-h300`;
-        }
+        if (match && match[1]) return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w300-h300`;
     }
-    // Jika link gambar direct biasa, kembalikan apa adanya (biar bisa termuat)
     return url;
 };
 
-// Deteksi Hak Akses Direktur / Lead
 window.isLead = function() {
     if(!currentUser) return false;
     const dept = (currentUser['DEPARTEMEN'] || currentUser['DEPT'] || '').toUpperCase();
     const nama = (currentUser['NAMA'] || '').toUpperCase();
-    
-    return dept.includes('DIREKTUR') || 
-           dept.includes('LEAD') || 
-           dept.includes('MANAGER') || 
-           nama.includes('QADRIAH') || 
-           nama.includes('SALMAN');
+    return dept.includes('DIREKTUR') || dept.includes('LEAD') || dept.includes('MANAGER') || nama.includes('QADRIAH') || nama.includes('SALMAN');
 };
 
-// Cek LocalStorage Session
+// Strict Delegation Check
+window.isUserAssigned = function(taskName, projectObj, currentUserObj) {
+    if (!projectObj._parsedAssignments) return false;
+    const assignedArr = projectObj._parsedAssignments[taskName] || [];
+    const myKode = window.getTeamProp(currentUserObj, 'KODE');
+    const myNama = window.getTeamProp(currentUserObj, 'NAMA');
+    return assignedArr.includes(myKode) || assignedArr.includes(myNama);
+};
+
 try { 
   const savedUser = localStorage.getItem('rustikaUser'); 
   if (savedUser) currentUser = JSON.parse(savedUser); 
 } catch(e) {}
 
-// =============== NAVIGATION & AUTH ===============
+
+// =========================================================
+// 3. NAVIGATION & AUTHENTICATION
+// =========================================================
 window.switchView = function(id, skipInit = false) { 
   document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active')); 
   const targetView = $id(id); 
@@ -1178,10 +1194,34 @@ window.switchView = function(id, skipInit = false) {
   lucide.createIcons(); 
 };
 
+window.switchExecTab = function(tabName) {
+  ['overview', 'timeline', 'timesheet', 'finance'].forEach(t => {
+    const el = $id(`exec-${t}-section`); if(el) el.classList.add('hidden');
+    const tabEl = $id(`tab-${t}`);
+    if(tabEl) {
+        tabEl.classList.remove('bg-[#003366]');
+        tabEl.classList.add('hover:bg-white/20');
+    }
+  });
+  
+  const sec = $id(`exec-${tabName}-section`); if(sec) sec.classList.remove('hidden');
+  const tEl = $id(`tab-${tabName}`);
+  if(tEl) {
+      tEl.classList.remove('hover:bg-white/20');
+      tEl.classList.add('bg-[#003366]');
+  }
+  
+  // Render ulang modul ketika tab dibuka
+  if (tabName === 'timeline') window.renderTimeline();
+  if (tabName === 'timesheet') window.renderTimesheetControls();
+  if (tabName === 'finance') window.renderFinanceTable();
+};
+
 window.checkLoginAndGo = function() { 
   if(currentUser) { 
     window.updateUI(); 
     window.switchView('view-team-dashboard', true); 
+    if(window.isLead()) window.renderLeadWorkspace();
     window.renderTeamWorkspace(); 
     window.renderJobdesk();
     window.renderSopTasks();
@@ -1197,9 +1237,7 @@ window.handleTeamLogin = async function(e) {
   const btn = $id('btnSubmitLogin'); 
   const msg = $id('loginMsg');
   
-  btn.innerHTML = 'VERIFIKASI...'; 
-  btn.disabled = true; 
-  if(msg) msg.classList.add('hidden');
+  btn.innerHTML = 'VERIFIKASI...'; btn.disabled = true; if(msg) msg.classList.add('hidden');
   
   try {
     const res = await fetch(API_URL + "?nocache=" + new Date().getTime()); 
@@ -1214,7 +1252,7 @@ window.handleTeamLogin = async function(e) {
     
     allData.forEach(p => {
       p._parsedAssignments = {}; 
-      const rawAssign = getVal(p, ['ASSIGNMENTS']); 
+      const rawAssign = window.getVal(p, ['ASSIGNMENTS']); 
       if (rawAssign) { try { p._parsedAssignments = JSON.parse(rawAssign); } catch(err) {} }
     });
 
@@ -1225,6 +1263,7 @@ window.handleTeamLogin = async function(e) {
       localStorage.setItem('rustikaUser', JSON.stringify(user)); 
       window.updateUI(); 
       window.switchView('view-team-dashboard', true); 
+      if(window.isLead()) window.renderLeadWorkspace();
       window.renderTeamWorkspace(); 
       window.renderJobdesk();
       window.renderSopTasks();
@@ -1234,50 +1273,36 @@ window.handleTeamLogin = async function(e) {
   } catch(e) { 
     if(msg) { msg.innerHTML = "Masalah koneksi database!"; msg.classList.remove('hidden'); } 
   }
-  btn.innerHTML = 'MASUK SEKARANG'; 
-  btn.disabled = false;
+  btn.innerHTML = 'MASUK SEKARANG'; btn.disabled = false;
 };
 
 window.handleLogout = function() { 
-  currentUser = null; 
-  localStorage.removeItem('rustikaUser'); 
-  window.switchView('view-gateway', true); 
+  currentUser = null; localStorage.removeItem('rustikaUser'); window.switchView('view-gateway', true); 
 };
 
-// ROLE-BASED UI RENDER & FOTO PROFIL FIX
+
+// =========================================================
+// 4. UI UPDATES & DASHBOARDS
+// =========================================================
 window.updateUI = function() {
   if (!currentUser) return;
-  const engName = $id('engName');
-  const engMeta = $id('engMeta');
-  
+  const engName = $id('engName'); const engMeta = $id('engMeta');
   if(engName) engName.textContent = (currentUser['NAMA'] || 'Tanpa Nama').toUpperCase();
   if(engMeta) engMeta.textContent = `${currentUser['DEPARTEMEN'] || '-'} • ${currentUser['KODE'] || '-'}`;
 
-  // Perbaikan Eksekusi Logika Foto Profil
   const rawFoto = currentUser['FOTO'] || currentUser['PHOTO'] || '';
   const fotoUrl = window.optimizeImageUrl(rawFoto);
-  const profImg = $id('profImg');
-  const profIcon = $id('profIcon');
+  const profImg = $id('profImg'); const profIcon = $id('profIcon');
   
   if (fotoUrl && fotoUrl.trim() !== '') {
-      if (profImg) { 
-          profImg.src = fotoUrl; 
-          profImg.classList.remove('hidden'); 
-      }
+      if (profImg) { profImg.src = fotoUrl; profImg.classList.remove('hidden'); }
       if (profIcon) profIcon.classList.add('hidden');
   } else {
-      if (profImg) { 
-          profImg.src = ''; 
-          profImg.classList.add('hidden'); 
-      }
+      if (profImg) { profImg.src = ''; profImg.classList.add('hidden'); }
       if (profIcon) profIcon.classList.remove('hidden');
   }
 
-  // Pengaturan View Role (Direktur vs Engineer)
-  const leadWs = $id('leadWorkspace');
-  const engBtns = $id('engineerButtons');
-  const kanban = $id('engineerKanban');
-  
+  const leadWs = $id('leadWorkspace'); const engBtns = $id('engineerButtons'); const kanban = $id('engineerKanban');
   if (window.isLead()) {
       if (leadWs) leadWs.classList.remove('hidden');
       if (engBtns) engBtns.classList.add('hidden');
@@ -1296,10 +1321,7 @@ window.renderLeadWorkspace = function() {
     
     let pendingCount = financeData.filter(f => (f.STATUS||'').toUpperCase() === 'PENDING').length; 
     const badge = $id('badgePendingFin');
-    if (badge) { 
-        if (pendingCount > 0) { badge.textContent = pendingCount; badge.classList.remove('hidden'); } 
-        else { badge.classList.add('hidden'); } 
-    }
+    if (badge) { if (pendingCount > 0) { badge.textContent = pendingCount; badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); } }
     
     let submittedNames = new Set(); 
     timesheetsData.forEach(t => { 
@@ -1307,11 +1329,7 @@ window.renderLeadWorkspace = function() {
         if (dStr) { 
             let rD = new Date(dStr); 
             if (isNaN(rD.getTime()) && dStr.includes('/')) rD = new Date(dStr.split('/').reverse().join('-')); 
-            if (!isNaN(rD.getTime())) { 
-                if (rD.toISOString().split('T')[0] === todayStr) { 
-                    submittedNames.add(window.getVal(t, ['NAMA ENGINEER', 'NAMA']).toUpperCase().trim()); 
-                } 
-            } 
+            if (!isNaN(rD.getTime())) { if (rD.toISOString().split('T')[0] === todayStr) { submittedNames.add(window.getVal(t, ['NAMA ENGINEER', 'NAMA']).toUpperCase().trim()); } } 
         } 
     });
     
@@ -1332,25 +1350,14 @@ window.renderLeadWorkspace = function() {
     lucide.createIcons();
 };
 
-// =============== DELEGASI KETAT (TEAM WORKSPACE) ===============
 window.renderTeamWorkspace = function() {
-  const cont = $id('projectList'); 
-  const m = $id('sideMenu');
+  const cont = $id('projectList'); const m = $id('sideMenu');
   if (!currentUser || !cont || !m) return;
   
-  const myKode = currentUser['KODE'];
-  const myNama = currentUser['NAMA'];
-
-  // STRICT FILTER: Cek spesifik array JSON ASSIGNMENTS
   const myProjects = allData.filter(p => {
-    const status = getVal(p, KEY_MAP.status).toLowerCase(); 
+    const status = window.getVal(p, KEY_MAP.status).toLowerCase(); 
     if (!status.includes('active') && status !== 'new') return false;
-    
-    const assignedTasks = (p.Tasks || []).filter(t => {
-      const assignedArr = p._parsedAssignments[t.name] || [];
-      return assignedArr.includes(myKode) || assignedArr.includes(myNama);
-    });
-    
+    const assignedTasks = (p.Tasks || []).filter(t => window.isUserAssigned(t.name, p, currentUser));
     p.myTasks = assignedTasks; 
     return assignedTasks.length > 0;
   });
@@ -1369,7 +1376,7 @@ window.renderTeamWorkspace = function() {
 
   const fil = myProjects.filter(p => {
     if (curTeamFilter === 'completed') return p.myAvg === 100; if (p.myAvg === 100) return false;
-    const t = (p.Type || '').toUpperCase(); const n = getVal(p, KEY_MAP.name).toUpperCase(); const cl = getVal(p, KEY_MAP.client).toUpperCase();
+    const t = (p.Type || '').toUpperCase(); const n = window.getVal(p, KEY_MAP.name).toUpperCase(); const cl = window.getVal(p, KEY_MAP.client).toUpperCase();
     const isVale = cl.includes('VALE') || cl.includes('PTVI') || n.includes('VALE') || n.includes('PTVI'); const isClm = cl.includes('CLM') || cl.includes('CITRA LAMPIA') || n.includes('CLM') || n.includes('CITRA LAMPIA');
     if (curTeamFilter === 'active_slf') return t === 'SLF' || n.includes('SLF'); if (curTeamFilter === 'active_pbg') return t === 'PBG' || n.includes('PBG'); if (curTeamFilter === 'client_vale') return isVale; if (curTeamFilter === 'client_clm') return isClm; if (curTeamFilter === 'client_perorangan') return !isVale && !isClm;
     return true;
@@ -1377,67 +1384,100 @@ window.renderTeamWorkspace = function() {
 
   window.currentEngineerProjects = fil;
 
-  // Jika Kosong, Tampilkan Teks Elegan Sesuai Permintaan
   if (fil.length === 0) {
-      cont.innerHTML = `
-      <div class="col-span-full py-16 bg-white border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-[11px]">
-          DATA KOSONG
-      </div>`;
-      lucide.createIcons();
-      return;
+      cont.innerHTML = `<div class="col-span-full py-16 bg-white border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-[11px]">Belum ada tugas yang didelegasikan kepada Anda.</div>`;
+      lucide.createIcons(); return;
   }
 
-  // Render Jika Ada
   cont.innerHTML = fil.map((p, idx) => {
       let sum = 0; p.myTasks.forEach(t => sum += (parseInt(t.progress) || 0));
       p.myAvg = p.myTasks.length > 0 ? Math.round(sum / p.myTasks.length) : 0;
-      
-      const n = getVal(p, KEY_MAP.name).toUpperCase(); const cl = getVal(p, KEY_MAP.client).toUpperCase();
+      const n = window.getVal(p, KEY_MAP.name).toUpperCase(); const cl = window.getVal(p, KEY_MAP.client).toUpperCase();
       const isVale = cl.includes('VALE') || cl.includes('PTVI') || n.includes('VALE') || n.includes('PTVI'); const isClm = cl.includes('CLM') || cl.includes('CITRA LAMPIA') || n.includes('CLM') || n.includes('CITRA LAMPIA');
       const cN = isVale ? 'PT VALE' : isClm ? 'PT CLM' : 'PERORANGAN'; const tagColor = cN === 'PT VALE' ? 'bg-amber-50 text-amber-600 border-amber-200' : cN === 'PT CLM' ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-indigo-50 text-indigo-600 border-indigo-200';
 
-      return `
-      <div onclick="window.openEngProjectModal(${idx})" class="bg-white rounded-[1.5rem] border border-slate-200 p-5 shadow-sm hover:shadow-md hover:border-[#f5a20f] transition-all cursor-pointer group flex items-center justify-between">
-          <div class="flex flex-col gap-2.5 items-start pr-4">
-              <div class="flex items-center gap-3">
-                  <h4 class="font-bold text-[13px] text-slate-800 group-hover:text-[#f5a20f] transition-colors uppercase line-clamp-2">${getVal(p, KEY_MAP.name)}</h4>
-                  <span class="text-[10px] font-bold bg-[#f5a20f]/10 text-[#f5a20f] px-2 py-0.5 rounded-md border border-[#f5a20f]/20">${p.myAvg}%</span>
-              </div>
-              <div class="flex flex-wrap gap-1.5">
-                  <span class="text-[8px] font-black px-2 py-0.5 border border-slate-200 rounded uppercase text-slate-400">${p.myTasks.length} TUGAS</span>
-                  <span class="text-[8px] font-black px-2 py-0.5 border rounded uppercase tracking-widest ${tagColor}">${cN}</span>
-              </div>
-          </div>
-          <div class="flex items-center gap-1.5 text-slate-400 group-hover:text-[#f5a20f] transition-colors shrink-0">
-              <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
-          </div>
-      </div>`;
+      return `<div onclick="window.openEngProjectModal(${idx})" class="bg-white rounded-[1.5rem] border border-slate-200 p-5 shadow-sm hover:shadow-md hover:border-[#f5a20f] transition-all cursor-pointer group flex items-center justify-between"><div class="flex flex-col gap-2.5 items-start pr-4"><div class="flex items-center gap-3"><h4 class="font-bold text-[13px] text-slate-800 group-hover:text-[#f5a20f] transition-colors uppercase line-clamp-2">${window.getVal(p, KEY_MAP.name)}</h4><span class="text-[10px] font-bold bg-[#f5a20f]/10 text-[#f5a20f] px-2 py-0.5 rounded-md border border-[#f5a20f]/20">${p.myAvg}%</span></div><div class="flex flex-wrap gap-1.5"><span class="text-[8px] font-black px-2 py-0.5 border border-slate-200 rounded uppercase text-slate-400">${p.myTasks.length} TUGAS</span><span class="text-[8px] font-black px-2 py-0.5 border rounded uppercase tracking-widest ${tagColor}">${cN}</span></div></div><div class="flex items-center gap-1.5 text-slate-400 group-hover:text-[#f5a20f] transition-colors shrink-0"><i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i></div></div>`;
   }).join('');
-  
   lucide.createIcons();
 };
 
+window.renderJobdesk = function() {
+    if (!currentUser) return; 
+    let filteredJd = jobdeskData;
+    const myKode = window.getTeamProp(currentUser, 'KODE').toUpperCase();
+    const isDirector = window.isLead();
+    const listCont = isDirector ? $id('dirJobdeskList') : $id('engJobdeskList');
+    if (!listCont) return;
+
+    if (!isDirector) { filteredJd = jobdeskData.filter(j => (j['TEAM CODE'] || '').toUpperCase() === myKode); }
+
+    if (filteredJd.length === 0) { 
+        listCont.innerHTML = `<div class="py-10 bg-white border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Belum ada tugas yang didelegasikan.</div>`; 
+        return; 
+    }
+
+    listCont.className = isDirector ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" : "flex flex-col gap-4";
+    listCont.innerHTML = filteredJd.map(j => {
+        const s = (j.STATUS || 'OPEN').toUpperCase(); 
+        const sColor = s === 'OPEN' ? 'bg-sky-100 text-sky-700' : (s === 'PROGRESS' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700');
+        const canEdit = isDirector || (j['TEAM CODE'] || '').toUpperCase() === myKode;
+        let statusUI = `<span class="px-2.5 py-1 rounded-md border text-[9px] font-black uppercase tracking-widest ${sColor}">${s}</span>`;
+        if (canEdit) { statusUI = `<select onchange="window.updateJdStatus(${j.rowIdx}, this)" class="bg-slate-50 border border-slate-200 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded outline-none focus:border-indigo-400 text-slate-700 cursor-pointer hover:bg-slate-100 transition-colors"><option value="OPEN" ${s==='OPEN'?'selected':''}>OPEN</option><option value="PROGRESS" ${s==='PROGRESS'?'selected':''}>PROGRESS</option><option value="DONE" ${s==='DONE'?'selected':''}>DONE</option></select>`; }
+        return `<div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col"><div class="flex justify-between items-start mb-4 gap-2"><div class="flex flex-wrap gap-1.5"><span class="text-[9px] font-black bg-indigo-50 text-indigo-600 px-2 py-1 rounded-md border uppercase"><i data-lucide="folder" class="w-3 h-3 inline pb-0.5 mr-0.5"></i> ${j['PROJECT NAME'] || '-'}</span></div><div class="shrink-0">${statusUI}</div></div><h4 class="text-sm font-bold text-slate-800 leading-relaxed mb-4 flex-1 whitespace-pre-wrap">${j.JOBDESK || '-'}</h4></div>`;
+    }).join('');
+    lucide.createIcons();
+};
+
+window.renderSopTasks = function() {
+    if (!currentUser) return;
+    const list = $id('engSopTaskList'); if (!list) return;
+    if (window.isLead()) return; 
+
+    const userEmail = (currentUser?.EMAIL || '').toLowerCase().trim();
+    const myTasks = taskAssignmentsData.filter(ta => (ta['ASSIGNEE_EMAIL'] || '').toLowerCase().trim() === userEmail);
+    
+    if(myTasks.length === 0) {
+        list.innerHTML = `<div class="py-10 bg-white border-2 border-dashed border-slate-200 rounded-3xl flex items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">BELUM ADA TASK SOP YANG DIASSIGN</div>`;
+        return;
+    }
+
+    const grouped = {};
+    myTasks.forEach(t => {
+        const pName = window.escapeJS(t['PROJECT'] || t['PROJECT NAME']);
+        if(!grouped[pName]) grouped[pName] = [];
+        grouped[pName].push(t);
+    });
+
+    let html = '';
+    for(let pName in grouped) {
+        html += `<div class="mb-2 mt-4 flex items-center gap-2 w-full"><i data-lucide="folder-open" class="w-5 h-5 text-emerald-600"></i><h3 class="text-sm font-black text-slate-800 uppercase tracking-wide">${pName}</h3></div>`;
+        grouped[pName].forEach(t => {
+            const tName = window.escapeJS(t['TASK'] || t['TASK NAME']);
+            let currentProgress = 0;
+            const projObj = allData.find(p => window.getVal(p, KEY_MAP.name) === (t['PROJECT'] || t['PROJECT NAME']));
+            if(projObj && projObj.Tasks) {
+                const taskObj = projObj.Tasks.find(x => x.name === (t['TASK'] || t['TASK NAME']));
+                if(taskObj) currentProgress = parseInt(taskObj.progress) || 0;
+            }
+            html += `<div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-3 group hover:border-emerald-300 transition-all tw-sop-row"><div class="flex justify-between items-start gap-2"><h4 class="text-sm font-bold text-slate-800 leading-snug">${tName}</h4><span class="text-[9px] font-black bg-emerald-50 text-emerald-600 px-2 py-1 rounded-md border border-emerald-100 uppercase tracking-widest shrink-0"><i data-lucide="activity" class="w-3 h-3 inline pb-0.5 mr-0.5"></i> ${currentProgress}%</span></div><div class="mt-auto pt-3 border-t border-slate-100 flex flex-col gap-3"><div class="flex items-center gap-2"><input type="number" min="0" max="100" class="tw-sop-prog w-20 p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-emerald-500 font-black text-center shadow-inner" value="${currentProgress}" placeholder="%"><input type="text" class="tw-sop-note flex-1 p-2.5 text-[10px] bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-emerald-500 font-medium shadow-inner" placeholder="Tulis catatan..." value="${window.escapeJS(t.NOTE || '')}"></div><button onclick="window.saveSopProgress(this, '${pName}', '${tName}')" class="w-full bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 hover:text-emerald-700 text-[10px] font-black uppercase tracking-widest py-3 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-1.5"><i data-lucide="save" class="w-4 h-4"></i> Simpan Progres</button></div></div>`;
+        });
+    }
+    list.innerHTML = html;
+    lucide.createIcons();
+};
+
+
+// =========================================================
+// 5. MODALS & SUBMISSION FUNCTIONS (ENGINEER & DIRECTOR)
+// =========================================================
+
 window.openEngProjectModal = function(idx) {
     const p = window.currentEngineerProjects[idx]; if (!p) return;
-    $id('epmTitle').textContent = getVal(p, KEY_MAP.name);
-    const epmAvgEl = $id('epmAvg'); 
-    if (epmAvgEl) epmAvgEl.textContent = `${p.myAvg}%`; 
+    $id('epmTitle').textContent = window.getVal(p, KEY_MAP.name);
+    const epmAvgEl = $id('epmAvg'); if (epmAvgEl) epmAvgEl.textContent = `${p.myAvg}%`; 
 
     let html = p.myTasks.map(t => {
-        return `
-        <div class="bg-white border border-slate-200 p-4 rounded-xl shadow-sm mb-3 task-row">
-            <div class="flex justify-between items-start mb-2 gap-2">
-                <h5 class="text-[12px] font-black text-slate-900 uppercase leading-snug">${escapeJS(t.name)}</h5>
-            </div>
-            <div class="flex items-center gap-3 mt-3">
-                <div class="flex items-center">
-                    <input type="number" min="0" max="100" value="${t.progress}" class="input-prog w-16 p-2 bg-slate-50 border border-slate-200 rounded-l-lg text-center font-bold text-xs outline-none focus:border-indigo-500">
-                    <span class="bg-slate-100 border border-l-0 border-slate-200 p-2 rounded-r-lg text-xs font-bold text-slate-500">%</span>
-                </div>
-                <input type="text" value="${escapeJS(t.keterangan || '')}" placeholder="Keterangan rinci..." class="input-ket flex-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium outline-none focus:border-indigo-500">
-                <button onclick="window.saveProgress(this, '${escapeJS(getVal(p, KEY_MAP.name))}', '${escapeJS(t.name)}')", class="bg-indigo-600 hover:bg-indigo-700 text-white font-black px-4 py-2 rounded-lg text-[9px] uppercase tracking-widest shadow-sm transition-all shrink-0">Simpan</button>
-            </div>
-        </div>`;
+        return `<div class="bg-white border border-slate-200 p-4 rounded-xl shadow-sm mb-3 task-row"><div class="flex justify-between items-start mb-2 gap-2"><h5 class="text-[12px] font-black text-slate-900 uppercase leading-snug">${window.escapeJS(t.name)}</h5></div><div class="flex items-center gap-3 mt-3"><div class="flex items-center"><input type="number" min="0" max="100" value="${t.progress}" class="input-prog w-16 p-2 bg-slate-50 border border-slate-200 rounded-l-lg text-center font-bold text-xs outline-none focus:border-indigo-500"><span class="bg-slate-100 border border-l-0 border-slate-200 p-2 rounded-r-lg text-xs font-bold text-slate-500">%</span></div><input type="text" value="${window.escapeJS(t.keterangan || '')}" placeholder="Keterangan rinci..." class="input-ket flex-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium outline-none focus:border-indigo-500"><button onclick="window.saveProgress(this, '${window.escapeJS(window.getVal(p, KEY_MAP.name))}', '${window.escapeJS(t.name)}')", class="bg-indigo-600 hover:bg-indigo-700 text-white font-black px-4 py-2 rounded-lg text-[9px] uppercase tracking-widest shadow-sm transition-all shrink-0">Simpan</button></div></div>`;
     }).join('');
 
     $id('epmTaskList').innerHTML = html;
@@ -1456,137 +1496,18 @@ window.saveProgress = async function(btn, proj, task) {
   const ket = row.querySelector('.input-ket').value; 
   const origHTML = btn.innerHTML;
   
-  btn.innerHTML = 'WAIT...'; 
-  btn.disabled = true;
+  btn.innerHTML = 'WAIT...'; btn.disabled = true;
   
   try {
-    const code = currentUser ? currentUser['KODE'] : 'ENG'; 
-    await fetch(API_URL, { 
-        method: 'POST', 
-        body: JSON.stringify({ action: 'UPDATE_PROGRESS', projectName: proj, taskName: task, teamCode: code, progress: prog, keterangan: ket }) 
-    });
+    const code = currentUser ? window.getTeamProp(currentUser, 'KODE') : 'ENG'; 
+    await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'UPDATE_PROGRESS', projectName: proj, taskName: task, teamCode: code, progress: prog, keterangan: ket }) });
+    btn.innerHTML = 'SAVED'; btn.classList.replace('bg-indigo-600', 'bg-emerald-500');
     
-    btn.innerHTML = 'SAVED'; 
-    btn.classList.replace('bg-indigo-600', 'bg-emerald-500');
+    const pD = allData.find(p => window.getVal(p, KEY_MAP.name) === proj); 
+    if (pD && pD.Tasks) { const tD = pD.Tasks.find(t => t.name === task); if (tD) { tD.progress = parseInt(prog); tD.keterangan = ket; } }
     
-    const pD = allData.find(p => getVal(p, KEY_MAP.name) === proj); 
-    if (pD && pD.Tasks) { 
-        const tD = pD.Tasks.find(t => t.name === task); 
-        if (tD) { tD.progress = parseInt(prog); tD.keterangan = ket; } 
-    }
-    
-    setTimeout(() => { 
-        btn.innerHTML = origHTML; 
-        btn.classList.replace('bg-emerald-500', 'bg-indigo-600'); 
-        btn.disabled = false; 
-    }, 1500);
-  } catch(e) { 
-      alert('Error saving data');
-      btn.innerHTML = origHTML; 
-      btn.disabled = false; 
-  }
-};
-
-window.renderJobdesk = function() {
-    if (!currentUser) return; 
-    
-    let filteredJd = jobdeskData;
-    const myKode = getTeamProp(currentUser, 'KODE').toUpperCase();
-    
-    // Tentukan target list berdasarkan Role
-    const isDirector = window.isLead();
-    const listCont = isDirector ? $id('dirJobdeskList') : $id('engJobdeskList');
-    
-    if (!listCont) return;
-
-    if (!isDirector) { 
-        filteredJd = jobdeskData.filter(j => (j['TEAM CODE'] || '').toUpperCase() === myKode); 
-    }
-
-    if (filteredJd.length === 0) { 
-        listCont.innerHTML = `<div class="py-10 bg-white rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">BELUM ADA JOBDESK</div>`; 
-        return; 
-    }
-
-    listCont.className = isDirector ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" : "flex flex-col gap-4";
-
-    listCont.innerHTML = filteredJd.map(j => {
-        const s = (j.STATUS || 'OPEN').toUpperCase(); let sColor = s === 'OPEN' ? 'bg-sky-100 text-sky-700 border-sky-200' : (s === 'PROGRESS' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200');
-        const canEdit = isDirector || (j['TEAM CODE'] || '').toUpperCase() === myKode;
-        let statusUI = `<span class="px-2.5 py-1 rounded-md border text-[9px] font-black uppercase tracking-widest ${sColor}">${s}</span>`;
-        
-        if (canEdit) { 
-            statusUI = `<select onchange="window.updateJdStatus(${j.rowIdx}, this)" class="bg-slate-50 border border-slate-200 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded outline-none focus:border-indigo-400 text-slate-700 cursor-pointer hover:bg-slate-100 transition-colors"><option value="OPEN" ${s==='OPEN'?'selected':''}>OPEN</option><option value="PROGRESS" ${s==='PROGRESS'?'selected':''}>PROGRESS</option><option value="DONE" ${s==='DONE'?'selected':''}>DONE</option></select>`; 
-        }
-
-        return `
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all relative group flex flex-col">
-            <div class="flex justify-between items-start mb-4 gap-2">
-                <div class="flex flex-wrap gap-1.5"><span class="text-[9px] font-black bg-indigo-50 text-indigo-600 px-2 py-1 rounded-md border border-indigo-100 uppercase tracking-widest"><i data-lucide="folder" class="w-3 h-3 inline pb-0.5 mr-0.5"></i> ${j['PROJECT NAME'] || '-'}</span>${isDirector ? `<span class="text-[9px] font-black bg-purple-50 text-purple-600 px-2 py-1 rounded-md border border-purple-100 uppercase tracking-widest"><i data-lucide="user" class="w-3 h-3 inline pb-0.5 mr-0.5"></i> ${j['TEAM CODE']}</span>` : ''}</div>
-                <div class="shrink-0">${statusUI}</div>
-            </div>
-            <h4 class="text-sm font-bold text-slate-800 leading-relaxed mb-4 flex-1 whitespace-pre-wrap">${j.JOBDESK || '-'}</h4>
-            <div class="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100 bg-slate-50/50 -mx-5 -mb-5 px-5 py-4 rounded-b-2xl mt-auto">
-                <div><p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] mb-1">Deadline</p><p class="text-xs font-bold text-rose-600 flex items-center gap-1.5"><i data-lucide="calendar-clock" class="w-3.5 h-3.5"></i> ${formatTglMini(j.DEADLINE)}</p></div>
-                <div class="text-right"><p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] mb-1">Prioritas</p><p class="text-xs font-black uppercase tracking-widest ${j.PRIORITY==='High'?'text-rose-600':(j.PRIORITY==='Medium'?'text-amber-500':'text-emerald-500')}">${j.PRIORITY || '-'}</p></div>
-            </div>
-        </div>`;
-    }).join('');
-    lucide.createIcons();
-};
-
-window.renderSopTasks = function() {
-    if (!currentUser) return;
-    const list = $id('engSopTaskList'); if (!list) return;
-    
-    if (window.isLead()) return; // Cuma tim yang render SOP task di kanbannya
-
-    const userEmail = (currentUser?.EMAIL || '').toLowerCase().trim();
-    const myTasks = taskAssignmentsData.filter(ta => (ta['ASSIGNEE_EMAIL'] || '').toLowerCase().trim() === userEmail);
-    
-    if(myTasks.length === 0) {
-        list.innerHTML = `<div class="py-10 bg-white border-2 border-dashed border-slate-200 rounded-3xl flex items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">BELUM ADA TASK SOP YANG DIASSIGN</div>`;
-        return;
-    }
-
-    const grouped = {};
-    myTasks.forEach(t => {
-        const pName = escapeJS(t['PROJECT'] || t['PROJECT NAME']);
-        if(!grouped[pName]) grouped[pName] = [];
-        grouped[pName].push(t);
-    });
-
-    let html = '';
-    for(let pName in grouped) {
-        html += `<div class="mb-2 mt-4 flex items-center gap-2 w-full"><i data-lucide="folder-open" class="w-5 h-5 text-emerald-600"></i><h3 class="text-sm font-black text-slate-800 uppercase tracking-wide">${pName}</h3></div>`;
-        
-        grouped[pName].forEach(t => {
-            const tName = escapeJS(t['TASK'] || t['TASK NAME']);
-            let currentProgress = 0;
-            const projObj = allData.find(p => getVal(p, KEY_MAP.name) === (t['PROJECT'] || t['PROJECT NAME']));
-            if(projObj && projObj.Tasks) {
-                const taskObj = projObj.Tasks.find(x => x.name === (t['TASK'] || t['TASK NAME']));
-                if(taskObj) currentProgress = parseInt(taskObj.progress) || 0;
-            }
-
-            html += `
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-3 group hover:border-emerald-300 transition-all tw-sop-row">
-                <div class="flex justify-between items-start gap-2">
-                    <h4 class="text-sm font-bold text-slate-800 leading-snug">${tName}</h4>
-                    <span class="text-[9px] font-black bg-emerald-50 text-emerald-600 px-2 py-1 rounded-md border border-emerald-100 uppercase tracking-widest shrink-0"><i data-lucide="activity" class="w-3 h-3 inline pb-0.5 mr-0.5"></i> ${currentProgress}%</span>
-                </div>
-                <div class="mt-auto pt-3 border-t border-slate-100 flex flex-col gap-3">
-                    <div class="flex items-center gap-2">
-                        <input type="number" min="0" max="100" class="tw-sop-prog w-20 p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-emerald-500 font-black text-center shadow-inner" value="${currentProgress}" placeholder="%">
-                        <input type="text" class="tw-sop-note flex-1 p-2.5 text-[10px] bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-emerald-500 font-medium shadow-inner" placeholder="Tulis catatan..." value="${escapeJS(t.NOTE || '')}">
-                    </div>
-                    <button onclick="window.saveSopProgress(this, '${pName}', '${tName}')" class="w-full bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 hover:text-emerald-700 text-[10px] font-black uppercase tracking-widest py-3 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-1.5"><i data-lucide="save" class="w-4 h-4"></i> Simpan Progres</button>
-                </div>
-            </div>`;
-        });
-    }
-    list.innerHTML = html;
-    lucide.createIcons();
+    setTimeout(() => { btn.innerHTML = origHTML; btn.classList.replace('bg-emerald-500', 'bg-indigo-600'); btn.disabled = false; }, 1500);
+  } catch(e) { alert('Error saving data'); btn.innerHTML = origHTML; btn.disabled = false; }
 };
 
 window.saveSopProgress = async function(btn, proj, task) {
@@ -1595,484 +1516,118 @@ window.saveSopProgress = async function(btn, proj, task) {
     const ket = row.querySelector('.tw-sop-note').value;
     const origHTML = btn.innerHTML;
     
-    btn.innerHTML = '<span class="animate-pulse">WAIT...</span>';
-    btn.disabled = true;
+    btn.innerHTML = '<span class="animate-pulse">WAIT...</span>'; btn.disabled = true;
 
     try {
-        const code = currentUser ? getTeamProp(currentUser, 'KODE') : 'ENG';
+        const code = currentUser ? window.getTeamProp(currentUser, 'KODE') : 'ENG';
         await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'UPDATE_PROGRESS', projectName: proj, taskName: task, teamCode: code, progress: prog, keterangan: ket }) });
         
         btn.innerHTML = '<i data-lucide="check-circle-2" class="w-4 h-4"></i> SAVED';
-        btn.classList.replace('text-emerald-600', 'text-white');
-        btn.classList.replace('bg-emerald-50', 'bg-emerald-500');
+        btn.classList.replace('text-emerald-600', 'text-white'); btn.classList.replace('bg-emerald-50', 'bg-emerald-500');
+        lucide.createIcons();
         
+        const pD = allData.find(p => window.getVal(p, KEY_MAP.name) === proj);
+        if (pD && pD.Tasks) { const tD = pD.Tasks.find(t => t.name === task); if (tD) { tD.progress = parseInt(prog); tD.keterangan = ket; } }
+
         setTimeout(() => {
-            btn.innerHTML = origHTML;
-            btn.disabled = false;
-            btn.classList.replace('text-white', 'text-emerald-600');
-            btn.classList.replace('bg-emerald-500', 'bg-emerald-50');
+            btn.innerHTML = origHTML; btn.disabled = false;
+            btn.classList.replace('text-white', 'text-emerald-600'); btn.classList.replace('bg-emerald-500', 'bg-emerald-50');
             lucide.createIcons();
         }, 1500);
-    } catch (error) {
-        alert('Gagal update.');
-        btn.innerHTML = origHTML;
-        btn.disabled = false;
-    }
+    } catch (error) { alert('Gagal update.'); btn.innerHTML = origHTML; btn.disabled = false; }
 };
 
-
-// =============== DYNAMIC SMART TIMESHEET (TIME LOCK) ===============
 window.openTimesheetModal = function() {
   $id('tsDate').valueAsDate = new Date();
   tsRows = [{ id: Date.now(), start: '08:00', end: '09:00', proj: '', desc: '', loc: 'KANTOR', ken: '', isBreak: false, isOvertime: false }];
   window.renderTsGrid(); 
   $id('timesheetModal').classList.replace('hidden', 'flex');
 };
-
 window.closeTimesheetModal = function() { $id('timesheetModal').classList.replace('flex', 'hidden'); };
 
 window.renderTsGrid = function() {
-  const cont = $id('tsRowsContainer'); 
-  if(!cont) return; 
-  
-  const myProjNames = window.currentEngineerProjects ? window.currentEngineerProjects.map(p => escapeJS(getVal(p, KEY_MAP.name))) : [];
+  const cont = $id('tsRowsContainer'); if(!cont) return; 
+  const myProjNames = window.currentEngineerProjects ? window.currentEngineerProjects.map(p => window.escapeJS(window.getVal(p, KEY_MAP.name))) : [];
 
   cont.innerHTML = tsRows.map(r => {
-    if (r.isBreak) { 
-      return `<div class="flex p-3 bg-slate-100 rounded-xl justify-center"><span class="text-[10px] font-black text-rose-500 uppercase tracking-widest">${r.start} - ${r.end} | ${r.desc}</span></div>`; 
-    }
+    if (r.isBreak) return `<div class="flex p-3 bg-slate-100 rounded-xl justify-center"><span class="text-[10px] font-black text-rose-500 uppercase tracking-widest">${r.start} - ${r.end} | ${r.desc}</span></div>`; 
     let opts = `<option value="Operasional Kantor"></option>${myProjNames.map(pn => `<option value="${pn}"></option>`).join('')}`;
-    
-    return `
-      <div class="flex flex-col md:flex-row gap-2 bg-white border p-3 rounded-xl ${r.isOvertime ? 'border-purple-300 bg-purple-50' : ''}">
-        <div class="flex gap-2 md:w-1/4">
-          <input type="time" value="${r.start}" onchange="window.updateTsRow(${r.id}, 'start', this.value)" class="w-full p-2 text-xs border rounded-lg font-bold outline-none">
-          <input type="time" value="${r.end}" onchange="window.updateTsRow(${r.id}, 'end', this.value)" class="w-full p-2 text-xs border rounded-lg font-bold outline-none">
-        </div>
-        <input type="text" list="ts-proj-${r.id}" value="${r.proj}" onchange="window.updateTsRow(${r.id}, 'proj', this.value)" placeholder="Proyek..." class="md:w-1/4 p-2 text-xs border rounded-lg font-bold outline-none">
-        <datalist id="ts-proj-${r.id}">${opts}</datalist>
-        <select onchange="window.updateTsRow(${r.id}, 'loc', this.value)" class="md:w-1/6 p-2 text-xs border rounded-lg font-bold text-sky-600 outline-none">
-          <option value="KANTOR" ${r.loc==='KANTOR'?'selected':''}>KANTOR</option>
-          <option value="SITE" ${r.loc==='SITE'?'selected':''}>SITE</option>
-        </select>
-        <input type="text" value="${r.desc}" onchange="window.updateTsRow(${r.id}, 'desc', this.value)" placeholder="Aktivitas..." class="flex-1 p-2 text-xs border rounded-lg outline-none">
-        <button type="button" onclick="tsRows=tsRows.filter(x=>x.id!==${r.id});window.renderTsGrid();" class="p-2 text-rose-500 border rounded-lg hover:bg-rose-50 outline-none"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-      </div>`;
+    return `<div class="flex flex-col md:flex-row gap-2 bg-white border p-3 rounded-xl ${r.isOvertime ? 'border-purple-300 bg-purple-50' : ''}"><div class="flex gap-2 md:w-1/4"><input type="time" value="${r.start}" onchange="window.updateTsRow(${r.id}, 'start', this.value)" class="w-full p-2 text-xs border rounded-lg font-bold outline-none"><input type="time" value="${r.end}" onchange="window.updateTsRow(${r.id}, 'end', this.value)" class="w-full p-2 text-xs border rounded-lg font-bold outline-none"></div><input type="text" list="ts-proj-${r.id}" value="${r.proj}" onchange="window.updateTsRow(${r.id}, 'proj', this.value)" placeholder="Proyek..." class="md:w-1/4 p-2 text-xs border rounded-lg font-bold outline-none"><datalist id="ts-proj-${r.id}">${opts}</datalist><select onchange="window.updateTsRow(${r.id}, 'loc', this.value)" class="md:w-1/6 p-2 text-xs border rounded-lg font-bold text-sky-600 outline-none"><option value="KANTOR" ${r.loc==='KANTOR'?'selected':''}>KANTOR</option><option value="SITE" ${r.loc==='SITE'?'selected':''}>SITE</option></select><input type="text" value="${r.desc}" onchange="window.updateTsRow(${r.id}, 'desc', this.value)" placeholder="Aktivitas..." class="flex-1 p-2 text-xs border rounded-lg outline-none"><button type="button" onclick="tsRows=tsRows.filter(x=>x.id!==${r.id});window.renderTsGrid();" class="p-2 text-rose-500 border rounded-lg hover:bg-rose-50 outline-none"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
   }).join('');
   lucide.createIcons();
 };
 
 window.updateTsRow = function(id, field, val) {
-  const i = tsRows.findIndex(r => r.id === id); 
-  if (i === -1) return; 
-  tsRows[i][field] = val;
-  
+  const i = tsRows.findIndex(r => r.id === id); if (i === -1) return; tsRows[i][field] = val;
   if (field === 'end' && !tsRows[i].isBreak) {
-    const sm = parseTimeMin(tsRows[i].start); 
-    let em = parseTimeMin(val);
-    
-    // SMART TIME LOCK
-    if (!tsRows[i].isOvertime && em > 1020) { 
-      alert("Jam kerja reguler mentok 17:00. Gunakan TAMBAH LEMBUR."); 
-      tsRows[i].end = "17:00"; em = 1020; 
-    }
+    const sm = window.parseTimeMin(tsRows[i].start); let em = window.parseTimeMin(val);
+    if (!tsRows[i].isOvertime && em > 1020) { alert("Jam reguler mentok 17:00. Gunakan TAMBAH LEMBUR."); tsRows[i].end = "17:00"; em = 1020; }
     if (sm < 720 && em > 720) { tsRows[i].end = "12:00"; em = 720; }
-    if (em === 720 && sm < 720 && !tsRows.some(r => r.isBreak && r.start === "12:00")) { 
-      tsRows.splice(i + 1, 0, { id: Date.now(), start: "12:00", end: "13:00", proj: "-", desc: "ISTIRAHAT", loc: "-", ken: "-", isBreak: true, isOvertime: false }); 
-      tsRows.splice(i + 2, 0, { id: Date.now() + 1, start: "13:00", end: "14:00", proj: "", desc: "", loc: "KANTOR", ken: "", isBreak: false, isOvertime: false }); 
-    }
+    if (em === 720 && sm < 720 && !tsRows.some(r => r.isBreak && r.start === "12:00")) { tsRows.splice(i + 1, 0, { id: Date.now(), start: "12:00", end: "13:00", proj: "-", desc: "ISTIRAHAT", loc: "-", ken: "-", isBreak: true, isOvertime: false }); tsRows.splice(i + 2, 0, { id: Date.now() + 1, start: "13:00", end: "14:00", proj: "", desc: "", loc: "KANTOR", ken: "", isBreak: false, isOvertime: false }); }
     if (sm < 930 && em > 930) { tsRows[i].end = "15:30"; em = 930; }
-    if (em === 930 && sm < 930 && !tsRows.some(r => r.isBreak && r.start === "15:30")) { 
-      tsRows.splice(i + 1, 0, { id: Date.now(), start: "15:30", end: "16:00", proj: "-", desc: "SHOLAT ASHAR", loc: "-", ken: "-", isBreak: true, isOvertime: false }); 
-      tsRows.splice(i + 2, 0, { id: Date.now() + 1, start: "16:00", end: "17:00", proj: "", desc: "", loc: "KANTOR", ken: "", isBreak: false, isOvertime: false }); 
-    }
+    if (em === 930 && sm < 930 && !tsRows.some(r => r.isBreak && r.start === "15:30")) { tsRows.splice(i + 1, 0, { id: Date.now(), start: "15:30", end: "16:00", proj: "-", desc: "SHOLAT ASHAR", loc: "-", ken: "-", isBreak: true, isOvertime: false }); tsRows.splice(i + 2, 0, { id: Date.now() + 1, start: "16:00", end: "17:00", proj: "", desc: "", loc: "KANTOR", ken: "", isBreak: false, isOvertime: false }); }
   }
   window.renderTsGrid();
 };
 
 window.addTsRow = function() {
-  const nr = tsRows.filter(r => !r.isOvertime); 
-  const lr = nr[nr.length - 1] || tsRows[tsRows.length - 1]; 
-  let ns = lr ? parseTimeMin(lr.end) : 480;
-  
+  const nr = tsRows.filter(r => !r.isOvertime); const lr = nr[nr.length - 1] || tsRows[tsRows.length - 1]; let ns = lr ? window.parseTimeMin(lr.end) : 480;
   if (ns >= 1020) return alert("Jam mentok 17:00. Gunakan TAMBAH LEMBUR.");
-  
-  if (ns >= 720 && ns < 780) { 
-    tsRows.push({ id: Date.now(), start: "12:00", end: "13:00", proj: "-", desc: "ISTIRAHAT", loc: "-", ken: "-", isBreak: true, isOvertime: false }); ns = 780; 
-  } else if (ns >= 930 && ns < 960) { 
-    tsRows.push({ id: Date.now(), start: "15:30", end: "16:00", proj: "-", desc: "SHOLAT ASHAR", loc: "-", ken: "-", isBreak: true, isOvertime: false }); ns = 960; 
-  }
-  
-  let ne = ns + 60; 
-  if (ns < 720 && ne > 720) ne = 720; 
-  if (ns < 930 && ne > 930) ne = 930; 
-  if (ne > 1020) ne = 1020;
-  
-  tsRows.push({ id: Date.now() + 1, start: formatTimeMin(ns), end: formatTimeMin(ne), proj: "", desc: "", loc: "KANTOR", ken: "", isBreak: false, isOvertime: false }); 
+  if (ns >= 720 && ns < 780) { tsRows.push({ id: Date.now(), start: "12:00", end: "13:00", proj: "-", desc: "ISTIRAHAT", loc: "-", ken: "-", isBreak: true, isOvertime: false }); ns = 780; } else if (ns >= 930 && ns < 960) { tsRows.push({ id: Date.now(), start: "15:30", end: "16:00", proj: "-", desc: "SHOLAT ASHAR", loc: "-", ken: "-", isBreak: true, isOvertime: false }); ns = 960; }
+  let ne = ns + 60; if (ns < 720 && ne > 720) ne = 720; if (ns < 930 && ne > 930) ne = 930; if (ne > 1020) ne = 1020;
+  tsRows.push({ id: Date.now() + 1, start: window.formatTimeMin(ns), end: window.formatTimeMin(ne), proj: "", desc: "", loc: "KANTOR", ken: "", isBreak: false, isOvertime: false }); 
   window.renderTsGrid();
 };
 
 window.addTsOvertime = function() { 
-  const lr = tsRows[tsRows.length - 1]; 
-  let ns = lr ? parseTimeMin(lr.end) : 1020; 
-  if (ns < 1020) ns = 1020; 
-  let ne = ns + 60; 
-  if (ne > 1439) ne = 1439; 
-  tsRows.push({ id: Date.now(), start: formatTimeMin(ns), end: formatTimeMin(ne), proj: "", desc: "", loc: "KANTOR", ken: "", isBreak: false, isOvertime: true }); 
+  const lr = tsRows[tsRows.length - 1]; let ns = lr ? window.parseTimeMin(lr.end) : 1020; if (ns < 1020) ns = 1020; let ne = ns + 60; if (ne > 1439) ne = 1439; 
+  tsRows.push({ id: Date.now(), start: window.formatTimeMin(ns), end: window.formatTimeMin(ne), proj: "", desc: "", loc: "KANTOR", ken: "", isBreak: false, isOvertime: true }); 
   window.renderTsGrid(); 
 };
 
 window.submitTimesheet = async function(e) {
-  e.preventDefault(); 
-  let err = false;
-  
+  e.preventDefault(); let err = false;
   const acts = tsRows.filter(r => !r.isBreak && (r.desc.trim() !== '' || r.proj.trim() !== '')).map(r => {
-    if (parseTimeMin(r.start) >= parseTimeMin(r.end)) err = true; 
+    if (window.parseTimeMin(r.start) >= window.parseTimeMin(r.end)) err = true; 
     const locClean = (r.loc || 'KANTOR').replace(/\|/g, '').replace(/\[|\]/g, ''); 
     return { namaProyek: r.proj, jamMulai: r.start, jamSelesai: r.end, deskripsi: `[LOC:${locClean}] ${r.desc}`, kendala: r.ken };
   });
+  if (err) return alert("Ada Jam Selesai <= Jam Mulai!"); if (acts.length === 0) return alert("Isi minimal 1 aktivitas valid!");
   
-  if (err) return alert("Ada Jam Selesai <= Jam Mulai!"); 
-  if (acts.length === 0) return alert("Isi minimal 1 aktivitas valid!");
-  
-  const btn = $id('btnSubmitTS'); const orig = btn.innerHTML; 
-  btn.innerHTML = 'MENGIRIM...'; btn.disabled = true;
-  
+  const btn = $id('btnSubmitTS'); const orig = btn.innerHTML; btn.innerHTML = 'MENGIRIM...'; btn.disabled = true;
   try {
-    await fetch(API_URL, { 
-      method: 'POST', 
-      body: JSON.stringify({ action: 'SUBMIT_TIMESHEET', tanggal: $id('tsDate').value, namaEngineer: currentUser['NAMA'], deptEngineer: currentUser['DEPARTEMEN'], activities: acts }) 
-    });
-    btn.innerHTML = 'TERKIRIM!'; 
-    setTimeout(() => { window.closeTimesheetModal(); btn.innerHTML = orig; btn.disabled = false; }, 1500);
+    await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'SUBMIT_TIMESHEET', tanggal: $id('tsDate').value, namaEngineer: window.getTeamProp(currentUser, 'NAMA'), deptEngineer: window.getTeamProp(currentUser, 'DEPT'), activities: acts }) });
+    btn.innerHTML = 'TERKIRIM!'; setTimeout(() => { window.closeTimesheetModal(); btn.innerHTML = orig; btn.disabled = false; }, 1500);
   } catch(err) { alert('Gagal mengirim data.'); btn.innerHTML = orig; btn.disabled = false; }
 };
 
-// =============== FINANCE & IMAGE COMPRESS ===============
+// Modal Finance / Kasbon
 window.openFinanceModal = function() {
-  const myProjNames = window.currentEngineerProjects ? window.currentEngineerProjects.map(p => escapeJS(getVal(p, KEY_MAP.name))) : [];
+  const myProjNames = window.currentEngineerProjects ? window.currentEngineerProjects.map(p => window.escapeJS(window.getVal(p, KEY_MAP.name))) : [];
   let opts = `<option value="Operasional Kantor">Operasional Kantor</option>`; myProjNames.forEach(pn => opts += `<option value="${pn}">${pn}</option>`);
-  
-  const finProj = $id('finProj');
-  if(finProj) finProj.innerHTML = `<option value="">-- Pilih Proyek --</option>${opts}`; 
+  const finProj = $id('finProj'); if(finProj) finProj.innerHTML = `<option value="">-- Pilih Proyek --</option>${opts}`; 
   $id('financeModal').classList.replace('hidden', 'flex'); 
 };
 window.closeFinanceModal = function() { $id('financeModal').classList.replace('flex', 'hidden'); };
-
 window.handleFinPhoto = function(e) {
-  const file = e.target.files[0]; if(!file) return; 
-  $id('finFileName').textContent = 'Memproses foto...'; 
-  
+  const file = e.target.files[0]; if(!file) return; $id('finFileName').textContent = 'Memproses foto...'; 
   const reader = new FileReader();
   reader.onload = (event) => { 
-    const img = new Image(); 
-    img.onload = () => { 
-      const canvas = document.createElement('canvas'); 
-      const MAX_SIZE = 600; let width = img.width; let height = img.height; 
-      if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
-      else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } } 
-      canvas.width = width; canvas.height = height; 
-      const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); 
-      $id('finBase64').value = canvas.toDataURL('image/jpeg', 0.6); 
-      $id('finFileName').textContent = '✓ Foto Siap Dikirim'; 
-      $id('finFileName').classList.replace('text-slate-500', 'text-amber-600'); 
-    }; 
-    img.src = event.target.result; 
-  }; 
-  reader.readAsDataURL(file);
+    const img = new Image(); img.onload = () => { 
+      const canvas = document.createElement('canvas'); const MAX_SIZE = 600; let width = img.width; let height = img.height; 
+      if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } } 
+      canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); 
+      $id('finBase64').value = canvas.toDataURL('image/jpeg', 0.6); $id('finFileName').textContent = '✓ Foto Siap Dikirim'; $id('finFileName').classList.replace('text-slate-500', 'text-amber-600'); 
+    }; img.src = event.target.result; 
+  }; reader.readAsDataURL(file);
 };
-
 window.submitFinance = async function(e) {
   e.preventDefault(); if(!$id('finBase64').value) return alert('Wajib unggah foto nota!');
   const btn = $id('btnSubmitFin'); const orig = btn.innerHTML; btn.innerHTML = 'MENGIRIM...'; btn.disabled = true;
   try {
-    await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'SUBMIT_FINANCE', namaEngineer: currentUser['NAMA'], namaProyek: $id('finProj').value, nominal: $id('finNom').value, keterangan: $id('finKet').value, fotoNota: $id('finBase64').value }) });
-    btn.innerHTML = '✓ BERHASIL'; 
-    setTimeout(() => { window.closeFinanceModal(); btn.innerHTML = orig; btn.disabled = false; }, 2000);
+    await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'SUBMIT_FINANCE', namaEngineer: window.getTeamProp(currentUser, 'NAMA'), namaProyek: $id('finProj').value, nominal: $id('finNom').value, keterangan: $id('finKet').value, fotoNota: $id('finBase64').value }) });
+    btn.innerHTML = '✓ BERHASIL'; setTimeout(() => { window.closeFinanceModal(); btn.innerHTML = orig; btn.disabled = false; }, 2000);
   } catch(err) { alert('Gagal mengirim pengajuan.'); btn.innerHTML = orig; btn.disabled = false; }
-};
-
-// =============== BOD PANEL (EXECUTIVE) ===============
-let curExecFilter = 'ACTIVES';
-const execFiltersConfig = [
-    { id: 'ACTIVES', label: 'ACTIVES', color: 'bg-[#0ea5e9]' },
-    { id: 'SLF', label: 'SLF', color: 'bg-slate-800' },
-    { id: 'PBG', label: 'PBG', color: 'bg-slate-800' },
-    { id: 'HIGH', label: 'High', color: 'bg-rose-500' },
-    { id: 'MEDIUM', label: 'Medium', color: 'bg-amber-500' },
-    { id: 'LOW', label: 'Low', color: 'bg-emerald-500' },
-    { id: 'COMPLETE', label: 'Complete', color: 'bg-emerald-600' }
-];
-
-window.switchExecTab = function(tabName) {
-  ['overview', 'timeline', 'timesheet', 'finance'].forEach(t => {
-    const el = $id(`exec-${t}-section`); if(el) el.classList.add('hidden');
-    const tabEl = $id(`tab-${t}`);
-    if(tabEl) {
-        tabEl.classList.remove('bg-[#003366]');
-        tabEl.classList.add('hover:bg-white/20');
-    }
-  });
-  
-  const sec = $id(`exec-${tabName}-section`); if(sec) sec.classList.remove('hidden');
-  const tEl = $id(`tab-${tabName}`);
-  if(tEl) {
-      tEl.classList.remove('hover:bg-white/20');
-      tEl.classList.add('bg-[#003366]');
-  }
-  
-  if (tabName === 'timeline') window.renderTimeline();
-  if (tabName === 'timesheet') window.renderTimesheetControls();
-  if (tabName === 'finance') window.renderFinanceTable();
-};
-
-window.handleSearchProject = function(val) {
-    curExecSearch = val.toLowerCase().trim();
-    window.renderExecutiveGrid();
-};
-
-window.renderExecutive = function() {
-  const statusCount = { ACTIVES: 0, NEW: 0, COMPLETE: 0, "ON HOLD": 0, CLOSED: 0 };
-  allData.forEach(p => {
-    const status = (getVal(p, KEY_MAP.status) || '').toUpperCase().trim();
-    if (status.includes('ACTIVE')) statusCount.ACTIVES++;
-    else if (status === 'NEW') statusCount.NEW++;
-    else if (status.includes('COMPLETE')) statusCount.COMPLETE++;
-    else if (status.includes('HOLD')) statusCount["ON HOLD"]++;
-    else if (status.includes('CLOSE')) statusCount.CLOSED++;
-  });
-
-  let totalAll = allData.length;
-  let actSum = statusCount.ACTIVES + statusCount.NEW; 
-  ['k0','k1','k2','k3','k4','k5'].forEach((k,i)=>{
-      const el = $id(k);
-      if(el) el.textContent = [totalAll, actSum, statusCount.NEW, statusCount.COMPLETE, statusCount["ON HOLD"], statusCount.CLOSED][i];
-  });
-
-  window.makePie('cProjType', ['ACTIVES', 'NEW', 'COMPLETE', 'ON HOLD', 'CLOSED'], [actSum, statusCount.NEW, statusCount.COMPLETE, statusCount["ON HOLD"], statusCount.CLOSED], ['#0ea5e9','#8b5cf6','#22c55e','#eab308','#64748b'], 'status', 'pie');
-
-  const pc = allData.reduce((a,p)=>{const v=getVal(p,KEY_MAP.priority).toUpperCase(); if(v.includes('HIGH') || v.includes('HIGHT'))a.H++;else if(v.includes('MEDIUM'))a.M++;else a.L++; return a;},{H:0,M:0,L:0});
-  
-  window.makePie('cPriority', ['High','Medium','Low'], [pc.H,pc.M,pc.L], ['#f97316','#fb923c','#22c55e'], 'priority', 'pie');
-  
-  window.renderFilteredList('priority', 'High');
-  window.renderExecutiveGrid();
-};
-
-window.makePie = function(id, labels, data, colors, type, chartType = 'pie') {
-  if (charts[id]) charts[id].destroy(); const canvas = $id(id); if(!canvas) return;
-  charts[id] = new Chart(canvas, { 
-      type: chartType, 
-      data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 2, borderColor: '#ffffff', hoverOffset: 6 }] }, 
-      options: { 
-          responsive: true, maintainAspectRatio: false, 
-          onClick: (e, el) => { if(el.length) window.renderFilteredList(type, labels[el[0].index]); }, 
-          plugins: { legend: { display: false }, datalabels: { color: '#fff', font: { weight: 'bold', size: 10 }, formatter: (v, ctx) => { let s = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0); return (v / s) * 100 > 5 ? v : ''; } } } 
-      } 
-  });
-  const lCont = $id('l' + id.substring(1)); 
-  if(lCont) { 
-      lCont.innerHTML = labels.map((l, i) => `<div onclick="window.renderFilteredList('${type}','${l}')" class="flex items-center gap-2 px-3.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-full cursor-pointer text-[10px] font-bold text-slate-600 shadow-sm transition-colors"><span class="w-2.5 h-2.5 rounded-full shadow-sm" style="background:${colors[i]}"></span>${l} <span class="text-slate-800 ml-1.5 font-black">${data[i]}</span></div>`).join(''); 
-  }
-};
-
-window.renderFilteredList = function(type, val) {
-  const tEl = $id('detailTitle'); if(tEl) tEl.textContent = `DAFTAR: ${val.toUpperCase()}`;
-  const fil = allData.filter(p => {
-    const sv = getVal(p, KEY_MAP.status).toLowerCase();
-    if (type === 'status') { const v = val.toUpperCase(); if (v === 'ACTIVES') return sv.includes('active') || sv === 'new'; if (v === 'NEW') return sv === 'new'; if (v === 'COMPLETE') return sv.includes('complete'); if (v === 'ON HOLD') return sv.includes('hold'); if (v === 'CLOSED') return sv.includes('closed'); return false; }
-    if (type === 'priority') { const pr = getVal(p, KEY_MAP.priority).toUpperCase(); return (pr.includes('HIGH') || pr.includes('HIGHT') ? 'High' : (pr.includes('MEDIUM') ? 'Medium' : (pr.includes('LOW') ? 'Low' : ''))) === val; } return false;
-  });
-  const panel = $id('detailPanel'); if(!panel) return;
-  if (fil.length === 0) return panel.innerHTML = `<div class="w-full h-full flex flex-col items-center justify-center text-slate-400 text-[11px] italic">Kosong</div>`;
-  
-  panel.innerHTML = `<div class="flex gap-6 items-end h-full min-w-max px-6 pb-20 pt-8">` + fil.map((p, i) => {
-    const pg = window.getCalcProgress(p); const nm = escapeJS(getVal(p, KEY_MAP.name)); const barHeight = Math.max(pg, 5); const delay = i * 50; 
-    return `<div class="flex flex-col items-center justify-end h-full w-[44px] shrink-0 group"><span class="text-[10px] font-black text-[#003366] mb-1.5 transition-all duration-500 opacity-0 translate-y-2 animated-text" style="transition-delay: ${delay + 300}ms">${pg}%</span><div class="w-10 bg-[#38bdf8] rounded-t-lg transition-all duration-1000 ease-out animated-bar hover:bg-[#0ea5e9] cursor-pointer" style="height: 0%; transition-delay: ${delay}ms" data-height="${barHeight}%"></div><div class="mt-4 relative w-[2px]"><div class="absolute top-0 right-2 origin-top-right -rotate-45 w-[140px] text-right"><p class="text-[9px] font-bold text-slate-500 truncate uppercase hover:text-[#0ea5e9] cursor-default transition-colors" title="${nm}">${nm}</p></div></div></div>`;
-  }).join('') + `</div>`;
-  setTimeout(() => { panel.querySelectorAll('.animated-bar').forEach(b => b.style.height = b.getAttribute('data-height')); panel.querySelectorAll('.animated-text').forEach(t => t.classList.remove('opacity-0', 'translate-y-2')); }, 50);
-};
-
-window.renderExecutiveGrid = function() {
-    const efEl = $id('execFilters');
-    if(efEl) efEl.innerHTML = execFiltersConfig.map(f => `<button onclick="curExecFilter='${f.id}';window.renderExecutiveGrid()" class="px-5 py-2.5 rounded-full text-[10px] font-black uppercase border transition-colors ${curExecFilter===f.id?f.color+' text-white border-transparent':'bg-white text-slate-500 hover:bg-slate-50'}">${f.label}</button>`).join('');
-    
-    const fil = allData.filter(p => {
-        const s = getVal(p, KEY_MAP.status).toLowerCase(); const pt = (p.Type||'').toUpperCase(); const prRaw = getVal(p, KEY_MAP.priority).toUpperCase(); const pr = prRaw.includes('HIGH')?'HIGH':(prRaw.includes('MEDIUM')?'MEDIUM':'LOW');
-        const nm = getVal(p, KEY_MAP.name).toLowerCase();
-        
-        if(curExecSearch && !nm.includes(curExecSearch)) return false;
-
-        if(curExecFilter==='ACTIVES') return s.includes('active') || s.includes('new'); 
-        if(curExecFilter==='CLOSED') return s.includes('closed'); 
-        if(curExecFilter==='COMPLETE') return s.includes('complete');
-        if(curExecFilter==='SLF') return pt==='SLF'; if(curExecFilter==='PBG') return pt==='PBG'; 
-        if(curExecFilter==='HIGH') return pr==='HIGH'; if(curExecFilter==='MEDIUM') return pr==='MEDIUM'; if(curExecFilter==='LOW') return pr==='LOW'; 
-        return true;
-    });
-    
-    window.currentExecutiveData = fil; const grid = $id('executiveGrid'); if(!grid) return;
-    if(fil.length===0) { grid.innerHTML = `<div class="col-span-full py-16 text-center text-slate-400 font-bold uppercase border-2 border-dashed rounded-3xl">Proyek Tidak Ditemukan</div>`; return; }
-    
-    const today = new Date().getTime();
-    grid.innerHTML = fil.map((p, i) => {
-        const pg = window.getCalcProgress(p); const sStr = getVal(p, ['start date', 'date start', 'mulai', 'start']); const eStr = getVal(p, ['date end', 'end date', 'selesai', 'end']); let oTag = '';
-        if(eStr && pg<100) { let eD = new Date(eStr).getTime(); if(isNaN(eD)&&eStr.includes('/')) eD=new Date(eStr.split('/').reverse().join('-')).getTime(); if(!isNaN(eD) && today>eD) { const diffDays = Math.ceil(Math.abs(today - eD) / (1000 * 60 * 60 * 24)); oTag=`<div class="absolute -top-3 -right-3 bg-rose-600 text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg border-2 border-white animate-pulse z-10">OVERDUE ${diffDays} HARI</div>`; } }
-        
-        let taskListHtml = '';
-        if(p.Tasks && p.Tasks.length > 0) {
-            let phaseMap = {};
-            p.Tasks.forEach(t => {
-                let g = t.group || "TAHAPAN UMUM";
-                if (!phaseMap[g]) phaseMap[g] = { sum: 0, count: 0 };
-                phaseMap[g].sum += (parseInt(t.progress) || 0);
-                phaseMap[g].count++;
-            });
-            
-            let phaseIndex = 0;
-            for (let phaseName in phaseMap) {
-                 let avg = Math.round(phaseMap[phaseName].sum / phaseMap[phaseName].count);
-                 taskListHtml += `
-                 <div onclick="window.openBodModal(${i}, ${phaseIndex})" class="bg-white px-4 py-3 rounded-lg flex justify-between items-center cursor-pointer shadow-sm hover:shadow-md transition-shadow group mb-2 border border-slate-100 hover:border-sky-200">
-                    <span class="text-[10px] font-bold text-slate-700 uppercase truncate pr-2 group-hover:text-sky-600 flex items-center gap-1.5"><i data-lucide="layers" class="w-3 h-3 text-slate-400"></i> ${escapeJS(phaseName)}</span>
-                    <div class="flex items-center gap-2">
-                        <span class="text-[10px] font-black text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded">${avg}%</span>
-                        <i data-lucide="chevron-right" class="w-3 h-3 text-slate-400 group-hover:text-sky-500"></i>
-                    </div>
-                 </div>`;
-                 phaseIndex++;
-            }
-        } else {
-            taskListHtml = `<div class="text-[10px] italic text-slate-500 text-center py-4">Tidak ada data task.</div>`;
-        }
-        
-        let priorityRaw = getVal(p, KEY_MAP.priority).toUpperCase();
-        let priorityTag = priorityRaw.includes('HIGH') ? 'HIGH' : priorityRaw.includes('MEDIUM') ? 'MEDIUM' : 'LOW';
-        let priorityColor = priorityTag === 'HIGH' ? 'text-rose-500 border-rose-200' : priorityTag === 'MEDIUM' ? 'text-amber-500 border-amber-200' : 'text-emerald-500 border-emerald-200';
-
-        return `
-        <div class="bg-[#FEF08A] rounded-[24px] p-5 flex flex-col border border-[#fde047] shadow-sm relative min-h-[450px]">
-            ${oTag}
-            <div class="mb-4">
-                <h2 class="text-[14px] font-black text-slate-800 uppercase leading-none">${p.Type||'PROYEK'}</h2>
-                <p class="text-[11px] font-bold text-slate-700 line-clamp-2 mt-1.5 uppercase">${getVal(p, KEY_MAP.name)}</p>
-            </div>
-            
-            <div class="bg-white/60 p-4 rounded-[16px] mb-4 shrink-0 shadow-sm border border-white/50">
-                <div class="flex justify-between items-center mb-4">
-                    <div class="relative w-12 h-12 shrink-0">
-                        <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
-                            <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="3"></circle>
-                            <circle cx="18" cy="18" r="15.9" fill="none" stroke="#0ea5e9" stroke-width="3" stroke-dasharray="${pg},100" stroke-linecap="round"></circle>
-                        </svg>
-                        <div class="absolute inset-0 flex items-center justify-center text-[11px] font-black text-slate-800">${pg}%</div>
-                    </div>
-                    <span class="bg-white ${priorityColor} text-[8px] font-black px-2.5 py-1 rounded shadow-sm border uppercase">${priorityTag}</span>
-                </div>
-                <table class="w-full text-[9px] font-bold text-slate-600 uppercase tracking-widest leading-relaxed">
-                    <tr><td class="pb-1 w-10 text-slate-500">START</td><td class="pb-1">: ${sStr || '-'}</td></tr>
-                    <tr><td class="pb-1 text-slate-500">END</td><td class="pb-1">: ${eStr || '-'}</td></tr>
-                    <tr><td class="align-top text-slate-500">PIC</td><td class="truncate max-w-[120px]">: ${getVal(p, ['pic']) || '-'}</td></tr>
-                </table>
-            </div>
-            
-            <p class="text-[10px] font-black uppercase tracking-[0.1em] mb-3 text-slate-700 shrink-0">ACTION BOARD (PHASES)</p>
-            <div class="flex flex-col pb-2">${taskListHtml}</div>
-        </div>`;
-    }).join('');
-    lucide.createIcons();
-};
-
-window.openBodModal = function(pI, phI) {
-    const p = window.currentExecutiveData[pI]; if(!p) return;
-    const bpj = $id('bodProjName'); if(bpj) bpj.textContent = getVal(p, KEY_MAP.name);
-    
-    let phaseMap = {};
-    let phaseNames = [];
-    (p.Tasks || []).forEach(t => {
-        let g = t.group || "TAHAPAN UMUM";
-        if (!phaseMap[g]) {
-            phaseMap[g] = [];
-            phaseNames.push(g);
-        }
-        phaseMap[g].push(t);
-    });
-
-    let selectedPhaseName = phaseNames[phI];
-    let tasksToRender = phaseMap[selectedPhaseName] || [];
-    
-    const bpn = $id('bodPhaseName'); if(bpn) bpn.textContent = selectedPhaseName;
-    
-    const btl = $id('bodTaskList'); 
-    if(btl) {
-        btl.innerHTML = tasksToRender.map(t => {
-            let assignBtn = `<button onclick="window.openAssignModal('${escapeJS(getVal(p, KEY_MAP.name))}', '${escapeJS(t.name)}')" class="text-[10px] bg-[#f5a20f] hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg font-black uppercase tracking-widest shadow-md transition-all active:scale-95 flex items-center gap-1.5 shrink-0 border border-amber-500"><i data-lucide="user-plus" class="w-4 h-4"></i> TUGASKAN TIM</button>`;
-            
-            let assignBadge = ''; 
-            const assignedKodes = p._parsedAssignments ? p._parsedAssignments[t.name] : null;
-            if (assignedKodes && Array.isArray(assignedKodes) && assignedKodes.length > 0) {
-                const names = assignedKodes.map(k => { 
-                    let tm = teamsData.find(x => (x['KODE'] || x['NAMA']) === k); 
-                    return tm ? (tm['NAMA'] || k).split(' ')[0] : k; 
-                }).join(', ');
-                assignBadge = `<span class="text-[9px] bg-purple-50 text-purple-600 border border-purple-200 px-2 py-1 rounded font-black uppercase truncate max-w-[200px]" title="${names}"><i data-lucide="users" class="w-3 h-3 inline pb-0.5 mr-0.5"></i>KERJA: ${names}</span>`;
-            } else {
-                assignBadge = `<span class="text-[9px] bg-slate-100 text-slate-500 border border-slate-200 px-2 py-1 rounded font-black uppercase truncate max-w-[150px]"><i data-lucide="tag" class="w-3 h-3 inline pb-0.5 mr-0.5"></i>UNASSIGNED</span>`;
-            }
-
-            return `
-            <div class="bg-white border border-slate-200 p-4 rounded-xl shadow-sm flex flex-col mb-3">
-                <div class="flex justify-between items-start mb-3 gap-2">
-                    <div class="flex flex-col gap-2 flex-1 overflow-hidden">
-                        <h5 class="text-[12px] font-black text-slate-900 uppercase leading-snug">${escapeJS(t.name)}</h5>
-                        <div class="flex items-center gap-2 flex-wrap mt-1">
-                            ${assignBtn}
-                            ${assignBadge}
-                        </div>
-                    </div>
-                    <span class="text-2xl font-black text-indigo-600 shrink-0">${t.progress}%</span>
-                </div>
-                <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
-                    <p class="text-[10px] text-slate-500 italic font-medium flex-1 truncate pr-2">"${escapeJS(t.keterangan || 'Belum ada rincian.')}"</p>
-                    <span class="text-[8px] font-bold text-slate-400 uppercase bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200 shrink-0">Upd: ${escapeJS(t.updatedBy||'-')}</span>
-                </div>
-            </div>`;
-        }).join('');
-    }
-    
-    const m = $id('bodModal'); if(m) m.classList.replace('hidden','flex'); lucide.createIcons();
-};
-
-window.closeBodModal = function() { const m = $id('bodModal'); if(m) m.classList.replace('flex', 'hidden'); };
-
-let curAssignProjName = ''; let curAssignTaskName = '';
-window.openAssignModal = function(projName, taskName) {
-    curAssignProjName = projName; curAssignTaskName = taskName;
-    const p = allData.find(x => getVal(x, KEY_MAP.name) === projName); if (!p) return;
-    const currentAssigned = p._parsedAssignments ? (p._parsedAssignments[taskName] || []) : [];
-    
-    const atmProjNameEl = $id('atmTaskName'); if(atmProjNameEl) atmProjNameEl.textContent = taskName;
-
-    let html = teamsData.map(tm => {
-        const k = tm['KODE'] || tm['NAMA']; const n = tm['NAMA']; 
-        if(!n || n === 'Tanpa Nama') return ''; 
-        const isChecked = currentAssigned.includes(k) ? 'checked' : '';
-        return `<label class="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:bg-indigo-50 shadow-sm"><input type="checkbox" value="${k}" class="atm-checkbox" ${isChecked}><div><p class="text-xs font-bold text-slate-800 uppercase">${n}</p></div></label>`;
-    }).join('');
-
-    const listCont = $id('atmTeamList'); if(listCont) listCont.innerHTML = html;
-    const m = $id('assignTaskModal'); if(m) m.classList.replace('hidden', 'flex');
-};
-window.closeAssignModal = function() { const m = $id('assignTaskModal'); if(m) m.classList.replace('flex', 'hidden'); };
-
-window.submitAssignTask = async function() {
-    const btn = $id('btnSubmitAssign'); const orig = btn.innerHTML; btn.innerHTML = 'MENYIMPAN...'; btn.disabled = true;
-    const checkboxes = document.querySelectorAll('.atm-checkbox:checked'); const selectedKodes = Array.from(checkboxes).map(cb => cb.value);
-
-    try {
-        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'ASSIGN_TASK', projectName: curAssignProjName, taskName: curAssignTaskName, assignees: selectedKodes }) });
-        btn.innerHTML = '✓ TERSIMPAN'; setTimeout(() => { window.closeAssignModal(); btn.innerHTML = orig; btn.disabled = false; window.init(true); }, 1500);
-    } catch(e) { alert('Error.'); btn.innerHTML = orig; btn.disabled = false; }
 };
 
 window.openAddProjectModal = function() { const m = $id('addProjectModal'); if(m) m.classList.replace('hidden', 'flex'); };
@@ -2095,28 +1650,447 @@ window.submitAgenda = async function(e) {
     } catch(err) { alert('Error'); btn.innerHTML = orig; btn.disabled = false; }
 };
 
-// =============== TIMELINE (2026 STRICT) ===============
-// =========================================================
-// =========================================================
-// FITUR TIMESHEET GENERATOR & REPORT (FIXED UI)
-// =========================================================
+// Modal Assign Jobdesk (Direktur)
+window.openAddJobdeskModal = function() {
+    let pOpts = `<option value="">-- Pilih Proyek --</option><option value="NON-PROYEK / UMUM">NON-PROYEK / UMUM</option>`;
+    allData.forEach(p => { const nm = window.getVal(p, KEY_MAP.name); if(nm) pOpts += `<option value="${window.escapeJS(nm)}">${window.escapeJS(nm)}</option>`; });
+    $id('jdProj').innerHTML = pOpts;
+    
+    let tOpts = `<option value="">-- Pilih Tim --</option>`;
+    teamsData.forEach(t => { 
+        const n = window.getTeamProp(t, 'NAMA'); const k = window.getTeamProp(t, 'KODE'); 
+        if(n !== 'Tanpa Nama' && n !== '') tOpts += `<option value="${k}">${k} - ${n}</option>`; 
+    }); 
+    $id('jdTeam').innerHTML = tOpts;
+    
+    $id('jdDetail').value = ''; $id('jdDeadline').valueAsDate = new Date();
+    const m = $id('addJobdeskModal'); if(m) m.classList.replace('hidden', 'flex'); 
+};
+window.closeAddJobdeskModal = function() { $id('addJobdeskModal').classList.replace('flex', 'hidden'); };
+window.submitJobdesk = async function(e) {
+    e.preventDefault(); const btn = $id('btnSubmitJd'); const orig = btn.innerHTML; btn.innerHTML = 'MEMPROSES...'; btn.disabled = true;
+    try {
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'ADD_JOBDESK', projectName: $id('jdProj').value, teamCode: $id('jdTeam').value, jobdesk: $id('jdDetail').value, deadline: $id('jdDeadline').value, priority: $id('jdPriority').value, createdBy: window.getTeamProp(currentUser, 'NAMA') }) });
+        btn.innerHTML = '✓ TERSIMPAN'; setTimeout(() => { window.closeAddJobdeskModal(); btn.innerHTML = orig; btn.disabled = false; window.init(true); }, 2000);
+    } catch(err) { alert('Gagal assign jobdesk.'); btn.innerHTML = orig; btn.disabled = false; }
+};
 
+// Modal Assign SOP (Direktur)
+window.openAssignSopModal = function() {
+    let pOpts = `<option value="">-- Pilih Proyek --</option>`; 
+    allData.forEach(p => { pOpts += `<option value="${window.escapeJS(window.getVal(p, KEY_MAP.name))}">${window.escapeJS(window.getVal(p, KEY_MAP.name))}</option>`; });
+    $id('asProj').innerHTML = pOpts; 
+    $id('asTaskList').innerHTML = '<p class="text-xs text-slate-500 text-center italic">Silakan pilih proyek terlebih dahulu.</p>';
+    const m = $id('assignSopModal'); if(m) m.classList.replace('hidden', 'flex');
+};
+window.closeAssignSopModal = function() { $id('assignSopModal').classList.replace('flex', 'hidden'); };
+window.onAssignSopProjChange = function(projName) {
+    if(!projName) return $id('asTaskList').innerHTML = '<p class="text-xs text-slate-500 text-center italic">Silakan pilih proyek terlebih dahulu.</p>';
+    const p = allData.find(x => window.getVal(x, KEY_MAP.name) === projName); if(!p) return;
+    
+    let tOpts = `<option value="">-- Pilih Tim --</option>`;
+    teamsData.forEach(t => { 
+        const n = window.getTeamProp(t, 'NAMA'); const k = window.getTeamProp(t, 'KODE'); 
+        if(n !== 'Tanpa Nama') tOpts += `<option value="${k}">${k} - ${n}</option>`; 
+    });
+
+    let html = p.Tasks.map(t => {
+        const existingAssign = p._parsedAssignments[t.name] || [];
+        const currTeam = existingAssign.length > 0 ? existingAssign[0] : '';
+        return `<div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-3 task-assign-row" data-task="${window.escapeJS(t.name)}"><p class="text-xs font-black text-slate-800 uppercase mb-2">${window.escapeJS(t.name)}</p><select class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 font-bold text-xs text-slate-700 team-select">${tOpts.replace(`value="${currTeam}"`, `value="${currTeam}" selected`)}</select></div>`;
+    }).join('');
+    $id('asTaskList').innerHTML = html;
+};
+window.submitAssignSop = async function(e) {
+    e.preventDefault(); 
+    const projName = $id('asProj').value; if(!projName) return alert('Pilih proyek!');
+    const btn = $id('btnSubmitAs'); const orig = btn.innerHTML; btn.innerHTML = 'MEMPROSES...'; btn.disabled = true;
+    
+    let assignments = {};
+    document.querySelectorAll('.task-assign-row').forEach(row => {
+        const tName = row.getAttribute('data-task'); const tCode = row.querySelector('.team-select').value;
+        if(tCode) assignments[tName] = [tCode]; 
+    });
+
+    try {
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'ASSIGN_MULTIPLE_TASKS', projectName: projName, assignments: assignments }) });
+        btn.innerHTML = '✓ TERSIMPAN'; setTimeout(() => { window.closeAssignSopModal(); btn.innerHTML = orig; btn.disabled = false; window.init(true); }, 1500);
+    } catch(err) { alert('Gagal assign task.'); btn.innerHTML = orig; btn.disabled = false; }
+};
+
+// Modal Monitor SOP (Direktur)
+window.openMonitorSopModal = function() {
+    let pOpts = `<option value="">-- Semua Proyek --</option>`; 
+    allData.forEach(p => { pOpts += `<option value="${window.escapeJS(window.getVal(p, KEY_MAP.name))}">${window.escapeJS(window.getVal(p, KEY_MAP.name))}</option>`; });
+    $id('msProj').innerHTML = pOpts; 
+    window.onMonitorSopProjChange(''); 
+    const m = $id('monitorSopModal'); if(m) m.classList.replace('hidden', 'flex');
+};
+window.closeMonitorSopModal = function() { $id('monitorSopModal').classList.replace('flex', 'hidden'); };
+window.onMonitorSopProjChange = function(projFilter) {
+    const list = $id('msTaskList'); let html = '';
+    const projectsToRender = projFilter ? allData.filter(p => window.getVal(p, KEY_MAP.name) === projFilter) : allData;
+
+    projectsToRender.forEach(p => {
+        if(!p._parsedAssignments || Object.keys(p._parsedAssignments).length === 0) return;
+        let hasTask = false; let taskHtml = '';
+        p.Tasks.forEach(t => {
+            const assignedArr = p._parsedAssignments[t.name] || [];
+            if (assignedArr.length > 0) {
+                hasTask = true;
+                const names = assignedArr.map(k => { 
+                    let tm = teamsData.find(x => (window.getTeamProp(x, 'KODE') || window.getTeamProp(x, 'NAMA')) === k); 
+                    return tm ? window.getTeamProp(tm, 'NAMA').split(' ')[0] : k; 
+                }).join(', ');
+                taskHtml += `<div class="bg-white border border-slate-200 p-3 rounded-xl shadow-sm flex justify-between items-center mb-2"><div><p class="text-[11px] font-black text-slate-800 uppercase">${window.escapeJS(t.name)}</p><p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1"><i data-lucide="user" class="w-3 h-3 inline pb-0.5"></i> ${names}</p></div><span class="text-lg font-black text-indigo-600">${t.progress}%</span></div>`;
+            }
+        });
+        if (hasTask) html += `<div class="mb-4"><h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 border-b pb-1"><i data-lucide="folder" class="w-3 h-3 inline pb-0.5"></i> ${window.escapeJS(window.getVal(p, KEY_MAP.name))}</h4>${taskHtml}</div>`;
+    });
+
+    list.innerHTML = html || '<p class="text-xs text-slate-500 text-center italic">Tidak ada tugas SOP yang diassign.</p>';
+    lucide.createIcons();
+};
+
+window.updateJdStatus = async function(rowIdx, selectEl) {
+    const nS = selectEl.value; selectEl.disabled = true; selectEl.classList.add('opacity-50', 'animate-pulse');
+    try {
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'UPDATE_JOBDESK_STATUS', rowIdx: rowIdx, newStatus: nS }) });
+        const i = jobdeskData.find(j => j.rowIdx === rowIdx); if(i) i.STATUS = nS;
+        selectEl.disabled = false; selectEl.classList.remove('opacity-50', 'animate-pulse'); 
+        selectEl.classList.replace('text-slate-700', 'text-emerald-600');
+        setTimeout(() => selectEl.classList.replace('text-emerald-600', 'text-slate-700'), 1500);
+    } catch(e) { alert("Error update status."); selectEl.disabled = false; selectEl.classList.remove('opacity-50', 'animate-pulse'); window.renderJobdesk(); }
+};
+
+// =========================================================
+// 6. EXECUTIVE DASHBOARD (OVERVIEW)
+// =========================================================
+window.handleSearchProject = function(val) {
+    curExecSearch = val.toLowerCase().trim();
+    window.renderExecutiveGrid();
+};
+
+window.renderExecutive = function() {
+  const statusCount = { ACTIVES: 0, NEW: 0, COMPLETE: 0, "ON HOLD": 0, CLOSED: 0 };
+  allData.forEach(p => {
+    const status = (window.getVal(p, KEY_MAP.status) || '').toUpperCase().trim();
+    if (status.includes('ACTIVE')) statusCount.ACTIVES++;
+    else if (status === 'NEW') statusCount.NEW++;
+    else if (status.includes('COMPLETE')) statusCount.COMPLETE++;
+    else if (status.includes('HOLD')) statusCount["ON HOLD"]++;
+    else if (status.includes('CLOSE')) statusCount.CLOSED++;
+  });
+
+  let totalAll = allData.length;
+  let actSum = statusCount.ACTIVES + statusCount.NEW; 
+  ['k0','k1','k2','k3','k4','k5'].forEach((k,i)=>{
+      const el = $id(k); if(el) el.textContent = [totalAll, actSum, statusCount.NEW, statusCount.COMPLETE, statusCount["ON HOLD"], statusCount.CLOSED][i];
+  });
+
+  window.makePie('cProjType', ['ACTIVES', 'NEW', 'COMPLETE', 'ON HOLD', 'CLOSED'], [actSum, statusCount.NEW, statusCount.COMPLETE, statusCount["ON HOLD"], statusCount.CLOSED], ['#0ea5e9','#8b5cf6','#22c55e','#eab308','#64748b'], 'status', 'pie');
+  const pc = allData.reduce((a,p)=>{const v=window.getVal(p,KEY_MAP.priority).toUpperCase(); if(v.includes('HIGH') || v.includes('HIGHT'))a.H++;else if(v.includes('MEDIUM'))a.M++;else a.L++; return a;},{H:0,M:0,L:0});
+  window.makePie('cPriority', ['High','Medium','Low'], [pc.H,pc.M,pc.L], ['#f97316','#fb923c','#22c55e'], 'priority', 'pie');
+  
+  window.renderFilteredList('priority', 'High');
+  window.renderExecutiveGrid();
+};
+
+window.makePie = function(id, labels, data, colors, type, chartType = 'pie') {
+  if (charts[id]) charts[id].destroy(); const canvas = $id(id); if(!canvas) return;
+  charts[id] = new Chart(canvas, { 
+      type: chartType, 
+      data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 2, borderColor: '#ffffff', hoverOffset: 6 }] }, 
+      options: { 
+          responsive: true, maintainAspectRatio: false, 
+          onClick: (e, el) => { if(el.length) window.renderFilteredList(type, labels[el[0].index]); }, 
+          plugins: { legend: { display: false }, datalabels: { color: '#fff', font: { weight: 'bold', size: 10 }, formatter: (v, ctx) => { let s = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0); return (v / s) * 100 > 5 ? v : ''; } } } 
+      } 
+  });
+  const lCont = $id('l' + id.substring(1)); 
+  if(lCont) { lCont.innerHTML = labels.map((l, i) => `<div onclick="window.renderFilteredList('${type}','${l}')" class="flex items-center gap-2 px-3.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-full cursor-pointer text-[10px] font-bold text-slate-600 shadow-sm transition-colors"><span class="w-2.5 h-2.5 rounded-full shadow-sm" style="background:${colors[i]}"></span>${l} <span class="text-slate-800 ml-1.5 font-black">${data[i]}</span></div>`).join(''); }
+};
+
+window.renderFilteredList = function(type, val) {
+  const tEl = $id('detailTitle'); if(tEl) tEl.textContent = `DAFTAR: ${val.toUpperCase()}`;
+  const fil = allData.filter(p => {
+    const sv = window.getVal(p, KEY_MAP.status).toLowerCase();
+    if (type === 'status') { const v = val.toUpperCase(); if (v === 'ACTIVES') return sv.includes('active') || sv === 'new'; if (v === 'NEW') return sv === 'new'; if (v === 'COMPLETE') return sv.includes('complete'); if (v === 'ON HOLD') return sv.includes('hold'); if (v === 'CLOSED') return sv.includes('closed'); return false; }
+    if (type === 'priority') { const pr = window.getVal(p, KEY_MAP.priority).toUpperCase(); return (pr.includes('HIGH') || pr.includes('HIGHT') ? 'High' : (pr.includes('MEDIUM') ? 'Medium' : (pr.includes('LOW') ? 'Low' : ''))) === val; } return false;
+  });
+  const panel = $id('detailPanel'); if(!panel) return;
+  if (fil.length === 0) return panel.innerHTML = `<div class="w-full h-full flex flex-col items-center justify-center text-slate-400 text-[11px] italic">Kosong</div>`;
+  
+  panel.innerHTML = `<div class="flex gap-6 items-end h-full min-w-max px-6 pb-20 pt-8">` + fil.map((p, i) => {
+    const pg = window.getCalcProgress(p); const nm = window.escapeJS(window.getVal(p, KEY_MAP.name)); const barHeight = Math.max(pg, 5); const delay = i * 50; 
+    return `<div class="flex flex-col items-center justify-end h-full w-[44px] shrink-0 group"><span class="text-[10px] font-black text-[#003366] mb-1.5 transition-all duration-500 opacity-0 translate-y-2 animated-text" style="transition-delay: ${delay + 300}ms">${pg}%</span><div class="w-10 bg-[#38bdf8] rounded-t-lg transition-all duration-1000 ease-out animated-bar hover:bg-[#0ea5e9] cursor-pointer" style="height: 0%; transition-delay: ${delay}ms" data-height="${barHeight}%"></div><div class="mt-4 relative w-[2px]"><div class="absolute top-0 right-2 origin-top-right -rotate-45 w-[140px] text-right"><p class="text-[9px] font-bold text-slate-500 truncate uppercase hover:text-[#0ea5e9] cursor-default transition-colors" title="${nm}">${nm}</p></div></div></div>`;
+  }).join('') + `</div>`;
+  setTimeout(() => { panel.querySelectorAll('.animated-bar').forEach(b => b.style.height = b.getAttribute('data-height')); panel.querySelectorAll('.animated-text').forEach(t => t.classList.remove('opacity-0', 'translate-y-2')); }, 50);
+};
+
+window.renderExecutiveGrid = function() {
+    const efEl = $id('execFilters');
+    if(efEl) efEl.innerHTML = execFiltersConfig.map(f => `<button onclick="curExecFilter='${f.id}';window.renderExecutiveGrid()" class="px-5 py-2.5 rounded-full text-[10px] font-black uppercase border transition-colors ${curExecFilter===f.id?f.color+' text-white border-transparent':'bg-white text-slate-500 hover:bg-slate-50'}">${f.label}</button>`).join('');
+    
+    const fil = allData.filter(p => {
+        const s = window.getVal(p, KEY_MAP.status).toLowerCase(); const pt = (p.Type||'').toUpperCase(); const prRaw = window.getVal(p, KEY_MAP.priority).toUpperCase(); const pr = prRaw.includes('HIGH')?'HIGH':(prRaw.includes('MEDIUM')?'MEDIUM':'LOW');
+        const nm = window.getVal(p, KEY_MAP.name).toLowerCase();
+        
+        if(curExecSearch && !nm.includes(curExecSearch)) return false;
+        if(curExecFilter==='ACTIVES') return s.includes('active') || s.includes('new'); 
+        if(curExecFilter==='CLOSED') return s.includes('closed'); 
+        if(curExecFilter==='COMPLETE') return s.includes('complete');
+        if(curExecFilter==='SLF') return pt==='SLF'; if(curExecFilter==='PBG') return pt==='PBG'; 
+        if(curExecFilter==='HIGH') return pr==='HIGH'; if(curExecFilter==='MEDIUM') return pr==='MEDIUM'; if(curExecFilter==='LOW') return pr==='LOW'; 
+        return true;
+    });
+    
+    window.currentExecutiveData = fil; const grid = $id('executiveGrid'); if(!grid) return;
+    if(fil.length===0) { grid.innerHTML = `<div class="col-span-full py-16 text-center text-slate-400 font-bold uppercase border-2 border-dashed rounded-3xl">Proyek Tidak Ditemukan</div>`; return; }
+    
+    const today = new Date().getTime();
+    grid.innerHTML = fil.map((p, i) => {
+        const pg = window.getCalcProgress(p); const sStr = window.getVal(p, ['start date', 'date start', 'mulai', 'start']); const eStr = window.getVal(p, ['date end', 'end date', 'selesai', 'end']); let oTag = '';
+        if(eStr && pg<100) { let eD = new Date(eStr).getTime(); if(isNaN(eD)&&eStr.includes('/')) eD=new Date(eStr.split('/').reverse().join('-')).getTime(); if(!isNaN(eD) && today>eD) { const diffDays = Math.ceil(Math.abs(today - eD) / (1000 * 60 * 60 * 24)); oTag=`<div class="absolute -top-3 -right-3 bg-rose-600 text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg border-2 border-white animate-pulse z-10">OVERDUE ${diffDays} HARI</div>`; } }
+        
+        let taskListHtml = '';
+        if(p.Tasks && p.Tasks.length > 0) {
+            let phaseMap = {};
+            p.Tasks.forEach(t => {
+                let g = t.group || "TAHAPAN UMUM";
+                if (!phaseMap[g]) phaseMap[g] = { sum: 0, count: 0 };
+                phaseMap[g].sum += (parseInt(t.progress) || 0);
+                phaseMap[g].count++;
+            });
+            
+            let phaseIndex = 0;
+            for (let phaseName in phaseMap) {
+                 let avg = Math.round(phaseMap[phaseName].sum / phaseMap[phaseName].count);
+                 taskListHtml += `
+                 <div onclick="window.openBodModal(${i}, ${phaseIndex})" class="bg-white px-4 py-3 rounded-lg flex justify-between items-center cursor-pointer shadow-sm hover:shadow-md transition-shadow group mb-2 border border-slate-100 hover:border-sky-200">
+                    <span class="text-[10px] font-bold text-slate-700 uppercase truncate pr-2 group-hover:text-sky-600 flex items-center gap-1.5"><i data-lucide="layers" class="w-3 h-3 text-slate-400"></i> ${window.escapeJS(phaseName)}</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-black text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded">${avg}%</span>
+                        <i data-lucide="chevron-right" class="w-3 h-3 text-slate-400 group-hover:text-sky-500"></i>
+                    </div>
+                 </div>`;
+                 phaseIndex++;
+            }
+        } else {
+            taskListHtml = `<div class="text-[10px] italic text-slate-500 text-center py-4">Tidak ada data task.</div>`;
+        }
+        
+        let priorityRaw = window.getVal(p, KEY_MAP.priority).toUpperCase();
+        let priorityTag = priorityRaw.includes('HIGH') ? 'HIGH' : priorityRaw.includes('MEDIUM') ? 'MEDIUM' : 'LOW';
+        let priorityColor = priorityTag === 'HIGH' ? 'text-rose-500 border-rose-200' : priorityTag === 'MEDIUM' ? 'text-amber-500 border-amber-200' : 'text-emerald-500 border-emerald-200';
+
+        return `
+        <div class="bg-[#FEF08A] rounded-[24px] p-5 flex flex-col border border-[#fde047] shadow-sm relative min-h-[450px]">
+            ${oTag}
+            <div class="mb-4">
+                <h2 class="text-[14px] font-black text-slate-800 uppercase leading-none">${p.Type||'PROYEK'}</h2>
+                <p class="text-[11px] font-bold text-slate-700 line-clamp-2 mt-1.5 uppercase">${window.getVal(p, KEY_MAP.name)}</p>
+            </div>
+            
+            <div class="bg-white/60 p-4 rounded-[16px] mb-4 shrink-0 shadow-sm border border-white/50">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="relative w-12 h-12 shrink-0">
+                        <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
+                            <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="3"></circle>
+                            <circle cx="18" cy="18" r="15.9" fill="none" stroke="#0ea5e9" stroke-width="3" stroke-dasharray="${pg},100" stroke-linecap="round"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center text-[11px] font-black text-slate-800">${pg}%</div>
+                    </div>
+                    <span class="bg-white ${priorityColor} text-[8px] font-black px-2.5 py-1 rounded shadow-sm border uppercase">${priorityTag}</span>
+                </div>
+                <table class="w-full text-[9px] font-bold text-slate-600 uppercase tracking-widest leading-relaxed">
+                    <tr><td class="pb-1 w-10 text-slate-500">START</td><td class="pb-1">: ${sStr || '-'}</td></tr>
+                    <tr><td class="pb-1 text-slate-500">END</td><td class="pb-1">: ${eStr || '-'}</td></tr>
+                    <tr><td class="align-top text-slate-500">PIC</td><td class="truncate max-w-[120px]">: ${window.getVal(p, ['pic']) || '-'}</td></tr>
+                </table>
+            </div>
+            
+            <p class="text-[10px] font-black uppercase tracking-[0.1em] mb-3 text-slate-700 shrink-0">ACTION BOARD (PHASES)</p>
+            <div class="flex flex-col pb-2">${taskListHtml}</div>
+        </div>`;
+    }).join('');
+    lucide.createIcons();
+};
+
+window.openBodModal = function(pI, phI) {
+    const p = window.currentExecutiveData[pI]; if(!p) return;
+    const bpj = $id('bodProjName'); if(bpj) bpj.textContent = window.getVal(p, KEY_MAP.name);
+    
+    let phaseMap = {};
+    let phaseNames = [];
+    (p.Tasks || []).forEach(t => {
+        let g = t.group || "TAHAPAN UMUM";
+        if (!phaseMap[g]) {
+            phaseMap[g] = [];
+            phaseNames.push(g);
+        }
+        phaseMap[g].push(t);
+    });
+
+    let selectedPhaseName = phaseNames[phI];
+    let tasksToRender = phaseMap[selectedPhaseName] || [];
+    
+    const bpn = $id('bodPhaseName'); if(bpn) bpn.textContent = selectedPhaseName;
+    
+    const btl = $id('bodTaskList'); 
+    if(btl) {
+        btl.innerHTML = tasksToRender.map(t => {
+            let assignBtn = `<button onclick="window.openAssignModal('${window.escapeJS(window.getVal(p, KEY_MAP.name))}', '${window.escapeJS(t.name)}')" class="text-[10px] bg-[#f5a20f] hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg font-black uppercase tracking-widest shadow-md transition-all active:scale-95 flex items-center gap-1.5 shrink-0 border border-amber-500"><i data-lucide="user-plus" class="w-4 h-4"></i> TUGASKAN TIM</button>`;
+            
+            let assignBadge = ''; 
+            const assignedKodes = p._parsedAssignments ? p._parsedAssignments[t.name] : null;
+            if (assignedKodes && Array.isArray(assignedKodes) && assignedKodes.length > 0) {
+                const names = assignedKodes.map(k => { 
+                    let tm = teamsData.find(x => (window.getTeamProp(x, 'KODE') || window.getTeamProp(x, 'NAMA')) === k); 
+                    return tm ? window.getTeamProp(tm, 'NAMA').split(' ')[0] : k; 
+                }).join(', ');
+                assignBadge = `<span class="text-[9px] bg-purple-50 text-purple-600 border border-purple-200 px-2 py-1 rounded font-black uppercase truncate max-w-[200px]" title="${names}"><i data-lucide="users" class="w-3 h-3 inline pb-0.5 mr-0.5"></i>KERJA: ${names}</span>`;
+            } else {
+                assignBadge = `<span class="text-[9px] bg-slate-100 text-slate-500 border border-slate-200 px-2 py-1 rounded font-black uppercase truncate max-w-[150px]"><i data-lucide="tag" class="w-3 h-3 inline pb-0.5 mr-0.5"></i>UNASSIGNED</span>`;
+            }
+
+            return `
+            <div class="bg-white border border-slate-200 p-4 rounded-xl shadow-sm flex flex-col mb-3">
+                <div class="flex justify-between items-start mb-3 gap-2">
+                    <div class="flex flex-col gap-2 flex-1 overflow-hidden">
+                        <h5 class="text-[12px] font-black text-slate-900 uppercase leading-snug">${window.escapeJS(t.name)}</h5>
+                        <div class="flex items-center gap-2 flex-wrap mt-1">
+                            ${assignBtn}
+                            ${assignBadge}
+                        </div>
+                    </div>
+                    <span class="text-2xl font-black text-indigo-600 shrink-0">${t.progress}%</span>
+                </div>
+                <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
+                    <p class="text-[10px] text-slate-500 italic font-medium flex-1 truncate pr-2">"${window.escapeJS(t.keterangan || 'Belum ada rincian.')}"</p>
+                    <span class="text-[8px] font-bold text-slate-400 uppercase bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200 shrink-0">Upd: ${window.escapeJS(t.updatedBy||'-')}</span>
+                </div>
+            </div>`;
+        }).join('');
+    }
+    
+    // Simpan index agar bisa direfresh
+    window.curBodProjIdx = pI;
+    window.curBodPhaseIdx = phI;
+    
+    const m = $id('bodModal'); if(m) m.classList.replace('hidden','flex'); lucide.createIcons();
+};
+
+window.closeBodModal = function() { const m = $id('bodModal'); if(m) m.classList.replace('flex', 'hidden'); };
+
+let curAssignProjName = ''; let curAssignTaskName = '';
+window.openAssignModal = function(projName, taskName) {
+    curAssignProjName = projName; curAssignTaskName = taskName;
+    const p = allData.find(x => window.getVal(x, KEY_MAP.name) === projName); if (!p) return;
+    const currentAssigned = p._parsedAssignments ? (p._parsedAssignments[taskName] || []) : [];
+    
+    const atmProjNameEl = $id('atmTaskName'); if(atmProjNameEl) atmProjNameEl.textContent = taskName;
+
+    let html = teamsData.map(tm => {
+        const k = window.getTeamProp(tm, 'KODE') || window.getTeamProp(tm, 'NAMA'); const n = window.getTeamProp(tm, 'NAMA'); 
+        if(!n || n === 'Tanpa Nama' || n.toUpperCase().includes('QADRIAH') || n.toUpperCase().includes('SALMAN')) return ''; 
+        const isChecked = currentAssigned.includes(k) ? 'checked' : '';
+        return `<label class="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:bg-indigo-50 shadow-sm"><input type="checkbox" value="${k}" class="atm-checkbox" ${isChecked}><div><p class="text-xs font-bold text-slate-800 uppercase">${n}</p></div></label>`;
+    }).join('');
+
+    const listCont = $id('atmTeamList'); if(listCont) listCont.innerHTML = html;
+    const m = $id('assignTaskModal'); if(m) m.classList.replace('hidden', 'flex');
+};
+window.closeAssignModal = function() { const m = $id('assignTaskModal'); if(m) m.classList.replace('flex', 'hidden'); };
+
+window.submitAssignTask = async function() {
+    const btn = $id('btnSubmitAssign'); const orig = btn.innerHTML; btn.innerHTML = 'MENYIMPAN...'; btn.disabled = true;
+    const checkboxes = document.querySelectorAll('.atm-checkbox:checked'); const selectedKodes = Array.from(checkboxes).map(cb => cb.value);
+
+    try {
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'ASSIGN_TASK', projectName: curAssignProjName, taskName: curAssignTaskName, assignees: selectedKodes }) });
+        btn.innerHTML = '✓ TERSIMPAN'; 
+        
+        // Update local state agar tidak perlu reload page full
+        const p = allData.find(x => window.getVal(x, KEY_MAP.name) === curAssignProjName);
+        if (p) {
+            if (!p._parsedAssignments) p._parsedAssignments = {};
+            p._parsedAssignments[curAssignTaskName] = selectedKodes;
+        }
+
+        setTimeout(() => { 
+            window.closeAssignModal(); 
+            btn.innerHTML = orig; 
+            btn.disabled = false; 
+            // Refresh modal BOD Action Board jika sedang terbuka
+            if (!$id('bodModal').classList.contains('hidden')) {
+                window.openBodModal(window.curBodProjIdx, window.curBodPhaseIdx);
+            }
+        }, 1500);
+    } catch(e) { alert('Error saat penugasan.'); btn.innerHTML = orig; btn.disabled = false; }
+};
+
+
+// =========================================================
+// 7. TIMELINE & CALENDAR (2026 STRICT)
+// =========================================================
+window.renderTimeline = function() {
+    const strictYear = 2026;
+    const actP = allData.filter(p => { const sv = window.getVal(p, KEY_MAP.status).toLowerCase(); return sv.includes('active') || sv === 'new'; });
+    window.calendarDateMap = {}; 
+    actP.forEach(p => {
+        let sS = window.getVal(p, ['start date', 'date start', 'mulai', 'start']); let eS = window.getVal(p, ['date end', 'end date', 'selesai', 'end']);
+        let sD = new Date(sS); if(isNaN(sD.getTime()) && sS.includes('/')) sD = new Date(sS.split('/').reverse().join('-'));
+        let eD = new Date(eS); if(isNaN(eD.getTime()) && eS.includes('/')) eD = new Date(eS.split('/').reverse().join('-'));
+        if (!isNaN(sD.getTime()) && !isNaN(eD.getTime())) {
+            let curr = new Date(sD.getTime()); curr.setHours(0,0,0,0); let end = new Date(eD.getTime()); end.setHours(0,0,0,0); let limit = 0;
+            while(curr <= end && limit < 2000) { let y = curr.getFullYear(); if (y === strictYear) { let m = String(curr.getMonth() + 1).padStart(2, '0'); let d = String(curr.getDate()).padStart(2, '0'); let dStr = `${y}-${m}-${d}`; if(!window.calendarDateMap[dStr]) window.calendarDateMap[dStr] = []; window.calendarDateMap[dStr].push(p); } curr.setDate(curr.getDate() + 1); limit++; }
+        }
+    });
+
+    const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']; const dayNames = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min']; 
+    let calHtml = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
+    for (let m = 0; m < 12; m++) {
+        calHtml += `<div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm"><h3 class="text-center font-black text-slate-800 uppercase tracking-widest mb-3 border-b pb-2">${monthNames[m]} 2026</h3><div class="grid grid-cols-7 gap-1 text-center mb-2">${dayNames.map(d => `<div class="text-[9px] font-bold text-slate-400">${d}</div>`).join('')}</div><div class="grid grid-cols-7 gap-1 text-center">`;
+        let firstDayJS = new Date(strictYear, m, 1).getDay(); let first = firstDayJS === 0 ? 6 : firstDayJS - 1; let daysInMonth = new Date(strictYear, m + 1, 0).getDate();
+        for (let i = 0; i < first; i++) { calHtml += `<div></div>`; }
+        for (let d = 1; d <= daysInMonth; d++) {
+            let dStr = `${strictYear}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            let projs = window.calendarDateMap[dStr] || []; 
+            let boxClasses = "relative cursor-pointer text-xs font-bold w-6 h-6 mx-auto flex items-center justify-center rounded-md ";
+            if (projs.length > 0) { boxClasses += "bg-indigo-500 text-white shadow-sm hover:scale-110"; } else { boxClasses += "bg-slate-50 text-slate-500 hover:bg-slate-100"; }
+            calHtml += `<div onclick="window.showDateProjects('${dStr}')" class="${boxClasses}" title="${projs.length} Proyek">${d}</div>`;
+        }
+        calHtml += `</div></div>`;
+    }
+    calHtml += `</div>`;
+    const calCont = $id('calendarGridContainer'); if(calCont) calCont.innerHTML = calHtml;
+};
+
+window.showDateProjects = function(dStr) {
+    const projs = window.calendarDateMap[dStr] || []; const panel = $id('calendarSidePanel'); if(!panel) return;
+    const dt = new Date(dStr); const tglFull = `${dt.getDate()}/${dt.getMonth()+1}/${dt.getFullYear()}`;
+    let html = `<div class="bg-indigo-50 border-b border-indigo-100 p-4 rounded-t-xl"><div><h3 class="font-black text-indigo-800 text-sm uppercase">${tglFull}</h3><p class="text-[10px] font-bold text-indigo-500 mt-1">${projs.length} Proyek Berjalan</p></div></div><div class="p-4 overflow-y-auto flex-1 space-y-3 bg-slate-50/50">`;
+    if(projs.length > 0) { projs.forEach(p => { const nm = window.getVal(p, KEY_MAP.name); html += `<div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm"><h4 class="font-bold text-[11px] text-slate-800 uppercase leading-snug">${nm}</h4></div>`; }); } else { html += `<div class="text-center py-10 text-slate-400 text-xs italic">Tidak ada aktivitas.</div>`; }
+    html += `</div>`; panel.innerHTML = html;
+};
+
+
+// =========================================================
+// 8. TIMESHEET GENERATOR / REPORT REVIEW (BOD PANEL)
+// =========================================================
 window.renderTimesheetControls = function() {
     console.log("Rendering Timesheet Controls...");
-    
-    // 1. Isi Dropdown Pilih Tim / Engineer
     const rt = $id('repTeam'); 
     if (rt) {
         rt.innerHTML = '<option value="">- Pilih Engineer / Tim -</option>' + 
         teamsData.map((t, i) => `<option value="${i}">${window.getTeamProp(t,'KODE')} - ${window.getTeamProp(t,'NAMA')}</option>`).join('');
     }
 
-    // 2. Set Default Tanggal (Start: 7 hari lalu, End: Hari ini)
     const today = new Date();
     const lastWeek = new Date();
     lastWeek.setDate(today.getDate() - 7);
 
-    // Helper format YYYY-MM-DD aman
     const formatDateYMD = (d) => {
         let month = '' + (d.getMonth() + 1), day = '' + d.getDate(), year = d.getFullYear();
         if (month.length < 2) month = '0' + month;
@@ -2127,7 +2101,6 @@ window.renderTimesheetControls = function() {
     const rs = $id('repStart'); if (rs) rs.value = formatDateYMD(lastWeek); 
     const re = $id('repEnd'); if (re) re.value = formatDateYMD(today);
 
-    // 3. Render Kolom Akses Cepat (Grid Avatar Tim) DENGAN AMAN
     const qsg = $id('quickSelectGrid');
     if (qsg) {
         try {
@@ -2137,7 +2110,6 @@ window.renderTimesheetControls = function() {
                 const rawFoto = window.getTeamProp(t, 'FOTO');
                 const fotoKompres = window.optimizeImageUrl(rawFoto);
                 
-                // Buat inisial jika tidak ada foto
                 let inisial = "TM";
                 const parts = namaLengkap.trim().split(' ');
                 if (parts.length > 1) {
@@ -2147,7 +2119,6 @@ window.renderTimesheetControls = function() {
                 }
                 
                 let avatarHtml = '';
-                // Render gambar (jika link error akan diganti div inisial oleh onError)
                 if (fotoKompres && fotoKompres.trim() !== '') {
                     avatarHtml = `<img src="${fotoKompres}" alt="${inisial}" class="w-10 h-10 rounded-full object-cover border-2 border-indigo-100 mb-2 shadow-sm bg-slate-100" onerror="this.outerHTML='<div class=\\'w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-[10px] mb-2 border border-indigo-100 shadow-sm\\'>${inisial}</div>'">`;
                 } else {
@@ -2165,7 +2136,6 @@ window.renderTimesheetControls = function() {
             console.error("Gagal merender Grid Akses Cepat:", err);
         }
     }
-    
     if (typeof lucide !== 'undefined') lucide.createIcons();
 };
 
@@ -2181,7 +2151,6 @@ window.generateReport = function(idx) {
 
     if (!sd || !ed) return alert("Pilih rentang tanggal mulai dan akhir!");
 
-    // Filter Data
     const filteredResults = timesheetsData.filter(r => {
         const rowString = Object.values(r).join('|').toUpperCase();
         let isUserMatch = (n !== 'TANPA NAMA' && rowString.includes(n)) || (k !== '---' && rowString.includes(k));
@@ -2212,7 +2181,6 @@ window.generateReport = function(idx) {
 
     window.currentReportData = { profile: tP, start: sd, end: ed, grouped: grouped };
 
-    // Update Header Modal
     const repNameEl = $id('repModalName'); if (repNameEl) repNameEl.textContent = window.getTeamProp(tP, 'NAMA');
     const repDeptEl = $id('repModalDept'); if (repDeptEl) repDeptEl.textContent = `${window.getTeamProp(tP, 'KODE')} • ${window.getTeamProp(tP, 'DEPT')}`;
     const repDateEl = $id('repModalDate'); if (repDateEl) repDateEl.textContent = `${window.formatTanggalHari(sd)} - ${window.formatTanggalHari(ed)}`;
@@ -2300,7 +2268,7 @@ window.exportToCSV = function() {
 };
 
 window.handlePrintPDF = function() {
-    if (!currentReportData) return; const pW = window.open('', '_blank'); if (!pW) return alert("Izinkan pop-up untuk mencetak PDF!");
+    if (!currentReportData) return; const pW = window.open('', '_blank'); if (!pW) return alert("Izinkan pop-up!");
     let tR = '';
     Object.keys(currentReportData.grouped).sort().forEach(d => {
         let actsRaw = currentReportData.grouped[d]; let hourlyLogs = [];
@@ -2324,95 +2292,6 @@ window.handlePrintPDF = function() {
     
     pW.document.open(); pW.document.write(h1); pW.document.close();
 };
-// =============== REPORTS & PDF ===============
-window.renderTimesheetControls = function() {
-    const rt = $id('repTeam'); if(rt) rt.innerHTML = '<option value="">- Pilih Engineer -</option>' + teamsData.map((t,i)=>`<option value="${i}">${t.KODE || t.NAMA} - ${t.NAMA}</option>`).join('');
-};
-
-window.generateReport = function() {
-    const rTeam = $id('repTeam'); if(!rTeam || !rTeam.value) return alert("Pilih Tim / Engineer!");
-    const tP = teamsData[parseInt(rTeam.value)]; const n = (tP.NAMA||'').toUpperCase(), k = (tP.KODE||'').toUpperCase();
-    const sd = $id('repStart') ? $id('repStart').value : ""; const ed = $id('repEnd') ? $id('repEnd').value : "";
-    if (!sd || !ed) return alert("Pilih rentang tanggal!");
-
-    const fR = timesheetsData.filter(r => { 
-        const rs = Object.values(r).join('|').toUpperCase(); 
-        let isMatch = false; if(n && rs.includes(n)) isMatch = true; if(k && rs.includes(k)) isMatch = true; if(!isMatch) return false;
-        let dateStr = getVal(r, ['TANGGAL', 'DATE', 'WAKTU', 'TIMESTAMP']); if (!dateStr) return false;
-        let rD = new Date(dateStr); if (isNaN(rD.getTime())) return false; 
-        const sDate = new Date(sd); const eDate = new Date(ed); rD.setHours(0, 0, 0, 0); sDate.setHours(0, 0, 0, 0); eDate.setHours(0, 0, 0, 0); return rD >= sDate && rD <= eDate;
-    });
-
-    let g = {}; fR.forEach(r => { let tg = getVal(r,['TANGGAL','DATE','TIMESTAMP'])||'Unk'; if(!g[tg]) g[tg]=[]; g[tg].push(r); });
-    currentReportData = { profile: tP, start: sd, end: ed, grouped: g };
-
-    const rn = $id('repModalName'); if(rn) rn.textContent = tP.NAMA; 
-    const rm = $id('repModalDate'); if(rm) rm.innerHTML = `${formatTanggalHari(sd)} - ${formatTanggalHari(ed)}`;
-
-    const dts = Object.keys(g).sort((a, b) => new Date(a) - new Date(b));
-    const tb = $id('reportTableBody'); const rmEl = $id('reportModal');
-    
-    if (dts.length === 0) {
-        if(tb) tb.innerHTML = `<tr><td colspan="6" class="p-12 text-center text-slate-500 font-bold">Kosong.</td></tr>`;
-        if(rmEl) rmEl.classList.replace('hidden', 'flex'); return;
-    }
-
-    let rh = '';
-    dts.forEach(d => {
-        let actsRaw = g[d]; let hourlyLogs = [];
-        actsRaw.forEach(a => {
-            let fullDesc = getVal(a, ['DESKRIPSI', 'DESKRIPSI PEKERJAAN', 'AKTIVITAS']); let lokasi = "KANTOR"; let descClean = fullDesc;
-            if (fullDesc.startsWith('[')) { const endBr = fullDesc.indexOf(']'); if (endBr > -1) { const locTag = fullDesc.substring(1, endBr); if (locTag.startsWith('LOC:')) lokasi = locTag.substring(4).trim(); descClean = fullDesc.substring(endBr + 1).trim(); } }
-            hourlyLogs.push({ jam: `${getVal(a, ['JAM MULAI', 'MULAI'])} - ${getVal(a, ['JAM SELESAI', 'SELESAI'])}`, proj: getVal(a, ['NAMA PROYEK', 'PROYEK']), desc: descClean, lokasi: lokasi, ken: getVal(a, ['KENDALA', 'ISSUE']), isBreak: false });
-        });
-        
-        if (!hourlyLogs.some(l => (l.jam || "").includes("12:00") && (l.jam || "").includes("13:00")) && hourlyLogs.length > 0) { hourlyLogs.push({ jam: "12:00 - 13:00", proj: "-", desc: "ISTIRAHAT", lokasi: "-", ken: "-", isBreak: true }); }
-        if (!hourlyLogs.some(l => (l.jam || "").includes("15:30") && (l.jam || "").includes("16:00")) && hourlyLogs.length > 0) { hourlyLogs.push({ jam: "15:30 - 16:00", proj: "-", desc: "SHOLAT ASHAR", lokasi: "-", ken: "-", isBreak: true }); }
-        hourlyLogs.sort((a, b) => parseTimeMin((a.jam || "00:00").split('-')[0].trim()) - parseTimeMin((b.jam || "00:00").split('-')[0].trim()));
-        
-        rh += `<tbody class="border-b-2 border-slate-300">`;
-        hourlyLogs.forEach((l, i) => {
-            rh += `<tr class="${l.isBreak ? 'bg-slate-50/80' : 'bg-white hover:bg-slate-50'}">`;
-            if (i === 0) { rh += `<td rowspan="${hourlyLogs.length}" class="py-4 px-5 align-top border-r"><div class="font-bold text-[12px]">${formatTanggalHari(d)}</div></td>`; }
-            rh += `<td class="py-3 px-4">${l.jam}</td><td class="py-3 px-4">${l.desc}</td><td class="py-3 px-4">${l.isBreak ? '' : l.proj}</td><td class="py-3 px-4">${l.isBreak ? '' : l.ken}</td><td class="py-3 px-4 text-center">${l.isBreak ? '' : l.lokasi}</td></tr>`;
-        });
-        rh += `</tbody>`;
-    });
-
-    if(tb) tb.innerHTML = rh;
-    if(rmEl) rmEl.classList.replace('hidden','flex'); lucide.createIcons();
-};
-
-window.closeReportModal = function() { const rm = $id('reportModal'); if(rm) rm.classList.replace('flex', 'hidden'); currentReportData = null; };
-
-window.exportToCSV = function() { alert('Tarik Excel Berjalan.'); };
-
-window.handlePrintPDF = function() {
-    if (!currentReportData) return; const pW = window.open('', '_blank'); if (!pW) return alert("Izinkan pop-up!");
-    let tR = '';
-    Object.keys(currentReportData.grouped).sort().forEach(d => {
-        let actsRaw = currentReportData.grouped[d]; let hourlyLogs = [];
-        actsRaw.forEach(a => {
-            let fullDesc = getVal(a, ['DESKRIPSI', 'DESKRIPSI PEKERJAAN']); let lokasi = "KANTOR"; let descClean = fullDesc;
-            if (fullDesc.startsWith('[')) { const endBr = fullDesc.indexOf(']'); if (endBr > -1) { const locTag = fullDesc.substring(1, endBr); if (locTag.startsWith('LOC:')) lokasi = locTag.substring(4).trim(); descClean = fullDesc.substring(endBr + 1).trim(); } }
-            hourlyLogs.push({ jam: `${getVal(a, ['JAM MULAI', 'MULAI'])} - ${getVal(a, ['JAM SELESAI', 'SELESAI'])}`, proj: getVal(a, ['NAMA PROYEK', 'PROYEK']), desc: descClean, lokasi: lokasi, ken: getVal(a, ['KENDALA', 'ISSUE']), isBreak: false });
-        });
-        hourlyLogs.sort((a, b) => parseTimeMin((a.jam || "00:00").split('-')[0].trim()) - parseTimeMin((b.jam || "00:00").split('-')[0].trim()));
-        
-        tR += `<tbody style="border-bottom:2px solid #cbd5e1;">`;
-        hourlyLogs.forEach((l, i) => {
-            tR += `<tr>`;
-            if (i === 0) { tR += `<td rowspan="${hourlyLogs.length}" style="border-right:1px solid #e2e8f0;padding:12px;font-weight:700;">${formatTanggalHari(d)}</td>`; }
-            tR += `<td style="padding:12px;border-bottom:1px solid #e2e8f0;">${l.jam}</td><td style="padding:12px;border-bottom:1px solid #e2e8f0;">${l.desc}</td><td style="padding:12px;border-bottom:1px solid #e2e8f0;">${l.proj}</td></tr>`;
-        }); tR += `</tbody>`;
-    });
-
-    const printScript = "<scr" + "ipt>setTimeout(()=>{window.print();}, 800);window.onafterprint=()=>{window.close();};</scr" + "ipt>";
-    
-    const h1 = `<!DOCTYPE html><html lang="id"><head><title>Time Sheet</title><style>body{font-family:sans-serif;}table{width:100%;border-collapse:collapse;}th{background:#f8fafc;padding:12px;text-align:left;border-bottom:2px solid #cbd5e1;}</style></head><body><h2>TIME SHEET REPORT</h2><p>${currentReportData.profile.NAMA}</p><table><thead><tr><th>Tanggal</th><th>Jam</th><th>Deskripsi</th><th>Proyek</th></tr></thead>${tR}</table>${printScript}</body></html>`;
-    
-    pW.document.open(); pW.document.write(h1); pW.document.close();
-};
 
 window.renderFinanceTable = function() {
     const fVal = $id('finFilter').value; const tb = $id('financeTableBody');
@@ -2426,272 +2305,27 @@ window.renderFinanceTable = function() {
 };
 window.updateFin = async function(rIdx, nS, btn) { btn.parentElement.innerHTML = 'WAIT...'; try { await fetch(API_URL, {method:'POST', body:JSON.stringify({action:'UPDATE_FINANCE_STATUS', rowIdx:rIdx, newStatus:nS})}); const i=financeData.find(f=>f.rowIdx===rIdx); if(i) i.STATUS=nS; window.renderFinanceTable(); } catch(e){ alert("Error"); window.renderFinanceTable(); } };
 
-// =============== INIT ===============
-  // =============== FITUR PENUGASAN (DIRECTOR & TEAM VISIBILITY) ===============
-
-// 1. FILTER STRICT DELEGATION
-window.isUserAssigned = function(taskName, projectObj, currentUserObj) {
-    if (!projectObj._parsedAssignments) return false;
-    const assignedArr = projectObj._parsedAssignments[taskName] || [];
-    const myKode = getTeamProp(currentUserObj, 'KODE');
-    const myNama = getTeamProp(currentUserObj, 'NAMA');
-    return assignedArr.includes(myKode) || assignedArr.includes(myNama);
-};
-
-// Override renderTeamWorkspace untuk menggunakan isUserAssigned
-window.renderTeamWorkspace = function() {
-    const cont = $id('projectList'); 
-    if (!currentUser || !cont) return;
-    
-    const myProjects = allData.filter(p => {
-        const status = getVal(p, KEY_MAP.status).toLowerCase(); 
-        if (!status.includes('active') && status !== 'new') return false;
-        
-        // Strict Delegation applied
-        const assignedTasks = (p.Tasks || []).filter(t => window.isUserAssigned(t.name, p, currentUser));
-        p.myTasks = assignedTasks; 
-        return assignedTasks.length > 0;
-    });
-
-    window.currentEngineerProjects = myProjects;
-
-    const emptyMessage = `<div class="col-span-full py-16 bg-white border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-[11px]">Belum ada tugas yang didelegasikan oleh Direksi kepada Anda.</div>`;
-
-    if (myProjects.length === 0) {
-        cont.innerHTML = emptyMessage;
-        lucide.createIcons();
-        return;
-    }
-
-    cont.innerHTML = myProjects.map((p, idx) => {
-        let sum = 0; p.myTasks.forEach(t => sum += (parseInt(t.progress) || 0));
-        p.myAvg = p.myTasks.length > 0 ? Math.round(sum / p.myTasks.length) : 0;
-        
-        return `
-        <div onclick="window.openEngProjectModal(${idx})" class="bg-white rounded-[1.5rem] border border-slate-200 p-5 shadow-sm hover:shadow-md hover:border-[#f5a20f] transition-all cursor-pointer group flex items-center justify-between">
-            <div class="flex flex-col gap-2.5 items-start pr-4">
-                <div class="flex items-center gap-3">
-                    <h4 class="font-bold text-[13px] text-slate-800 group-hover:text-[#f5a20f] transition-colors uppercase line-clamp-2">${getVal(p, KEY_MAP.name)}</h4>
-                    <span class="text-[10px] font-bold bg-[#f5a20f]/10 text-[#f5a20f] px-2 py-0.5 rounded-md border border-[#f5a20f]/20">${p.myAvg}%</span>
-                </div>
-                <div class="flex flex-wrap gap-1.5">
-                    <span class="text-[8px] font-black px-2 py-0.5 border border-slate-200 rounded uppercase text-slate-400">${p.myTasks.length} TUGAS</span>
-                </div>
-            </div>
-            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform"></i>
-        </div>`;
-    }).join('');
-    
-    lucide.createIcons();
-};
-
-// Override Render Jobdesk untuk Empty State
-window.renderJobdesk = function() {
-    if (!currentUser) return; 
-    
-    let filteredJd = jobdeskData;
-    const myKode = getTeamProp(currentUser, 'KODE').toUpperCase();
-    const isDirector = window.isLead();
-    const listCont = isDirector ? $id('dirJobdeskList') : $id('engJobdeskList');
-    
-    if (!listCont) return;
-
-    if (!isDirector) { 
-        filteredJd = jobdeskData.filter(j => (j['TEAM CODE'] || '').toUpperCase() === myKode); 
-    }
-
-    const emptyMessage = `<div class="py-10 bg-white border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">Belum ada tugas yang didelegasikan oleh Direksi kepada Anda.</div>`;
-
-    if (filteredJd.length === 0) { 
-        listCont.innerHTML = emptyMessage; 
-        return; 
-    }
-
-    listCont.className = isDirector ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" : "flex flex-col gap-4";
-    listCont.innerHTML = filteredJd.map(j => {
-        const s = (j.STATUS || 'OPEN').toUpperCase(); 
-        const sColor = s === 'OPEN' ? 'bg-sky-100 text-sky-700' : (s === 'PROGRESS' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700');
-        const canEdit = isDirector || (j['TEAM CODE'] || '').toUpperCase() === myKode;
-        let statusUI = `<span class="px-2.5 py-1 rounded-md border text-[9px] font-black uppercase tracking-widest ${sColor}">${s}</span>`;
-        
-        if (canEdit) { 
-            statusUI = `<select onchange="window.updateJdStatus(${j.rowIdx}, this)" class="bg-slate-50 border border-slate-200 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded outline-none focus:border-indigo-400 text-slate-700 cursor-pointer hover:bg-slate-100 transition-colors"><option value="OPEN" ${s==='OPEN'?'selected':''}>OPEN</option><option value="PROGRESS" ${s==='PROGRESS'?'selected':''}>PROGRESS</option><option value="DONE" ${s==='DONE'?'selected':''}>DONE</option></select>`; 
-        }
-
-        return `<div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col"><div class="flex justify-between items-start mb-4 gap-2"><div class="flex flex-wrap gap-1.5"><span class="text-[9px] font-black bg-indigo-50 text-indigo-600 px-2 py-1 rounded-md border uppercase"><i data-lucide="folder" class="w-3 h-3 inline pb-0.5 mr-0.5"></i> ${j['PROJECT NAME'] || '-'}</span></div><div class="shrink-0">${statusUI}</div></div><h4 class="text-sm font-bold text-slate-800 leading-relaxed mb-4 flex-1 whitespace-pre-wrap">${j.JOBDESK || '-'}</h4></div>`;
-    }).join('');
-    lucide.createIcons();
-};
-
-// 2. FITUR JOBDESK
-window.openAddJobdeskModal = function() {
-    let pOpts = `<option value="">-- Pilih Proyek --</option><option value="NON-PROYEK / UMUM">NON-PROYEK / UMUM</option>`;
-    allData.forEach(p => { const nm = getVal(p, KEY_MAP.name); if(nm) pOpts += `<option value="${escapeJS(nm)}">${escapeJS(nm)}</option>`; });
-    $id('jdProj').innerHTML = pOpts;
-    
-    let tOpts = `<option value="">-- Pilih Tim --</option>`;
-    teamsData.forEach(t => { 
-        const n = getTeamProp(t, 'NAMA'); const k = getTeamProp(t, 'KODE'); 
-        if(n !== 'Tanpa Nama' && n !== '') tOpts += `<option value="${k}">${k} - ${n}</option>`; 
-    }); 
-    $id('jdTeam').innerHTML = tOpts;
-    
-    $id('jdDetail').value = ''; $id('jdDeadline').valueAsDate = new Date();
-    const m = $id('addJobdeskModal'); if(m) m.classList.replace('hidden', 'flex'); 
-};
-window.closeAddJobdeskModal = function() { $id('addJobdeskModal').classList.replace('flex', 'hidden'); };
-
-window.submitJobdesk = async function(e) {
-    e.preventDefault(); 
-    const btn = $id('btnSubmitJd'); const orig = btn.innerHTML; btn.innerHTML = 'MEMPROSES...'; btn.disabled = true;
-    try {
-        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'ADD_JOBDESK', projectName: $id('jdProj').value, teamCode: $id('jdTeam').value, jobdesk: $id('jdDetail').value, deadline: $id('jdDeadline').value, priority: $id('jdPriority').value, createdBy: getTeamProp(currentUser, 'NAMA') }) });
-        btn.innerHTML = '✓ TERSIMPAN';
-        setTimeout(() => { window.closeAddJobdeskModal(); btn.innerHTML = orig; btn.disabled = false; window.init(true); }, 2000);
-    } catch(err) { alert('Gagal assign jobdesk.'); btn.innerHTML = orig; btn.disabled = false; }
-};
-
-window.updateJdStatus = async function(rowIdx, selectEl) {
-    const nS = selectEl.value; selectEl.disabled = true; selectEl.classList.add('opacity-50', 'animate-pulse');
-    try {
-        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'UPDATE_JOBDESK_STATUS', rowIdx: rowIdx, newStatus: nS }) });
-        const i = jobdeskData.find(j => j.rowIdx === rowIdx); if(i) i.STATUS = nS;
-        selectEl.disabled = false; selectEl.classList.remove('opacity-50', 'animate-pulse'); selectEl.classList.replace('text-slate-700', 'text-emerald-600');
-        setTimeout(() => selectEl.classList.replace('text-emerald-600', 'text-slate-700'), 1500);
-    } catch(e) { alert("Error update status."); selectEl.disabled = false; selectEl.classList.remove('opacity-50', 'animate-pulse'); window.renderJobdesk(); }
-};
-
-// 3. FITUR TASK ASSIGNMENT (SOP)
-window.openAssignSopModal = function() {
-    let pOpts = `<option value="">-- Pilih Proyek --</option>`; 
-    allData.forEach(p => { pOpts += `<option value="${escapeJS(getVal(p, KEY_MAP.name))}">${escapeJS(getVal(p, KEY_MAP.name))}</option>`; });
-    $id('asProj').innerHTML = pOpts; 
-    $id('asTaskList').innerHTML = '<p class="text-xs text-slate-500 text-center italic">Silakan pilih proyek terlebih dahulu.</p>';
-    const m = $id('assignSopModal'); if(m) m.classList.replace('hidden', 'flex');
-};
-window.closeAssignSopModal = function() { $id('assignSopModal').classList.replace('flex', 'hidden'); };
-
-window.onAssignSopProjChange = function(projName) {
-    if(!projName) return $id('asTaskList').innerHTML = '<p class="text-xs text-slate-500 text-center italic">Silakan pilih proyek terlebih dahulu.</p>';
-    const p = allData.find(x => getVal(x, KEY_MAP.name) === projName); if(!p) return;
-    
-    let tOpts = `<option value="">-- Pilih Tim --</option>`;
-    teamsData.forEach(t => { 
-        const n = getTeamProp(t, 'NAMA'); const k = getTeamProp(t, 'KODE'); 
-        if(n !== 'Tanpa Nama') tOpts += `<option value="${k}">${k} - ${n}</option>`; 
-    });
-
-    let html = p.Tasks.map(t => {
-        const existingAssign = p._parsedAssignments[t.name] || [];
-        const currTeam = existingAssign.length > 0 ? existingAssign[0] : '';
-        return `<div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-3 task-assign-row" data-task="${escapeJS(t.name)}"><p class="text-xs font-black text-slate-800 uppercase mb-2">${escapeJS(t.name)}</p><select class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 font-bold text-xs text-slate-700 team-select">${tOpts.replace(`value="${currTeam}"`, `value="${currTeam}" selected`)}</select></div>`;
-    }).join('');
-    $id('asTaskList').innerHTML = html;
-};
-
-window.submitAssignSop = async function(e) {
-    e.preventDefault(); 
-    const projName = $id('asProj').value; if(!projName) return alert('Pilih proyek!');
-    const btn = $id('btnSubmitAs'); const orig = btn.innerHTML; btn.innerHTML = 'MEMPROSES...'; btn.disabled = true;
-    
-    let assignments = {};
-    document.querySelectorAll('.task-assign-row').forEach(row => {
-        const tName = row.getAttribute('data-task');
-        const tCode = row.querySelector('.team-select').value;
-        if(tCode) {
-            assignments[tName] = [tCode]; // Update ASSIGNMENTS Array
-        }
-    });
-
-    try {
-        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'ASSIGN_MULTIPLE_TASKS', projectName: projName, assignments: assignments }) });
-        btn.innerHTML = '✓ TERSIMPAN';
-        setTimeout(() => { window.closeAssignSopModal(); btn.innerHTML = orig; btn.disabled = false; window.init(true); }, 1500);
-    } catch(err) { alert('Gagal assign task.'); btn.innerHTML = orig; btn.disabled = false; }
-};
-
-// 4. FITUR MONITOR SOP
-window.openMonitorSopModal = function() {
-    let pOpts = `<option value="">-- Semua Proyek --</option>`; 
-    allData.forEach(p => { pOpts += `<option value="${escapeJS(getVal(p, KEY_MAP.name))}">${escapeJS(getVal(p, KEY_MAP.name))}</option>`; });
-    $id('msProj').innerHTML = pOpts; 
-    window.onMonitorSopProjChange(''); // Load all initially
-    const m = $id('monitorSopModal'); if(m) m.classList.replace('hidden', 'flex');
-};
-window.closeMonitorSopModal = function() { $id('monitorSopModal').classList.replace('flex', 'hidden'); };
-
-window.onMonitorSopProjChange = function(projFilter) {
-    const list = $id('msTaskList');
-    let html = '';
-
-    const projectsToRender = projFilter ? allData.filter(p => getVal(p, KEY_MAP.name) === projFilter) : allData;
-
-    projectsToRender.forEach(p => {
-        if(!p._parsedAssignments || Object.keys(p._parsedAssignments).length === 0) return;
-        
-        let hasTask = false;
-        let taskHtml = '';
-        
-        p.Tasks.forEach(t => {
-            const assignedArr = p._parsedAssignments[t.name] || [];
-            if (assignedArr.length > 0) {
-                hasTask = true;
-                const names = assignedArr.map(k => { 
-                    let tm = teamsData.find(x => (x['KODE'] || x['NAMA']) === k); 
-                    return tm ? (tm['NAMA'] || k).split(' ')[0] : k; 
-                }).join(', ');
-                
-                taskHtml += `
-                <div class="bg-white border border-slate-200 p-3 rounded-xl shadow-sm flex justify-between items-center mb-2">
-                    <div>
-                        <p class="text-[11px] font-black text-slate-800 uppercase">${escapeJS(t.name)}</p>
-                        <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1"><i data-lucide="user" class="w-3 h-3 inline pb-0.5"></i> ${names}</p>
-                    </div>
-                    <span class="text-lg font-black text-indigo-600">${t.progress}%</span>
-                </div>`;
-            }
-        });
-
-        if (hasTask) {
-            html += `<div class="mb-4"><h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 border-b pb-1"><i data-lucide="folder" class="w-3 h-3 inline pb-0.5"></i> ${escapeJS(getVal(p, KEY_MAP.name))}</h4>${taskHtml}</div>`;
-        }
-    });
-
-    list.innerHTML = html || '<p class="text-xs text-slate-500 text-center italic">Tidak ada tugas SOP yang diassign.</p>';
-    lucide.createIcons();
-};
-
-// 5. UPDATE SUBMIT ASSIGN TASK (Modal Direktur pada Action Board)
-window.submitAssignTask = async function() {
-    const btn = $id('btnSubmitAssign'); const orig = btn.innerHTML; btn.innerHTML = 'MENYIMPAN...'; btn.disabled = true;
-    const checkboxes = document.querySelectorAll('.atm-checkbox:checked'); const selectedKodes = Array.from(checkboxes).map(cb => cb.value);
-
-    try {
-        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'ASSIGN_TASK', projectName: curAssignProjName, taskName: curAssignTaskName, assignees: selectedKodes }) });
-        const p = allData.find(x => getVal(x, KEY_MAP.name) === curAssignProjName);
-        if (p) {
-            if (!p._parsedAssignments) p._parsedAssignments = {};
-            p._parsedAssignments[curAssignTaskName] = selectedKodes;
-        }
-        btn.innerHTML = '✓ TERSIMPAN'; 
-        setTimeout(() => { 
-            window.closeAssignModal(); btn.innerHTML = orig; btn.disabled = false; window.init(true); 
-            // Refresh modal BOD jika sedang terbuka
-            if (!$id('bodModal').classList.contains('hidden') && window.curBodProjIdx !== undefined) {
-                window.openBodModal(window.curBodProjIdx, window.curBodPhaseIdx);
-            }
-        }, 1500);
-    } catch(e) { alert('Error saat menyimpan.'); btn.innerHTML = orig; btn.disabled = false; }
-};
+// =========================================================
+// 9. INIT (BOOTSTRAPPER)
+// =========================================================
 window.init = async function(isAuto = false) {
     try {
         const r = await fetch(API_URL + "?nocache=" + new Date().getTime()); 
         const d = await r.json();
+        
         let projects = d.projects || [];
         projects.forEach(p => {
-            p._parsedAssignments = {}; const rawAssign = getVal(p, ['ASSIGNMENTS']); if (rawAssign) { try { p._parsedAssignments = JSON.parse(rawAssign); } catch(err) {} }
+            p._parsedAssignments = {}; 
+            const rawAssign = window.getVal(p, ['ASSIGNMENTS']); 
+            if (rawAssign) { try { p._parsedAssignments = JSON.parse(rawAssign); } catch(err) {} }
         });
-        allData = projects; teamsData=d.teams||[]; timesheetsData=d.timesheets||[]; financeData=d.finance||[]; jobdeskData = d.jobdesks || []; taskAssignmentsData = d.taskAssignments || [];
+        
+        allData = projects; 
+        teamsData = d.teams || []; 
+        timesheetsData = d.timesheets || []; 
+        financeData = d.finance || []; 
+        jobdeskData = d.jobdesks || []; 
+        taskAssignmentsData = d.taskAssignments || [];
         
         const dashEl = $id('view-team-dashboard');
         if(dashEl && dashEl.classList.contains('active') && currentUser) { 
@@ -2714,6 +2348,7 @@ window.init = async function(isAuto = false) {
     } catch(e) { console.error("Init Error", e); }
 };
 
+// Start application
 window.init();
 </script>
 </body>
