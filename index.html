@@ -628,84 +628,75 @@
             <!-- Scrollable Main Container -->
             <main class="flex-1 overflow-y-auto p-8 scroll-smooth">
                 <div class="max-w-[1600px] mx-auto space-y-8">
-         <div id="exec-overview-section" class="space-y-8 animate-in fade-in">
-     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5">
-        <div class="kpi-card border border-slate-200">
-            <div><div class="kpi-label">TOTAL</div><div class="kpi-value text-[#003366]" id="k0">0</div></div>
-            <i data-lucide="clipboard-list" class="w-6 h-6 text-slate-200"></i>
-            <div class="absolute bottom-0 left-0 w-full h-1 bg-[#3b82f6]"></div>
-        </div>
-        <div class="kpi-card border border-slate-200">
-            <div><div class="kpi-label">ACTIVES</div><div class="kpi-value" id="k1">0</div></div>
-            <i data-lucide="play" class="w-6 h-6 text-slate-200"></i>
-            <div class="absolute bottom-0 left-0 w-full h-1 bg-[#0ea5e9]"></div>
-        </div>
-        <div class="kpi-card border border-slate-200">
-            <div><div class="kpi-label">NEW</div><div class="kpi-value" id="k2">0</div></div>
-            <i data-lucide="plus-circle" class="w-6 h-6 text-slate-200"></i>
-            <div class="absolute bottom-0 left-0 w-full h-1 bg-[#8b5cf6]"></div>
-        </div>
-        <div class="kpi-card border border-slate-200">
-            <div><div class="kpi-label">COMPLETE</div><div class="kpi-value" id="k3">0</div></div>
-            <i data-lucide="check-circle-2" class="w-6 h-6 text-slate-200"></i>
-            <div class="absolute bottom-0 left-0 w-full h-1 bg-[#22c55e]"></div>
-        </div>
-        <div class="kpi-card border border-slate-200">
-            <div><div class="kpi-label">ON HOLD</div><div class="kpi-value" id="k4">0</div></div>
-            <i data-lucide="pause-circle" class="w-6 h-6 text-slate-200"></i>
-            <div class="absolute bottom-0 left-0 w-full h-1 bg-[#eab308]"></div>
-        </div>
-        <div class="kpi-card border border-slate-200">
-            <div><div class="kpi-label">CLOSED</div><div class="kpi-value" id="k5">0</div></div>
-            <i data-lucide="x-circle" class="w-6 h-6 text-slate-200"></i>
-            <div class="absolute bottom-0 left-0 w-full h-1 bg-[#64748b]"></div>
-        </div>
-    </div>
+                    
+                    <div id="exec-overview-section" class="space-y-8 animate-in fade-in">
+                        
+                        <!-- 6 KPI Cards -->
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5">
+                            <div class="kpi-card border border-slate-200">
+                                <div><div class="kpi-label">TOTAL</div><div class="kpi-value text-[#003366]" id="k0">0</div></div>
+                                <i data-lucide="clipboard-list" class="w-6 h-6 text-slate-200"></i>
+                                <div class="absolute bottom-0 left-0 w-full h-1 bg-[#3b82f6]"></div>
+                            </div>
+                            <div class="kpi-card border border-slate-200">
+                                <div><div class="kpi-label">ACTIVES</div><div class="kpi-value" id="k1">0</div></div>
+                                <i data-lucide="play" class="w-6 h-6 text-slate-200"></i>
+                                <div class="absolute bottom-0 left-0 w-full h-1 bg-[#0ea5e9]"></div>
+                            </div>
+                            <div class="kpi-card border border-slate-200">
+                                <div><div class="kpi-label">NEW</div><div class="kpi-value" id="k2">0</div></div>
+                                <i data-lucide="plus-circle" class="w-6 h-6 text-slate-200"></i>
+                                <div class="absolute bottom-0 left-0 w-full h-1 bg-[#8b5cf6]"></div>
+                            </div>
+                            <div class="kpi-card border border-slate-200">
+                                <div><div class="kpi-label">COMPLETE</div><div class="kpi-value" id="k3">0</div></div>
+                                <i data-lucide="check-circle-2" class="w-6 h-6 text-slate-200"></i>
+                                <div class="absolute bottom-0 left-0 w-full h-1 bg-[#22c55e]"></div>
+                            </div>
+                            <div class="kpi-card border border-slate-200">
+                                <div><div class="kpi-label">ON HOLD</div><div class="kpi-value" id="k4">0</div></div>
+                                <i data-lucide="pause-circle" class="w-6 h-6 text-slate-200"></i>
+                                <div class="absolute bottom-0 left-0 w-full h-1 bg-[#eab308]"></div>
+                            </div>
+                            <div class="kpi-card border border-slate-200">
+                                <div><div class="kpi-label">CLOSED</div><div class="kpi-value" id="k5">0</div></div>
+                                <i data-lucide="x-circle" class="w-6 h-6 text-slate-200"></i>
+                                <div class="absolute bottom-0 left-0 w-full h-1 bg-[#64748b]"></div>
+                            </div>
+                        </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div class="chart-card shadow-md">
-            <div class="chart-title text-slate-500">ACTIVES BY PROJECT</div>
-            <div class="chart-wrap"><canvas id="cProjType" class="chart-canvas-3d"></canvas></div>
-            <div class="flex flex-wrap gap-3 justify-center mt-8" id="lProjType"></div>
-        </div>
-        <div class="chart-card shadow-md">
-            <div class="chart-title text-slate-500">ACTIVES BY PRIORITY</div>
-            <div class="chart-wrap"><canvas id="cPriority" class="chart-canvas-3d"></canvas></div>
-            <div class="flex flex-wrap gap-3 justify-center mt-8" id="lPriority"></div>
-        </div>
-        <div class="chart-card shadow-md">
-            <div class="chart-title text-slate-500" id="detailTitle">DAFTAR: HIGH</div>
-            <div class="flex-1 w-full overflow-x-auto overflow-y-hidden no-scrollbar relative" id="detailPanel">
-                <div class="w-full h-full flex flex-col items-center justify-center text-center p-8 text-slate-400 absolute inset-0">
-                    <i data-lucide="bar-chart-3" class="w-8 h-8 mb-3 opacity-20"></i>
-                    <p class="text-[11px] font-medium italic leading-relaxed">Klik grafik lingkaran atau legenda untuk melihat diagram proyek di sini.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="pt-6">
-        <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6 border-b border-slate-200 pb-4">
-            <h2 class="text-[15px] font-black uppercase tracking-[0.15em] text-slate-400 flex items-center gap-3 shrink-0">
-                <i data-lucide="layout-grid" class="w-5 h-5 text-[#ef4444]"></i> PROJECT PROGRESS TRACKER
-            </h2>
-            
-            <div class="flex flex-col md:flex-row items-center gap-4 w-full xl:w-auto">
-                <div class="flex w-full md:w-64 relative shrink-0">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
-                    </div>
-                    <input type="text" id="searchProjectInput" onkeyup="window.handleSearchProject(this.value)" placeholder="Cari Proyek..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-full outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 font-bold text-xs text-slate-800 shadow-sm transition-all">
-                </div>
-                
-                <div id="execFilters" class="flex gap-2.5 overflow-x-auto no-scrollbar pb-2 md:pb-0 w-full xl:w-auto max-w-full"></div>
-            </div>
-        </div>
-        
-        <div id="executiveGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 items-start"></div>
-    </div>
-</div>
-                  
+                        <!-- 3 Chart Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- ACTIVES BY PROJECT -->
+                            <div class="chart-card shadow-md">
+                                <div class="chart-title text-slate-500">ACTIVES BY PROJECT</div>
+                                <div class="chart-wrap"><canvas id="cProjType" class="chart-canvas-3d"></canvas></div>
+                                <div class="flex flex-wrap gap-3 justify-center mt-8" id="lProjType"></div>
+                            </div>
+                            <!-- ACTIVES BY PRIORITY -->
+                            <div class="chart-card shadow-md">
+                                <div class="chart-title text-slate-500">ACTIVES BY PRIORITY</div>
+                                <div class="chart-wrap"><canvas id="cPriority" class="chart-canvas-3d"></canvas></div>
+                                <div class="flex flex-wrap gap-3 justify-center mt-8" id="lPriority"></div>
+                            </div>
+                            <!-- DAFTAR TERPILIH (Bar Chart) -->
+                            <div class="chart-card shadow-md">
+                                <div class="chart-title text-slate-500" id="detailTitle">DAFTAR: HIGH</div>
+                                <div class="flex-1 w-full overflow-x-auto overflow-y-hidden no-scrollbar relative" id="detailPanel">
+                                    <div class="w-full h-full flex flex-col items-center justify-center text-center p-8 text-slate-400 absolute inset-0">
+                                        <i data-lucide="bar-chart-3" class="w-8 h-8 mb-3 opacity-20"></i>
+                                        <p class="text-[11px] font-medium italic leading-relaxed">Klik grafik lingkaran atau legenda untuk melihat diagram proyek di sini.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                      <!-- Search Bar Proyek (Menggantikan Tombol Aksi) -->
+                        <div class="flex w-full max-w-md relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i data-lucide="search" class="w-5 h-5 text-slate-400"></i>
+                            </div>
+                            <input type="text" id="searchProjectInput" onkeyup="window.handleSearchProject(this.value)" placeholder="Cari Nama Proyek..." class="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-full outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 font-bold text-sm text-slate-800 shadow-sm transition-all">
+                        </div>
                         <!--PART 3-->
                         <!-- PROJECT PROGRESS TRACKER -->
                         <div class="pt-6">
@@ -1819,6 +1810,23 @@ window.makePie = function(id, labels, data, colors, type, chartType = 'pie') {
   if(lCont) { lCont.innerHTML = labels.map((l, i) => `<div onclick="window.renderFilteredList('${type}','${l}')" class="flex items-center gap-2 px-3.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-full cursor-pointer text-[10px] font-bold text-slate-600 shadow-sm transition-colors"><span class="w-2.5 h-2.5 rounded-full shadow-sm" style="background:${colors[i]}"></span>${l} <span class="text-slate-800 ml-1.5 font-black">${data[i]}</span></div>`).join(''); }
 };
 
+window.renderFilteredList = function(type, val) {
+  const tEl = $id('detailTitle'); if(tEl) tEl.textContent = `DAFTAR: ${val.toUpperCase()}`;
+  const fil = allData.filter(p => {
+    const sv = window.getVal(p, KEY_MAP.status).toLowerCase();
+    if (type === 'status') { const v = val.toUpperCase(); if (v === 'ACTIVES') return sv.includes('active') || sv === 'new'; if (v === 'NEW') return sv === 'new'; if (v === 'COMPLETE') return sv.includes('complete'); if (v === 'ON HOLD') return sv.includes('hold'); if (v === 'CLOSED') return sv.includes('closed'); return false; }
+    if (type === 'priority') { const pr = window.getVal(p, KEY_MAP.priority).toUpperCase(); return (pr.includes('HIGH') || pr.includes('HIGHT') ? 'High' : (pr.includes('MEDIUM') ? 'Medium' : (pr.includes('LOW') ? 'Low' : ''))) === val; } return false;
+  });
+  const panel = $id('detailPanel'); if(!panel) return;
+  if (fil.length === 0) return panel.innerHTML = `<div class="w-full h-full flex flex-col items-center justify-center text-slate-400 text-[11px] italic">Kosong</div>`;
+  
+  panel.innerHTML = `<div class="flex gap-6 items-end h-full min-w-max px-6 pb-20 pt-8">` + fil.map((p, i) => {
+    const pg = window.getCalcProgress(p); const nm = window.escapeJS(window.getVal(p, KEY_MAP.name)); const barHeight = Math.max(pg, 5); const delay = i * 50; 
+    return `<div class="flex flex-col items-center justify-end h-full w-[44px] shrink-0 group"><span class="text-[10px] font-black text-[#003366] mb-1.5 transition-all duration-500 opacity-0 translate-y-2 animated-text" style="transition-delay: ${delay + 300}ms">${pg}%</span><div class="w-10 bg-[#38bdf8] rounded-t-lg transition-all duration-1000 ease-out animated-bar hover:bg-[#0ea5e9] cursor-pointer" style="height: 0%; transition-delay: ${delay}ms" data-height="${barHeight}%"></div><div class="mt-4 relative w-[2px]"><div class="absolute top-0 right-2 origin-top-right -rotate-45 w-[140px] text-right"><p class="text-[9px] font-bold text-slate-500 truncate uppercase hover:text-[#0ea5e9] cursor-default transition-colors" title="${nm}">${nm}</p></div></div></div>`;
+  }).join('') + `</div>`;
+  setTimeout(() => { panel.querySelectorAll('.animated-bar').forEach(b => b.style.height = b.getAttribute('data-height')); panel.querySelectorAll('.animated-text').forEach(t => t.classList.remove('opacity-0', 'translate-y-2')); }, 50);
+};
+
 window.renderExecutiveGrid = function() {
     const efEl = $id('execFilters');
     if(efEl) efEl.innerHTML = execFiltersConfig.map(f => `<button onclick="curExecFilter='${f.id}';window.renderExecutiveGrid()" class="px-5 py-2.5 rounded-full text-[10px] font-black uppercase border transition-colors ${curExecFilter===f.id?f.color+' text-white border-transparent':'bg-white text-slate-500 hover:bg-slate-50'}">${f.label}</button>`).join('');
@@ -1907,6 +1915,7 @@ window.renderExecutiveGrid = function() {
     }).join('');
     lucide.createIcons();
 };
+
 window.openBodModal = function(pI, phI) {
     const p = window.currentExecutiveData[pI]; if(!p) return;
     const bpj = $id('bodProjName'); if(bpj) bpj.textContent = window.getVal(p, KEY_MAP.name);
