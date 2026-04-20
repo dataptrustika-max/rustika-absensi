@@ -873,6 +873,7 @@ let currentUser = null;
 let charts = {};
 let tsRows = [];
 let currentReportData = null;
+let curExecSearch = '';
 
 const KEY_MAP = { 
   name: ['nama pekerjaan', 'project name', 'nama proyek'], 
@@ -1249,6 +1250,11 @@ window.switchExecTab = function(tabName) {
   if (tabName === 'finance') window.renderFinanceTable();
 };
 
+window.handleSearchProject = function(val) {
+    curExecSearch = val.toLowerCase().trim();
+    window.renderExecutiveGrid();
+};
+
 window.renderExecutive = function() {
   const statusCount = { ACTIVES: 0, NEW: 0, COMPLETE: 0, "ON HOLD": 0, CLOSED: 0 };
   allData.forEach(p => {
@@ -1267,9 +1273,12 @@ window.renderExecutive = function() {
       if(el) el.textContent = [totalAll, actSum, statusCount.NEW, statusCount.COMPLETE, statusCount["ON HOLD"], statusCount.CLOSED][i];
   });
 
-  window.makePie('cProjType', ['ACTIVES', 'NEW', 'COMPLETE', 'ON HOLD', 'CLOSED'], [actSum, statusCount.NEW, statusCount.COMPLETE, statusCount["ON HOLD"], statusCount.CLOSED], ['#0ea5e9','#8b5cf6','#22c55e','#eab308','#64748b'], 'status', 'doughnut');
+  // TIPE GRAFIK TELAH DIUBAH MENJADI 'pie' MURNI (KUE UTUH) BUKAN 'doughnut'
+  window.makePie('cProjType', ['ACTIVES', 'NEW', 'COMPLETE', 'ON HOLD', 'CLOSED'], [actSum, statusCount.NEW, statusCount.COMPLETE, statusCount["ON HOLD"], statusCount.CLOSED], ['#0ea5e9','#8b5cf6','#22c55e','#eab308','#64748b'], 'status', 'pie');
 
   const pc = allData.reduce((a,p)=>{const v=getVal(p,KEY_MAP.priority).toUpperCase(); if(v.includes('HIGH') || v.includes('HIGHT'))a.H++;else if(v.includes('MEDIUM'))a.M++;else a.L++; return a;},{H:0,M:0,L:0});
+  
+  // TIPE GRAFIK TELAH DIUBAH MENJADI 'pie' MURNI (KUE UTUH)
   window.makePie('cPriority', ['High','Medium','Low'], [pc.H,pc.M,pc.L], ['#f97316','#fb923c','#22c55e'], 'priority', 'pie');
   
   window.renderFilteredList('priority', 'High');
@@ -1316,6 +1325,11 @@ window.renderExecutiveGrid = function() {
     
     const fil = allData.filter(p => {
         const s = getVal(p, KEY_MAP.status).toLowerCase(); const pt = (p.Type||'').toUpperCase(); const prRaw = getVal(p, KEY_MAP.priority).toUpperCase(); const pr = prRaw.includes('HIGH')?'HIGH':(prRaw.includes('MEDIUM')?'MEDIUM':'LOW');
+        const nm = getVal(p, KEY_MAP.name).toLowerCase();
+        
+        // FUNGSI PENCARIAN BERDASARKAN INPUT TEXT SEARCH BAR
+        if(curExecSearch && !nm.includes(curExecSearch)) return false;
+
         if(curExecFilter==='ACTIVES') return s.includes('active') || s.includes('new'); 
         if(curExecFilter==='CLOSED') return s.includes('closed'); 
         if(curExecFilter==='COMPLETE') return s.includes('complete');
@@ -1325,7 +1339,7 @@ window.renderExecutiveGrid = function() {
     });
     
     window.currentExecutiveData = fil; const grid = $id('executiveGrid'); if(!grid) return;
-    if(fil.length===0) { grid.innerHTML = `<div class="col-span-full py-16 text-center text-slate-400 font-bold uppercase border-2 border-dashed rounded-3xl">Kosong</div>`; return; }
+    if(fil.length===0) { grid.innerHTML = `<div class="col-span-full py-16 text-center text-slate-400 font-bold uppercase border-2 border-dashed rounded-3xl">Proyek Tidak Ditemukan</div>`; return; }
     
     const today = new Date().getTime();
     grid.innerHTML = fil.map((p, i) => {
