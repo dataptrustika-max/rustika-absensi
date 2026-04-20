@@ -2096,45 +2096,253 @@ window.submitAgenda = async function(e) {
 };
 
 // =============== TIMELINE (2026 STRICT) ===============
-window.renderTimeline = function() {
-    const strictYear = 2026;
-    const actP = allData.filter(p => { const sv = getVal(p, KEY_MAP.status).toLowerCase(); return sv.includes('active') || sv === 'new'; });
-    window.calendarDateMap = {}; 
-    actP.forEach(p => {
-        let sS = getVal(p, ['start date', 'date start', 'mulai', 'start']); let eS = getVal(p, ['date end', 'end date', 'selesai', 'end']);
-        let sD = new Date(sS); if(isNaN(sD.getTime()) && sS.includes('/')) sD = new Date(sS.split('/').reverse().join('-'));
-        let eD = new Date(eS); if(isNaN(eD.getTime()) && eS.includes('/')) eD = new Date(eS.split('/').reverse().join('-'));
-        if (!isNaN(sD.getTime()) && !isNaN(eD.getTime())) {
-            let curr = new Date(sD.getTime()); curr.setHours(0,0,0,0); let end = new Date(eD.getTime()); end.setHours(0,0,0,0); let limit = 0;
-            while(curr <= end && limit < 2000) { let y = curr.getFullYear(); if (y === strictYear) { let m = String(curr.getMonth() + 1).padStart(2, '0'); let d = String(curr.getDate()).padStart(2, '0'); let dStr = `${y}-${m}-${d}`; if(!window.calendarDateMap[dStr]) window.calendarDateMap[dStr] = []; window.calendarDateMap[dStr].push(p); } curr.setDate(curr.getDate() + 1); limit++; }
-        }
-    });
+// =========================================================
+// FITUR TIMESHEET GENERATOR & REPORT
+// =========================================================
 
-    const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']; const dayNames = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min']; 
-    let calHtml = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
-    for (let m = 0; m < 12; m++) {
-        calHtml += `<div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm"><h3 class="text-center font-black text-slate-800 uppercase tracking-widest mb-3 border-b pb-2">${monthNames[m]} 2026</h3><div class="grid grid-cols-7 gap-1 text-center mb-2">${dayNames.map(d => `<div class="text-[9px] font-bold text-slate-400">${d}</div>`).join('')}</div><div class="grid grid-cols-7 gap-1 text-center">`;
-        let firstDayJS = new Date(strictYear, m, 1).getDay(); let first = firstDayJS === 0 ? 6 : firstDayJS - 1; let daysInMonth = new Date(strictYear, m + 1, 0).getDate();
-        for (let i = 0; i < first; i++) { calHtml += `<div></div>`; }
-        for (let d = 1; d <= daysInMonth; d++) {
-            let dStr = `${strictYear}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-            let projs = window.calendarDateMap[dStr] || []; 
-            let boxClasses = "relative cursor-pointer text-xs font-bold w-6 h-6 mx-auto flex items-center justify-center rounded-md ";
-            if (projs.length > 0) { boxClasses += "bg-indigo-500 text-white shadow-sm hover:scale-110"; } else { boxClasses += "bg-slate-50 text-slate-500 hover:bg-slate-100"; }
-            calHtml += `<div onclick="window.showDateProjects('${dStr}')" class="${boxClasses}" title="${projs.length} Proyek">${d}</div>`;
-        }
-        calHtml += `</div></div>`;
+window.renderTimesheetControls = function() {
+    // 1. Isi Dropdown Pilih Tim / Engineer
+    const rt = $id('repTeam'); 
+    if (rt) {
+        rt.innerHTML = '<option value="">- Pilih Engineer / Tim -</option>' + 
+        teamsData.map((t, i) => `<option value="${i}">${window.getTeamProp(t,'KODE')} - ${window.getTeamProp(t,'NAMA')}</option>`).join('');
     }
-    calHtml += `</div>`;
-    const calCont = $id('calendarGridContainer'); if(calCont) calCont.innerHTML = calHtml;
+
+    // 2. Set Default Tanggal (Start: 7 hari lalu, End: Hari ini)
+    const today = new Date();
+    const lastWeek = new Date();
+    lastWeek.setDate(today.getDate() - 7);
+
+    // Helper untuk format YYYY-MM-DD yang dibutuhkan oleh input type="date"
+    const formatDateYMD = (dateObj) => {
+        let month = '' + (dateObj.getMonth() + 1);
+        let day = '' + dateObj.getDate();
+        const year = dateObj.getFullYear();
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
+        return [year, month, day].join('-');
+    };
+
+    const rs = $id('repStart'); 
+    if (rs) rs.value = formatDateYMD(lastWeek); 
+    
+    const re = $id('repEnd'); 
+    if (re) re.value = formatDateYMD(today);
+
+    // 3. Render Kolom Akses Cepat (Grid Avatar Tim)
+    const qsg = $id('quickSelectGrid');
+    if (qsg) {
+        qsg.innerHTML = teamsData.map((t, i) => {
+            // Hindari merender akun Direksi di akses cepat engineer jika tidak diperlukan (Opsional)
+            // if(window.getTeamProp(t, 'NAMA').toUpperCase().includes('QADRIAH')) return '';
+            
+            const rawFoto = window.getTeamProp(t, 'FOTO');
+            const fotoKompres = window.optimizeImageUrl(rawFoto);
+            const namaLengkap = window.getTeamProp(t, 'NAMA');
+            const dept = window.getTeamProp(t, 'DEPT');
+            
+            // Buat inisial jika tidak ada foto
+            let inisial = "TM";
+            if (namaLengkap && namaLengkap !== "Tanpa Nama") {
+                const parts = namaLengkap.split(' ');
+                if (parts.length > 1) {
+                     inisial = (parts[0][0] + parts[1][0]).toUpperCase();
+                } else {
+                     inisial = parts[0].substring(0, 2).toUpperCase();
+                }
+            }
+            
+            let avatarHtml = '';
+            if (fotoKompres && fotoKompres.trim() !== '') {
+                avatarHtml = `<img src="${fotoKompres}" alt="${inisial}" class="w-10 h-10 rounded-full object-cover border-2 border-indigo-100 mb-2 shadow-sm bg-slate-100">`;
+            } else {
+                avatarHtml = `<div class="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-[10px] mb-2 border border-indigo-100 shadow-sm">${inisial}</div>`;
+            }
+
+            return `
+                <div onclick="window.generateReport(${i})" class="p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-indigo-400 hover:shadow-md shadow-sm transition-all flex flex-col items-center justify-center group">
+                    ${avatarHtml}
+                    <div class="text-[9px] font-bold text-slate-700 text-center truncate w-full uppercase group-hover:text-indigo-700 transition-colors" title="${namaLengkap}">${namaLengkap}</div>
+                    <div class="text-[7px] font-black text-slate-400 text-center truncate w-full uppercase mt-1 tracking-widest" title="${dept}">${dept}</div>
+                </div>`;
+        }).join('');
+    }
+    
+    // Inisialisasi ulang icon Lucide setelah render innerHTML
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 };
 
-window.showDateProjects = function(dStr) {
-    const projs = window.calendarDateMap[dStr] || []; const panel = $id('calendarSidePanel'); if(!panel) return;
-    const dt = new Date(dStr); const tglFull = `${dt.getDate()}/${dt.getMonth()+1}/${dt.getFullYear()}`;
-    let html = `<div class="bg-indigo-50 border-b border-indigo-100 p-4 rounded-t-xl"><div><h3 class="font-black text-indigo-800 text-sm uppercase">${tglFull}</h3><p class="text-[10px] font-bold text-indigo-500 mt-1">${projs.length} Proyek Berjalan</p></div></div><div class="p-4 overflow-y-auto flex-1 space-y-3 bg-slate-50/50">`;
-    if(projs.length > 0) { projs.forEach(p => { const nm = getVal(p, KEY_MAP.name); html += `<div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm"><h4 class="font-bold text-[11px] text-slate-800 uppercase leading-snug">${nm}</h4></div>`; }); } else { html += `<div class="text-center py-10 text-slate-400 text-xs italic">Tidak ada aktivitas.</div>`; }
-    html += `</div>`; panel.innerHTML = html;
+window.generateReport = function(idx) {
+    // Ambil index tim, jika dipanggil dari grid avatar gunakan 'idx', jika dari tombol gunakan value dropdown
+    const v = idx !== undefined ? idx : $id('repTeam').value;
+    if (v === "" || v === undefined) return alert("Pilih Tim / Engineer terlebih dahulu!");
+
+    const tP = teamsData[parseInt(v)];
+    const n = window.getTeamProp(tP, 'NAMA').toUpperCase();
+    const k = window.getTeamProp(tP, 'KODE').toUpperCase();
+    const sd = $id('repStart').value;
+    const ed = $id('repEnd').value;
+
+    if (!sd || !ed) return alert("Pilih rentang tanggal mulai dan akhir!");
+
+    // Filter Data Timesheet
+    const filteredResults = timesheetsData.filter(r => {
+        const rowString = Object.values(r).join('|').toUpperCase();
+        
+        // Cek Nama atau Kode Tim
+        let isUserMatch = false;
+        if (n !== 'TANPA NAMA' && rowString.includes(n)) isUserMatch = true;
+        if (k !== '---' && rowString.includes(k)) isUserMatch = true;
+        if (!isUserMatch) return false;
+
+        // Cek Tanggal
+        let dateStr = window.getVal(r, ['TANGGAL', 'DATE', 'TIMESTAMP', 'WAKTU']);
+        if (!dateStr) return false;
+
+        let rD = new Date(dateStr);
+        // Fix issue jika format tanggal dari sheet adalah dd/mm/yyyy
+        if (isNaN(rD.getTime()) && dateStr.includes('/')) {
+            const parts = dateStr.split('/');
+            if (parts.length === 3) {
+                // Asumsi format Indonesia (DD/MM/YYYY) -> YYYY-MM-DD
+                rD = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+            }
+        }
+        if (isNaN(rD.getTime())) return false;
+
+        const sDate = new Date(sd);
+        const eDate = new Date(ed);
+        
+        // Reset waktu ke 00:00:00 untuk perbandingan tanggal yang akurat
+        rD.setHours(0,0,0,0); 
+        sDate.setHours(0,0,0,0); 
+        eDate.setHours(0,0,0,0);
+
+        return rD >= sDate && rD <= eDate;
+    });
+
+    // Grouping Data Berdasarkan Tanggal
+    let grouped = {};
+    filteredResults.forEach(r => {
+        let tglKey = window.getVal(r, ['TANGGAL', 'DATE', 'TIMESTAMP']) || 'Unknown';
+        if (!grouped[tglKey]) grouped[tglKey] = [];
+        grouped[tglKey].push(r);
+    });
+
+    // Simpan ke memori global untuk fitur Export PDF/Excel nantinya
+    window.currentReportData = { profile: tP, start: sd, end: ed, grouped: grouped };
+
+    // Update Tampilan Header Modal
+    const repNameEl = $id('repModalName');
+    if (repNameEl) repNameEl.textContent = window.getTeamProp(tP, 'NAMA');
+    
+    const repDeptEl = $id('repModalDept');
+    if (repDeptEl) repDeptEl.textContent = `${window.getTeamProp(tP, 'KODE')} • ${window.getTeamProp(tP, 'DEPT')}`;
+    
+    const repDateEl = $id('repModalDate');
+    if (repDateEl) repDateEl.textContent = `${window.formatTanggalHari(sd)} - ${window.formatTanggalHari(ed)}`;
+
+    const tb = $id('reportTableBody');
+    if (!tb) return;
+
+    if (filteredResults.length === 0) {
+        tb.innerHTML = `
+            <tr>
+                <td colspan="6" class="p-12 text-center text-slate-500 border-b border-slate-200">
+                    <i data-lucide="file-x" class="w-10 h-10 mx-auto mb-3 text-slate-300"></i>
+                    <p class="font-bold">Tidak ada data timesheet ditemukan untuk periode ini.</p>
+                </td>
+            </tr>`;
+    } else {
+        let htmlRows = '';
+        // Urutkan tanggal dari yang terlama ke terbaru
+        const sortedDates = Object.keys(grouped).sort((a, b) => {
+             // Konversi ke format Date yang valid untuk sorting jika formatnya DD/MM/YYYY
+             const parseForSort = (dateString) => {
+                 if (dateString.includes('/')) {
+                     const parts = dateString.split('/');
+                     if (parts.length === 3) return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime();
+                 }
+                 return new Date(dateString).getTime();
+             };
+             return parseForSort(a) - parseForSort(b);
+        });
+
+        sortedDates.forEach(d => {
+            let acts = grouped[d];
+            let dailyTotalHours = 0;
+            
+            acts.forEach((a, i) => {
+                const jamMulai = window.getVal(a, ['JAM MULAI', 'MULAI']);
+                const jamSelesai = window.getVal(a, ['JAM SELESAI', 'SELESAI']);
+                
+                const df = window.parseTimeMin(jamSelesai) - window.parseTimeMin(jamMulai);
+                if (df > 0) dailyTotalHours += (df / 60);
+
+                let descRaw = window.getVal(a, ['DESKRIPSI', 'AKTIVITAS', 'DESKRIPSI PEKERJAAN']);
+                let lokasi = "KANTOR"; 
+                let descClean = descRaw;
+                
+                // Parsing tag lokasi (contoh: [LOC:SITE] Pemasangan Pipa)
+                if (descRaw.startsWith('[')) {
+                    const endBr = descRaw.indexOf(']');
+                    if (endBr > -1) {
+                        const locText = descRaw.substring(1, endBr);
+                        if (locText.startsWith('LOC:')) {
+                            lokasi = locText.substring(4).trim();
+                        } else {
+                            lokasi = locText.trim();
+                        }
+                        descClean = descRaw.substring(endBr + 1).trim();
+                    }
+                }
+
+                htmlRows += `<tbody class="border-b-2 border-slate-200">`;
+                htmlRows += `
+                    <tr class="bg-white hover:bg-slate-50 transition-colors group">
+                        ${i === 0 ? `<td rowspan="${acts.length}" class="py-4 px-5 align-top border-r border-slate-100 bg-slate-50/40 w-40">
+                            <div class="font-bold text-[12px] text-slate-800 leading-snug whitespace-nowrap">${window.formatTanggalHari(d)}</div>
+                            <div class="mt-3 text-[9px] font-black bg-white border border-slate-200 px-2 py-1 rounded text-slate-600 inline-block shadow-sm">TOTAL: ${dailyTotalHours.toFixed(1)} JAM</div>
+                        </td>` : ''}
+                        <td class="py-3 px-4 align-top border-b border-slate-100 w-28">
+                            <div class="text-[11px] font-bold text-slate-700 whitespace-nowrap">${jamMulai} - ${jamSelesai}</div>
+                        </td>
+                        <td class="py-3 px-4 align-top border-l border-slate-100 border-b border-slate-100">
+                            <p class="text-[11px] font-medium text-slate-700 leading-relaxed">${window.escapeJS(descClean)}</p>
+                        </td>
+                        <td class="py-3 px-4 align-top border-l border-slate-100 border-b border-slate-100">
+                            <span class="text-[10px] font-bold text-indigo-600 uppercase">${window.escapeJS(window.getVal(a, ['NAMA PROYEK', 'PROYEK']))}</span>
+                        </td>
+                        <td class="py-3 px-4 align-top border-l border-slate-100 border-b border-slate-100">
+                            <span class="text-[10px] text-rose-500 font-bold uppercase">${window.escapeJS(window.getVal(a, ['KENDALA', 'ISSUE']) || '-')}</span>
+                        </td>
+                        <td class="py-3 px-4 align-top border-l border-slate-100 border-b border-slate-100 text-center">
+                            <span class="inline-flex items-center gap-1 bg-slate-50 border border-slate-200 text-slate-600 rounded-full px-2.5 py-1 text-[9px] font-bold uppercase shadow-sm"><i data-lucide="map-pin" class="w-3 h-3 -mt-0.5 shrink-0"></i> ${window.escapeJS(lokasi)}</span>
+                        </td>
+                    </tr>`;
+                htmlRows += `</tbody>`;
+            });
+        });
+        tb.innerHTML = htmlRows;
+    }
+
+    // Tampilkan Modal
+    const repModal = $id('reportModal');
+    if (repModal) {
+        repModal.classList.replace('hidden', 'flex');
+        document.body.style.overflow = 'hidden'; // Kunci scroll background
+    }
+    
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+};
+
+window.closeReportModal = function() {
+    const repModal = $id('reportModal');
+    if (repModal) {
+        repModal.classList.replace('flex', 'hidden');
+        document.body.style.overflow = ''; // Kembalikan scroll background
+    }
+    window.currentReportData = null; // Bebaskan memori
 };
 
 // =============== REPORTS & PDF ===============
