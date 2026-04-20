@@ -2098,7 +2098,7 @@ window.submitAgenda = async function(e) {
 // =============== TIMELINE (2026 STRICT) ===============
 // =========================================================
 // =========================================================
-// FIX: TIMESHEET GENERATOR MODULE (UTUH & FUNGSIONAL)
+// FITUR TIMESHEET GENERATOR & REPORT (FIXED UI)
 // =========================================================
 
 window.renderTimesheetControls = function() {
@@ -2106,9 +2106,9 @@ window.renderTimesheetControls = function() {
     
     // 1. Isi Dropdown Pilih Tim / Engineer
     const rt = $id('repTeam'); 
-    if(rt) {
+    if (rt) {
         rt.innerHTML = '<option value="">- Pilih Engineer / Tim -</option>' + 
-        teamsData.map((t, i) => `<option value="${i}">${getTeamProp(t,'KODE')} - ${getTeamProp(t,'NAMA')}</option>`).join('');
+        teamsData.map((t, i) => `<option value="${i}">${window.getTeamProp(t,'KODE')} - ${window.getTeamProp(t,'NAMA')}</option>`).join('');
     }
 
     // 2. Set Default Tanggal (Start: 7 hari lalu, End: Hari ini)
@@ -2116,143 +2116,156 @@ window.renderTimesheetControls = function() {
     const lastWeek = new Date();
     lastWeek.setDate(today.getDate() - 7);
 
-    const rs = $id('repStart'); 
-    if(rs) rs.value = lastWeek.toISOString().split('T')[0]; 
-    
-    const re = $id('repEnd'); 
-    if(re) re.value = today.toISOString().split('T')[0];
+    // Helper format YYYY-MM-DD aman
+    const formatDateYMD = (d) => {
+        let month = '' + (d.getMonth() + 1), day = '' + d.getDate(), year = d.getFullYear();
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
+        return [year, month, day].join('-');
+    };
 
-    // 3. Render Kolom Akses Cepat (Grid Avatar Tim)
+    const rs = $id('repStart'); if (rs) rs.value = formatDateYMD(lastWeek); 
+    const re = $id('repEnd'); if (re) re.value = formatDateYMD(today);
+
+    // 3. Render Kolom Akses Cepat (Grid Avatar Tim) DENGAN AMAN
     const qsg = $id('quickSelectGrid');
-    if(qsg) {
-        qsg.innerHTML = teamsData.map((t, i) => {
-            const rawFoto = getTeamProp(t, 'FOTO');
-            const fotoKompres = window.optimizeImageUrl(rawFoto);
-            const namaLengkap = getTeamProp(t, 'NAMA');
-            const inisial = namaLengkap.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-            
-            let avatarHtml = '';
-            if (fotoKompres && fotoKompres.startsWith('http')) {
-                avatarHtml = `<img src="${fotoKompres}" alt="${inisial}" class="w-10 h-10 rounded-full object-cover border-2 border-indigo-100 mb-2 shadow-sm bg-slate-100">`;
-            } else {
-                avatarHtml = `<div class="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-[10px] mb-2 border border-indigo-100 shadow-sm">${inisial}</div>`;
-            }
+    if (qsg) {
+        try {
+            qsg.innerHTML = teamsData.map((t, i) => {
+                const namaLengkap = window.getTeamProp(t, 'NAMA') || 'Tanpa Nama';
+                const dept = window.getTeamProp(t, 'DEPT') || '-';
+                const rawFoto = window.getTeamProp(t, 'FOTO');
+                const fotoKompres = window.optimizeImageUrl(rawFoto);
+                
+                // Buat inisial jika tidak ada foto
+                let inisial = "TM";
+                const parts = namaLengkap.trim().split(' ');
+                if (parts.length > 1) {
+                     inisial = (parts[0][0] + parts[1][0]).toUpperCase();
+                } else if (parts[0].length > 0) {
+                     inisial = parts[0].substring(0, 2).toUpperCase();
+                }
+                
+                let avatarHtml = '';
+                // Render gambar (jika link error akan diganti div inisial oleh onError)
+                if (fotoKompres && fotoKompres.trim() !== '') {
+                    avatarHtml = `<img src="${fotoKompres}" alt="${inisial}" class="w-10 h-10 rounded-full object-cover border-2 border-indigo-100 mb-2 shadow-sm bg-slate-100" onerror="this.outerHTML='<div class=\\'w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-[10px] mb-2 border border-indigo-100 shadow-sm\\'>${inisial}</div>'">`;
+                } else {
+                    avatarHtml = `<div class="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-[10px] mb-2 border border-indigo-100 shadow-sm">${inisial}</div>`;
+                }
 
-            return `
-                <div onclick="window.generateReport(${i})" class="p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-indigo-400 hover:shadow-md shadow-sm transition-all flex flex-col items-center justify-center group">
-                    ${avatarHtml}
-                    <div class="text-[9px] font-bold text-slate-700 text-center truncate w-full uppercase group-hover:text-indigo-700 transition-colors" title="${namaLengkap}">${namaLengkap}</div>
-                    <div class="text-[7px] font-black text-slate-400 text-center truncate w-full uppercase mt-1 tracking-widest">${getTeamProp(t,'DEPT')}</div>
-                </div>`;
-        }).join('');
+                return `
+                    <div onclick="window.generateReport(${i})" class="p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-indigo-400 hover:shadow-md shadow-sm transition-all flex flex-col items-center justify-center group">
+                        ${avatarHtml}
+                        <div class="text-[9px] font-bold text-slate-700 text-center truncate w-full uppercase group-hover:text-indigo-700 transition-colors" title="${namaLengkap}">${namaLengkap}</div>
+                        <div class="text-[7px] font-black text-slate-400 text-center truncate w-full uppercase mt-1 tracking-widest" title="${dept}">${dept}</div>
+                    </div>`;
+            }).join('');
+        } catch(err) {
+            console.error("Gagal merender Grid Akses Cepat:", err);
+        }
     }
     
-    lucide.createIcons();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 };
 
 window.generateReport = function(idx) {
-    // Jika idx kosong (klik tombol Cari), ambil dari value dropdown
     const v = idx !== undefined ? idx : $id('repTeam').value;
-    if(v === "" || v === undefined) return alert("Pilih Tim / Engineer terlebih dahulu!");
+    if (v === "" || v === undefined) return alert("Pilih Tim / Engineer terlebih dahulu!");
 
     const tP = teamsData[parseInt(v)];
-    const n = getTeamProp(tP, 'NAMA').toUpperCase();
-    const k = getTeamProp(tP, 'KODE').toUpperCase();
+    const n = window.getTeamProp(tP, 'NAMA').toUpperCase();
+    const k = window.getTeamProp(tP, 'KODE').toUpperCase();
     const sd = $id('repStart').value;
     const ed = $id('repEnd').value;
 
     if (!sd || !ed) return alert("Pilih rentang tanggal mulai dan akhir!");
 
-    // Filter Data Timesheet dari variabel global timesheetsData
+    // Filter Data
     const filteredResults = timesheetsData.filter(r => {
         const rowString = Object.values(r).join('|').toUpperCase();
         let isUserMatch = (n !== 'TANPA NAMA' && rowString.includes(n)) || (k !== '---' && rowString.includes(k));
         if(!isUserMatch) return false;
 
-        let dateStr = getVal(r, ['TANGGAL', 'DATE', 'TIMESTAMP', 'WAKTU']);
+        let dateStr = window.getVal(r, ['TANGGAL', 'DATE', 'TIMESTAMP', 'WAKTU']);
         if (!dateStr) return false;
 
         let rD = new Date(dateStr);
         if (isNaN(rD.getTime()) && dateStr.includes('/')) {
-            // Fix format tanggal dd/mm/yyyy ke yyyy-mm-dd
-            rD = new Date(dateStr.split('/').reverse().join('-'));
+            const parts = dateStr.split('/');
+            if (parts.length === 3) rD = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
         }
-        
         if (isNaN(rD.getTime())) return false;
 
-        const sDate = new Date(sd);
-        const eDate = new Date(ed);
+        const sDate = new Date(sd); const eDate = new Date(ed);
         rD.setHours(0,0,0,0); sDate.setHours(0,0,0,0); eDate.setHours(0,0,0,0);
 
         return rD >= sDate && rD <= eDate;
     });
 
-    // Grouping Berdasarkan Tanggal
     let grouped = {};
     filteredResults.forEach(r => {
-        let tglKey = getVal(r, ['TANGGAL', 'DATE', 'TIMESTAMP']) || 'Unknown';
-        if(!grouped[tglKey]) grouped[tglKey] = [];
+        let tglKey = window.getVal(r, ['TANGGAL', 'DATE', 'TIMESTAMP']) || 'Unknown';
+        if (!grouped[tglKey]) grouped[tglKey] = [];
         grouped[tglKey].push(r);
     });
 
-    // Simpan ke memori global untuk PDF/Excel
-    currentReportData = { profile: tP, start: sd, end: ed, grouped: grouped };
+    window.currentReportData = { profile: tP, start: sd, end: ed, grouped: grouped };
 
-    // Update UI Modal Report
-    $id('repModalName').textContent = getTeamProp(tP, 'NAMA');
-    $id('repModalDept').textContent = `${getTeamProp(tP, 'KODE')} • ${getTeamProp(tP, 'DEPT')}`;
-    $id('repModalDate').textContent = `${formatTanggalHari(sd)} - ${formatTanggalHari(ed)}`;
+    // Update Header Modal
+    const repNameEl = $id('repModalName'); if (repNameEl) repNameEl.textContent = window.getTeamProp(tP, 'NAMA');
+    const repDeptEl = $id('repModalDept'); if (repDeptEl) repDeptEl.textContent = `${window.getTeamProp(tP, 'KODE')} • ${window.getTeamProp(tP, 'DEPT')}`;
+    const repDateEl = $id('repModalDate'); if (repDateEl) repDateEl.textContent = `${window.formatTanggalHari(sd)} - ${window.formatTanggalHari(ed)}`;
 
     const tb = $id('reportTableBody');
+    if (!tb) return;
+
     if (filteredResults.length === 0) {
         tb.innerHTML = `<tr><td colspan="6" class="p-12 text-center text-slate-500 border-b border-slate-200"><i data-lucide="file-x" class="w-10 h-10 mx-auto mb-3 text-slate-300"></i><p class="font-bold">Tidak ada data timesheet ditemukan untuk periode ini.</p></td></tr>`;
     } else {
         let htmlRows = '';
-        const sortedDates = Object.keys(grouped).sort((a, b) => new Date(a) - new Date(b));
+        const sortedDates = Object.keys(grouped).sort((a, b) => {
+             const parseForSort = (str) => {
+                 if (str.includes('/')) { const p = str.split('/'); if (p.length === 3) return new Date(`${p[2]}-${p[1]}-${p[0]}`).getTime(); }
+                 return new Date(str).getTime();
+             };
+             return parseForSort(a) - parseForSort(b);
+        });
 
         sortedDates.forEach(d => {
             let acts = grouped[d];
             let dailyTotalHours = 0;
             
             acts.forEach((a, i) => {
-                const jamMulai = getVal(a, ['JAM MULAI', 'MULAI']);
-                const jamSelesai = getVal(a, ['JAM SELESAI', 'SELESAI']);
-                const df = parseTimeMin(jamSelesai) - parseTimeMin(jamMulai);
+                const jamMulai = window.getVal(a, ['JAM MULAI', 'MULAI']);
+                const jamSelesai = window.getVal(a, ['JAM SELESAI', 'SELESAI']);
+                const df = window.parseTimeMin(jamSelesai) - window.parseTimeMin(jamMulai);
                 if (df > 0) dailyTotalHours += (df / 60);
 
-                let descRaw = getVal(a, ['DESKRIPSI', 'AKTIVITAS']);
-                let lokasi = "KANTOR"; 
-                let descClean = descRaw;
+                let descRaw = window.getVal(a, ['DESKRIPSI', 'AKTIVITAS', 'DESKRIPSI PEKERJAAN']);
+                let lokasi = "KANTOR"; let descClean = descRaw;
                 if (descRaw.startsWith('[')) {
                     const endBr = descRaw.indexOf(']');
                     if (endBr > -1) {
-                        lokasi = descRaw.substring(5, endBr).trim();
+                        const locText = descRaw.substring(1, endBr);
+                        if (locText.startsWith('LOC:')) lokasi = locText.substring(4).trim();
+                        else lokasi = locText.trim();
                         descClean = descRaw.substring(endBr + 1).trim();
                     }
                 }
 
                 htmlRows += `<tbody class="border-b-2 border-slate-200">`;
                 htmlRows += `
-                    <tr class="bg-white hover:bg-slate-50 transition-colors">
+                    <tr class="bg-white hover:bg-slate-50 transition-colors group">
                         ${i === 0 ? `<td rowspan="${acts.length}" class="py-4 px-5 align-top border-r border-slate-100 bg-slate-50/40 w-40">
-                            <div class="font-bold text-[12px] text-slate-800 leading-snug">${formatTanggalHari(d)}</div>
+                            <div class="font-bold text-[12px] text-slate-800 leading-snug whitespace-nowrap">${window.formatTanggalHari(d)}</div>
                             <div class="mt-3 text-[9px] font-black bg-white border border-slate-200 px-2 py-1 rounded text-slate-600 inline-block shadow-sm">TOTAL: ${dailyTotalHours.toFixed(1)} JAM</div>
                         </td>` : ''}
-                        <td class="py-3 px-4 align-top border-b border-slate-100 w-24">
-                            <div class="text-[11px] font-semibold text-slate-700">${jamMulai} - ${jamSelesai}</div>
-                        </td>
-                        <td class="py-3 px-4 align-top border-l border-slate-100 border-b border-slate-100">
-                            <p class="text-[11px] font-medium text-slate-700 leading-relaxed">${descClean}</p>
-                        </td>
-                        <td class="py-3 px-4 align-top border-l border-slate-100 border-b border-slate-100">
-                            <span class="text-[10px] font-bold text-indigo-600 uppercase">${getVal(a, ['NAMA PROYEK', 'PROYEK'])}</span>
-                        </td>
-                        <td class="py-3 px-4 align-top border-l border-slate-100 border-b border-slate-100">
-                            <span class="text-[10px] text-rose-500 font-bold uppercase">${getVal(a, ['KENDALA', 'ISSUE']) || '-'}</span>
-                        </td>
-                        <td class="py-3 px-4 align-top border-l border-slate-100 border-b border-slate-100 text-center">
-                            <span class="inline-flex items-center gap-1 bg-slate-50 border border-slate-200 text-slate-600 rounded-full px-2.5 py-1 text-[9px] font-bold uppercase shadow-sm">${lokasi}</span>
-                        </td>
+                        <td class="py-3 px-4 align-top border-b border-slate-100 w-28"><div class="text-[11px] font-bold text-slate-700 whitespace-nowrap">${jamMulai} - ${jamSelesai}</div></td>
+                        <td class="py-3 px-4 align-top border-l border-slate-100 border-b border-slate-100"><p class="text-[11px] font-medium text-slate-700 leading-relaxed">${window.escapeJS(descClean)}</p></td>
+                        <td class="py-3 px-4 align-top border-l border-slate-100 border-b border-slate-100"><span class="text-[10px] font-bold text-indigo-600 uppercase">${window.escapeJS(window.getVal(a, ['NAMA PROYEK', 'PROYEK']))}</span></td>
+                        <td class="py-3 px-4 align-top border-l border-slate-100 border-b border-slate-100"><span class="text-[10px] text-rose-500 font-bold uppercase">${window.escapeJS(window.getVal(a, ['KENDALA', 'ISSUE']) || '-')}</span></td>
+                        <td class="py-3 px-4 align-top border-l border-slate-100 border-b border-slate-100 text-center"><span class="inline-flex items-center gap-1 bg-slate-50 border border-slate-200 text-slate-600 rounded-full px-2.5 py-1 text-[9px] font-bold uppercase shadow-sm"><i data-lucide="map-pin" class="w-3 h-3 -mt-0.5 shrink-0"></i> ${window.escapeJS(lokasi)}</span></td>
                     </tr>`;
                 htmlRows += `</tbody>`;
             });
@@ -2260,14 +2273,56 @@ window.generateReport = function(idx) {
         tb.innerHTML = htmlRows;
     }
 
-    $id('reportModal').classList.replace('hidden', 'flex');
-    document.body.style.overflow = 'hidden';
-    lucide.createIcons();
+    const repModal = $id('reportModal');
+    if (repModal) { repModal.classList.replace('hidden', 'flex'); document.body.style.overflow = 'hidden'; }
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 };
 
 window.closeReportModal = function() {
-    $id('reportModal').classList.replace('flex', 'hidden');
-    document.body.style.overflow = '';
+    const repModal = $id('reportModal');
+    if (repModal) { repModal.classList.replace('flex', 'hidden'); document.body.style.overflow = ''; }
+    window.currentReportData = null; 
+};
+
+window.exportToCSV = function() {
+    if (!currentReportData) return; let csv = "TANGGAL,JAM,DESKRIPSI PEKERJAAN,NAMA PROYEK,KENDALA,LOKASI KERJA\n";
+    Object.keys(currentReportData.grouped).sort().forEach(d => {
+        let hourlyLogs = [];
+        currentReportData.grouped[d].forEach(a => {
+            let fullDesc = window.getVal(a, ['DESKRIPSI', 'DESKRIPSI PEKERJAAN', 'AKTIVITAS']); let lokasi = "KANTOR"; let descClean = fullDesc;
+            if (fullDesc.startsWith('[')) { const endBr = fullDesc.indexOf(']'); if (endBr > -1) { const locTag = fullDesc.substring(1, endBr); if (locTag.startsWith('LOC:')) lokasi = locTag.substring(4).trim(); descClean = fullDesc.substring(endBr + 1).trim(); } }
+            hourlyLogs.push({ jam: `${window.getVal(a, ['JAM MULAI', 'MULAI', 'WAKTU MULAI'])} - ${window.getVal(a, ['JAM SELESAI', 'SELESAI', 'WAKTU SELESAI'])}`, proj: window.getVal(a, ['NAMA PROYEK', 'PROYEK', 'PROJECT']), desc: descClean, lokasi: lokasi, ken: window.getVal(a, ['KENDALA', 'ISSUE']) });
+        });
+        hourlyLogs.sort((a, b) => window.parseTimeMin((a.jam || "00:00").split('-')[0].trim()) - window.parseTimeMin((b.jam || "00:00").split('-')[0].trim()));
+        hourlyLogs.forEach(l => { csv += `"${d}","${l.jam}","${(l.desc || "").replace(/"/g, '""')}","${(l.proj || "").replace(/"/g, '""')}","${(l.ken || "").replace(/"/g, '""')}","${(l.lokasi || "").replace(/"/g, '""')}"\n`; });
+    });
+    const b = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const l = document.createElement("a"); l.href = URL.createObjectURL(b); l.download = `TimeSheet_${currentReportData.profile.KODE}_${currentReportData.start}.csv`; document.body.appendChild(l); l.click(); document.body.removeChild(l);
+};
+
+window.handlePrintPDF = function() {
+    if (!currentReportData) return; const pW = window.open('', '_blank'); if (!pW) return alert("Izinkan pop-up untuk mencetak PDF!");
+    let tR = '';
+    Object.keys(currentReportData.grouped).sort().forEach(d => {
+        let actsRaw = currentReportData.grouped[d]; let hourlyLogs = [];
+        actsRaw.forEach(a => {
+            let fullDesc = window.getVal(a, ['DESKRIPSI', 'DESKRIPSI PEKERJAAN']); let lokasi = "KANTOR"; let descClean = fullDesc;
+            if (fullDesc.startsWith('[')) { const endBr = fullDesc.indexOf(']'); if (endBr > -1) { const locTag = fullDesc.substring(1, endBr); if (locTag.startsWith('LOC:')) lokasi = locTag.substring(4).trim(); descClean = fullDesc.substring(endBr + 1).trim(); } }
+            hourlyLogs.push({ jam: `${window.getVal(a, ['JAM MULAI', 'MULAI'])} - ${window.getVal(a, ['JAM SELESAI', 'SELESAI'])}`, proj: window.getVal(a, ['NAMA PROYEK', 'PROYEK']), desc: descClean, lokasi: lokasi, ken: window.getVal(a, ['KENDALA', 'ISSUE']), isBreak: false });
+        });
+        hourlyLogs.sort((a, b) => window.parseTimeMin((a.jam || "00:00").split('-')[0].trim()) - window.parseTimeMin((b.jam || "00:00").split('-')[0].trim()));
+        
+        tR += `<tbody style="border-bottom:2px solid #cbd5e1;">`;
+        hourlyLogs.forEach((l, i) => {
+            tR += `<tr>`;
+            if (i === 0) { tR += `<td rowspan="${hourlyLogs.length}" style="border-right:1px solid #e2e8f0;padding:12px;font-weight:700;">${window.formatTanggalHari(d)}</td>`; }
+            tR += `<td style="padding:12px;border-bottom:1px solid #e2e8f0;">${l.jam}</td><td style="padding:12px;border-bottom:1px solid #e2e8f0;">${l.desc}</td><td style="padding:12px;border-bottom:1px solid #e2e8f0;">${l.proj}</td></tr>`;
+        }); tR += `</tbody>`;
+    });
+
+    const printScript = "<scr" + "ipt>setTimeout(()=>{window.print();}, 800);window.onafterprint=()=>{window.close();};</scr" + "ipt>";
+    const h1 = `<!DOCTYPE html><html lang="id"><head><title>Time Sheet</title><style>body{font-family:sans-serif;}table{width:100%;border-collapse:collapse;}th{background:#f8fafc;padding:12px;text-align:left;border-bottom:2px solid #cbd5e1;}</style></head><body><h2>TIME SHEET REPORT</h2><p>${currentReportData.profile.NAMA}</p><table><thead><tr><th>Tanggal</th><th>Jam</th><th>Deskripsi</th><th>Proyek</th></tr></thead>${tR}</table>${printScript}</body></html>`;
+    
+    pW.document.open(); pW.document.write(h1); pW.document.close();
 };
 // =============== REPORTS & PDF ===============
 window.renderTimesheetControls = function() {
