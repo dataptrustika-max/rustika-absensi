@@ -19,6 +19,17 @@
 </head>
 <body class="bg-gray-100 font-sans text-gray-800">
 
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-xl flex items-center space-x-4">
+            <i class="fas fa-spinner fa-spin text-blue-600 text-3xl"></i>
+            <div>
+                <h3 class="text-lg font-bold text-gray-800">Menghubungkan ke Database...</h3>
+                <p class="text-sm text-gray-500">Membaca data dari Google Spreadsheet Anda</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Navbar -->
     <nav class="bg-blue-800 text-white shadow-md no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -76,9 +87,7 @@
                     <div class="md:col-span-3">
                         <label class="block text-xs font-medium text-gray-700 mb-1">Kategori (Divisi)</label>
                         <select id="input-kategori" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-                            <option value="">-- Pilih Kategori --</option>
-                            <option value="A. PEKERJAAN PERSIAPAN">A. PEKERJAAN PERSIAPAN</option>
-                            <option value="B. PEKERJAAN TANAH">B. PEKERJAAN TANAH</option>
+                            <option value="">-- Memuat Data... --</option>
                         </select>
                     </div>
                     <div class="md:col-span-5">
@@ -160,9 +169,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Cari Item Pekerjaan dari Spreadsheet:</label>
                     <div class="flex gap-2">
                         <select id="search-analisa-item" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">-- Pilih Pekerjaan --</option>
-                            <option value="T-01">1 m3 Galian Tanah Biasa sedalam 1 m</option>
-                            <option value="P-01">1 m1 Pengukuran dan Pemasangan Bouwplank</option>
+                            <option value="">-- Memuat Data... --</option>
                         </select>
                         <button onclick="lihatAnalisa()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">
                             Cari
@@ -212,45 +219,103 @@
 
     <!-- Application Logic -->
     <script>
-        // === MOCK DATABASE (Nanti ini diambil dari Google Spreadsheet via GAS) ===
-        const dbHSP = [
-            { id: "P-01", kat: "A. PEKERJAAN PERSIAPAN", ur: "Pengukuran dan Pemasangan Bouwplank", sat: "m1", harga: 85235.70 },
-            { id: "T-01", kat: "B. PEKERJAAN TANAH", ur: "Galian Tanah Biasa sedalam 1 m", sat: "m3", harga: 124047.00 }
-        ];
+        // ==========================================
+        // KONFIGURASI DATABASE GOOGLE SPREADSHEET
+        // ==========================================
+        // URL API Anda sudah dipasang di sini:
+        const URL_GOOGLE_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbyT1e2qXfSsZwOo3uhbWhDBFferQJ0lJ-BjfF9atJ8VuBFy1BN51u5kOckvrfChB3u4/exec"; 
 
-        const dbAnalisa = {
-            "T-01": {
-                uraian: "1 m3 Galian Tanah Biasa sedalam 1 m",
-                komponen: [
-                    { nama: "Pekerja", sat: "OH", koef: 0.750, harga: 120000 },
-                    { nama: "Mandor", sat: "OH", koef: 0.025, harga: 150000 }
-                    // Asumsi: Subtotal 112.500 (Pekerja) + 3.750 (Mandor) = 116.250 (Nilai simulasi agar total mendekati data asli)
-                ],
-                subtotal: 112770, // Berdasarkan screenshot user
-                overhead: 11277,
-                hsp_final: 124047
-            },
-            "P-01": {
-                uraian: "1 m1 Pengukuran dan Pemasangan Bouwplank",
-                komponen: [
-                    { nama: "Pekerja", sat: "OH", koef: 0.100, harga: 120000 },
-                    { nama: "Tukang Kayu", sat: "OH", koef: 0.100, harga: 130000 },
-                    { nama: "Kayu Balok 5/7", sat: "m3", koef: 0.012, harga: 3000000 },
-                    { nama: "Paku", sat: "kg", koef: 0.020, harga: 20000 }
-                ],
-                subtotal: 77487,
-                overhead: 7748.7,
-                hsp_final: 85235.70
-            }
-        };
-
-        // State Aplikasi
+        // State Database Real-time
+        let dbHSP = [];
+        let dbAnalisa = {};
         let currentRAB = []; // Menyimpan item yang diinput ke RAB
 
-        // Utility: Format Rupiah
+        // Fungsi Format Rupiah
         const formatRp = (angka) => {
             return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(angka);
         };
+
+        // ==========================================
+        // LOGIKA FETCH DATA DARI SPREADSHEET
+        // ==========================================
+        window.onload = async function() {
+            if(!URL_GOOGLE_APPS_SCRIPT || URL_GOOGLE_APPS_SCRIPT === "") {
+                document.getElementById('loading-overlay').innerHTML = `
+                    <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded shadow-lg max-w-md">
+                        <h3 class="font-bold text-red-800 text-lg mb-2">Aplikasi Belum Terhubung!</h3>
+                        <p class="text-sm text-red-700">Anda belum memasukkan URL Google Apps Script ke dalam kode HTML.</p>
+                    </div>`;
+                return;
+            }
+
+            try {
+                const response = await fetch(URL_GOOGLE_APPS_SCRIPT);
+                
+                // Mencegah error jika respon tidak dalam format JSON yang valid (contoh jika API salah)
+                const text = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch(e) {
+                    console.error("Bukan JSON:", text);
+                    throw new Error("Respon dari Spreadsheet tidak valid. Harap pastikan Deploy Script sebagai 'Aplikasi Web' dan di-set ke 'Siapa Saja/Anyone'.");
+                }
+                
+                if(data.error) {
+                    alert("Error dari Spreadsheet: " + data.error);
+                    document.getElementById('loading-overlay').classList.add('hidden');
+                    return;
+                }
+
+                dbHSP = data.hsp || [];
+                dbAnalisa = data.analisa || {};
+                
+                populateDropdowns();
+                document.getElementById('loading-overlay').classList.add('hidden'); // Sembunyikan loading
+                
+                // Jika data kosong, tampilkan peringatan halus
+                if(dbHSP.length === 0) {
+                    alert("Koneksi sukses, tetapi Sheet 'REKAP_HSP' masih kosong. Silakan isi datanya di Spreadsheet!");
+                }
+            } catch (error) {
+                console.error("Gagal menarik data:", error);
+                document.getElementById('loading-overlay').innerHTML = `
+                    <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded shadow-lg max-w-md">
+                        <h3 class="font-bold text-red-800">Koneksi Gagal</h3>
+                        <p class="text-sm text-red-700">${error.message || "Gagal terhubung ke Google Spreadsheet. Pastikan URL sudah benar dan Web App di-set ke 'Anyone/Siapa saja'."}</p>
+                    </div>`;
+            }
+        };
+
+        function populateDropdowns() {
+            // 1. Isi Kategori Divisi (Otomatis mendeteksi kategori unik dari data Anda)
+            const kategoriSelect = document.getElementById('input-kategori');
+            const uniqueKategori = [...new Set(dbHSP.map(item => item.kat))];
+            
+            kategoriSelect.innerHTML = '<option value="">-- Pilih Kategori --</option>';
+            uniqueKategori.forEach(kat => {
+                if(kat && kat.trim() !== "") {
+                    const opt = document.createElement('option');
+                    opt.value = kat;
+                    opt.text = kat;
+                    kategoriSelect.appendChild(opt);
+                }
+            });
+
+            // 2. Isi Dropdown Analisa (Otomatis mengisi dari semua data HSP)
+            const searchAnalisa = document.getElementById('search-analisa-item');
+            searchAnalisa.innerHTML = '<option value="">-- Pilih Pekerjaan --</option>';
+            dbHSP.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.id;
+                opt.text = item.ur;
+                searchAnalisa.appendChild(opt);
+            });
+        }
+
+        // ==========================================
+        // UI & EVENT LISTENERS
+        // ==========================================
 
         // UI Logic: Sinkronisasi Header RAB (Bisa diedit -> langsung update format cetak)
         document.getElementById('proj-name').addEventListener('input', (e) => document.getElementById('disp-proj-name').innerText = `: ${e.target.value || '-'}`);
@@ -328,7 +393,6 @@
             }, {});
 
             let grandTotal = 0;
-            let catIndex = 65; // ASCII 'A'
             
             for(const [kategori, items] of Object.entries(grouped)) {
                 // Baris Header Kategori
@@ -354,7 +418,7 @@
                         <td class="border border-gray-400 p-2 text-right">${formatRp(item.hargaSatuan)}</td>
                         <td class="border border-gray-400 p-2 text-right">${formatRp(item.jumlahHarga)}</td>
                         <td class="border border-gray-400 p-2 text-center no-print">
-                            <button onclick="hapusItem('${item.id}')" class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
+                            <button onclick="hapusItem('${item.id}')" class="text-red-600 hover:text-red-800" title="Hapus"><i class="fas fa-trash"></i></button>
                         </td>
                     `;
                     tbody.appendChild(tr);
@@ -388,7 +452,10 @@
             if(!hspId) return;
 
             const data = dbAnalisa[hspId];
-            if(!data) { alert("Data Analisa tidak ditemukan"); return; }
+            if(!data) { 
+                alert("Rincian Analisa untuk item ini belum didukung/tidak ada di database saat ini."); 
+                return; 
+            }
 
             document.getElementById('analisa-result').classList.remove('hidden');
             document.getElementById('analisa-judul').innerText = data.uraian;
