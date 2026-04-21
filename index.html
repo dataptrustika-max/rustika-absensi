@@ -2,501 +2,425 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi RAB Proyek</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rustika Consultant - Absensi</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- HTML5 QR Code -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
     <style>
-        /* Custom Print Styling to ensure only RAB format is printed */
-        @media print {
-            body * { visibility: hidden; }
-            #print-area, #print-area * { visibility: visible; }
-            #print-area { position: absolute; left: 0; top: 0; width: 100%; }
-            .no-print { display: none !important; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
-        .tab-active { border-bottom: 2px solid #2563eb; color: #2563eb; font-weight: 600; }
+
+        .bg-polka {
+            background-image: radial-gradient(#cbd5e1 1.2px, transparent 1.2px);
+            background-size: 24px 24px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Hack untuk menyembunyikan UI bawaan HTML5-QRCode */
+        #reader__dashboard, #reader__header, #reader__status_span, #reader__dashboard_section_csr {
+            display: none !important;
+        }
+        #reader {
+            border: none !important;
+            background: transparent;
+        }
+        #reader video {
+            object-fit: cover !important;
+            width: 100% !important;
+            height: 100% !important;
+            border-radius: 2.5rem;
+        }
+
+        /* Kesan Cermin Kamera Depan */
+        #selfie-video {
+            transform: scaleX(-1);
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+            border-radius: 2.5rem;
+            background-color: #000;
+        }
+
+        /* Bingkai Imbas Tersuai */
+        .qr-frame {
+            position: absolute;
+            inset: 2rem;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .qr-frame::before, .qr-frame::after, .qr-frame-inner::before, .qr-frame-inner::after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-color: white;
+            border-style: solid;
+        }
+        .qr-frame::before { top: 0; left: 0; border-width: 5px 0 0 5px; border-top-left-radius: 16px; }
+        .qr-frame::after { top: 0; right: 0; border-width: 5px 5px 0 0; border-top-right-radius: 16px; }
+        .qr-frame-inner { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
+        .qr-frame-inner::before { bottom: 0; left: 0; border-width: 0 0 5px 5px; border-bottom-left-radius: 16px; }
+        .qr-frame-inner::after { bottom: 0; right: 0; border-width: 0 5px 5px 0; border-bottom-right-radius: 16px; }
+
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="bg-gray-100 font-sans text-gray-800">
+<body>
 
-    <!-- Loading Overlay -->
-    <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-lg shadow-xl flex items-center space-x-4">
-            <i class="fas fa-spinner fa-spin text-blue-600 text-3xl"></i>
-            <div>
-                <h3 class="text-lg font-bold text-gray-800">Menghubungkan ke Database...</h3>
-                <p class="text-sm text-gray-500">Membaca data dari Google Spreadsheet Anda</p>
-            </div>
-        </div>
-    </div>
+    <div class="app-container">
 
-    <!-- Navbar -->
-    <nav class="bg-blue-800 text-white shadow-md no-print">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <i class="fas fa-hard-hat text-2xl mr-3"></i>
-                    <span class="font-bold text-xl tracking-wider">EstimatorPRO</span>
+        <!-- ========================================== -->
+        <!-- PAPARAN 1: PENGIMBAS QR (SCANNER LANGSUNG) -->
+        <!-- ========================================== -->
+        <div id="scanner-view" class="min-h-screen flex flex-col bg-white fade-in bg-polka">
+            <div class="px-6 pt-6 pb-4 flex items-center justify-between bg-white z-50 shadow-sm border-b border-slate-100">
+                <div class="w-12 h-12"></div>
+                <div class="flex flex-col items-center">
+                    <h3 class="font-black text-slate-800 text-lg">Scan ID Card</h3>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Arahkan ke Kamera</p>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <span class="text-sm bg-blue-700 px-3 py-1 rounded-full"><i class="fas fa-user-circle mr-1"></i> Admin</span>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        <!-- Tabs Navigation -->
-        <div class="flex border-b border-gray-300 mb-6 no-print">
-            <button onclick="switchTab('rab')" id="tab-rab" class="px-4 py-2 tab-active transition-colors duration-200">
-                <i class="fas fa-file-invoice-dollar mr-2"></i>Buat RAB Proyek
-            </button>
-            <button onclick="switchTab('analisa')" id="tab-analisa" class="px-4 py-2 text-gray-500 hover:text-blue-600 transition-colors duration-200">
-                <i class="fas fa-search-dollar mr-2"></i>Lihat Database Analisa
-            </button>
-        </div>
-
-        <!-- ==================== TAB 1: MENU BUAT RAB ==================== -->
-        <div id="view-rab" class="space-y-6">
-            
-            <!-- Project Info Card -->
-            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 no-print">
-                <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Informasi Proyek</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Proyek</label>
-                        <input type="text" id="proj-name" placeholder="Misal: Pembangunan Ruko 2 Lantai" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Lokasi</label>
-                        <input type="text" id="proj-loc" placeholder="Misal: Jakarta Selatan" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
-                        <input type="date" id="proj-date" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
+                <div class="w-12 h-12 flex items-center justify-center">
+                    <img src="https://rustikaconsultant.com/wp-content/uploads/2026/03/logo-rustika.png" alt="Logo" class="w-8 opacity-20">
                 </div>
             </div>
 
-            <!-- Input Pekerjaan (Hanya Form, tidak di-print) -->
-            <div class="bg-blue-50 p-6 rounded-lg border border-blue-100 no-print">
-                <h3 class="text-md font-bold text-blue-800 mb-4"><i class="fas fa-plus-circle mr-2"></i>Tambah Item Pekerjaan</h3>
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                    <div class="md:col-span-3">
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Kategori (Divisi)</label>
-                        <select id="input-kategori" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-                            <option value="">-- Memuat Data... --</option>
-                        </select>
-                    </div>
-                    <div class="md:col-span-5">
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Pilih HSP</label>
-                        <select id="input-hsp" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" disabled>
-                            <option value="">-- Pilih Kategori Dulu --</option>
-                        </select>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Volume</label>
-                        <input type="number" id="input-vol" min="0" step="0.01" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="0.00">
-                    </div>
-                    <div class="md:col-span-2">
-                        <button onclick="addItemRAB()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors text-sm">
-                            Tambahkan
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Area Cetak: FORMAT RAB -->
-            <div id="print-area" class="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+            <!-- Kamera Area -->
+            <div class="mx-4 my-4 flex-grow relative bg-slate-900 rounded-[2rem] shadow-inner overflow-hidden flex items-center justify-center border-[6px] border-slate-100">
+                <div id="reader" class="absolute inset-0"></div>
+                <div class="qr-frame"><div class="qr-frame-inner"></div></div>
                 
-                <!-- Header Dokumen (Hanya muncul saat print atau di preview area) -->
-                <div class="text-center mb-8 border-b-2 border-gray-800 pb-4">
-                    <h1 class="text-2xl font-bold uppercase tracking-wide">Rencana Anggaran Biaya (RAB)</h1>
-                    <table class="mt-4 text-left text-sm mx-auto w-3/4">
-                        <tr><td class="font-semibold w-32">Pekerjaan</td><td id="disp-proj-name">: -</td></tr>
-                        <tr><td class="font-semibold w-32">Lokasi</td><td id="disp-proj-loc">: -</td></tr>
-                        <tr><td class="font-semibold w-32">Tanggal</td><td id="disp-proj-date">: -</td></tr>
-                    </table>
-                </div>
-
-                <!-- Tabel RAB -->
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm border-collapse border border-gray-400">
-                        <thead>
-                            <tr class="bg-gray-100 font-bold">
-                                <th class="border border-gray-400 p-2 text-center w-12">NO</th>
-                                <th class="border border-gray-400 p-2 text-left">URAIAN PEKERJAAN</th>
-                                <th class="border border-gray-400 p-2 text-center w-16">VOL</th>
-                                <th class="border border-gray-400 p-2 text-center w-16">SAT</th>
-                                <th class="border border-gray-400 p-2 text-right w-32">HARGA SATUAN (Rp)</th>
-                                <th class="border border-gray-400 p-2 text-right w-40">JUMLAH HARGA (Rp)</th>
-                                <th class="border border-gray-400 p-2 text-center w-12 no-print">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="rab-table-body">
-                            <!-- Data RAB akan dirender di sini via JS -->
-                            <tr>
-                                <td colspan="7" class="text-center p-4 text-gray-500 italic">Belum ada item pekerjaan ditambahkan.</td>
-                            </tr>
-                        </tbody>
-                        <tfoot>
-                            <tr class="font-bold bg-gray-50">
-                                <td colspan="5" class="border border-gray-400 p-2 text-right">TOTAL RENCANA ANGGARAN BIAYA</td>
-                                <td class="border border-gray-400 p-2 text-right" id="grand-total">0</td>
-                                <td class="border border-gray-400 no-print"></td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-
-                <!-- Tombol Print -->
-                <div class="mt-8 flex justify-end no-print">
-                    <button onclick="window.print()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded shadow flex items-center">
-                        <i class="fas fa-print mr-2"></i> Cetak Dokumen (PDF)
-                    </button>
+                <!-- Loading Overlay Camera -->
+                <div id="camera-loading" class="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center z-20">
+                    <svg class="w-8 h-8 text-blue-500 animate-spin mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    <span class="text-white text-xs font-bold tracking-widest uppercase">Menyiapkan Kamera...</span>
                 </div>
             </div>
-        </div>
 
-        <!-- ==================== TAB 2: MENU LIHAT ANALISA ==================== -->
-        <div id="view-analisa" class="hidden space-y-6">
-            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Pencarian Data Analisa (Internal)</h2>
-                
-                <div class="mb-6 max-w-xl">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Cari Item Pekerjaan dari Spreadsheet:</label>
+            <!-- Bottom Panel Sesuai Referensi Gambar -->
+            <div class="bg-white rounded-t-[2rem] shadow-[0_-10px_30px_rgba(0,0,0,0.08)] w-full flex flex-col border-t border-slate-100 overflow-hidden">
+                <div class="p-6 pb-5">
+                    <h4 class="font-bold text-slate-800 text-sm mb-1">Scan ID Card atau Gunakan ID</h4>
+                    <p class="text-[11px] text-slate-500 mb-4">Direkomendasikan melalui scan ID Card</p>
                     <div class="flex gap-2">
-                        <select id="search-analisa-item" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">-- Memuat Data... --</option>
-                        </select>
-                        <button onclick="lihatAnalisa()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">
-                            Cari
+                        <input type="text" id="manual-id-input" placeholder="Masukkan ID Manual" class="flex-grow px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#0052cc] focus:ring-1 focus:ring-[#0052cc] bg-slate-50 font-medium uppercase">
+                        <button onclick="submitManualId()" class="bg-[#0052cc] hover:bg-[#003366] text-white font-bold px-6 py-3 rounded-xl shadow-md active:scale-95 transition-all text-sm">
+                            Submit
                         </button>
                     </div>
                 </div>
-
-                <!-- Hasil Analisa -->
-                <div id="analisa-result" class="hidden">
-                    <div class="bg-blue-50 p-4 border border-blue-200 rounded-t-lg">
-                        <h3 id="analisa-judul" class="font-bold text-lg text-blue-900"></h3>
+                
+                <!-- Indikator In / Out (Otomatis) -->
+                <div class="bg-[#0052cc] w-full py-4 px-10 flex justify-center gap-16 items-center">
+                    <div class="flex items-center gap-3">
+                        <div id="radio-in" class="w-5 h-5 rounded-full border-2 border-white flex items-center justify-center transition-all duration-300"></div>
+                        <span class="text-white font-semibold text-sm tracking-wide">In</span>
                     </div>
-                    <table class="w-full text-sm border-collapse border border-gray-300">
-                        <thead class="bg-gray-100">
-                            <tr>
-                                <th class="border border-gray-300 p-2 text-left">Kebutuhan</th>
-                                <th class="border border-gray-300 p-2 text-center w-24">Satuan</th>
-                                <th class="border border-gray-300 p-2 text-center w-24">Koefisien</th>
-                                <th class="border border-gray-300 p-2 text-right w-32">Harga Dasar (Rp)</th>
-                                <th class="border border-gray-300 p-2 text-right w-32">Jumlah (Rp)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="analisa-tbody">
-                            <!-- Diisi via JS -->
-                        </tbody>
-                        <tfoot class="bg-gray-50 font-medium">
-                            <tr>
-                                <td colspan="4" class="border border-gray-300 p-2 text-right">Jumlah Harga Tenaga, Bahan & Alat (A+B+C)</td>
-                                <td id="analisa-subtotal" class="border border-gray-300 p-2 text-right"></td>
-                            </tr>
-                            <tr>
-                                <td colspan="4" class="border border-gray-300 p-2 text-right text-blue-700 font-bold">Overhead & Profit (10%)</td>
-                                <td id="analisa-profit" class="border border-gray-300 p-2 text-right text-blue-700 font-bold"></td>
-                            </tr>
-                            <tr class="bg-blue-100 font-bold text-lg">
-                                <td colspan="4" class="border border-gray-300 p-2 text-right">Harga Satuan Pekerjaan (HSP) Final</td>
-                                <td id="analisa-total" class="border border-gray-300 p-2 text-right"></td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                    <div class="flex items-center gap-3">
+                        <div id="radio-out" class="w-5 h-5 rounded-full border-2 border-white flex items-center justify-center transition-all duration-300"></div>
+                        <span class="text-white font-semibold text-sm tracking-wide">Out</span>
+                    </div>
                 </div>
-
             </div>
         </div>
 
+        <!-- ========================================== -->
+        <!-- PAPARAN 2: KAMERA SWAFOTO (SELFIE) -->
+        <!-- ========================================== -->
+        <div id="selfie-view" class="hidden min-h-screen flex flex-col bg-white fade-in bg-polka">
+            <div class="px-6 pt-6 pb-4 flex items-center justify-between bg-white z-50 shadow-sm border-b border-slate-100">
+                <button onclick="resetToScanner()" class="w-12 h-12 flex items-center justify-center bg-slate-50 border border-slate-100 rounded-2xl shadow-sm active:scale-90">
+                    <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <div class="flex flex-col items-center">
+                    <h3 class="font-black text-slate-800 text-lg">Verifikasi Wajah</h3>
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Karyawan: <span id="display-scanned-id" class="text-[#0052cc]">...</span></p>
+                </div>
+                <div class="w-12 h-12"></div>
+            </div>
+
+            <div class="mx-6 my-4 flex-grow relative bg-slate-900 rounded-[2.5rem] shadow-[0_10px_40px_rgba(0,0,0,0.2)] overflow-hidden">
+                <video id="selfie-video" autoplay playsinline></video>
+                <div class="absolute inset-8 border-[4px] border-white/50 border-dashed rounded-[3rem] pointer-events-none"></div>
+
+                <div id="loadingOverlay" class="absolute inset-0 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center hidden z-50">
+                    <div class="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mb-4"></div>
+                    <p class="text-white font-bold tracking-[0.2em] text-xs animate-pulse uppercase">Mengirim Data...</p>
+                </div>
+            </div>
+
+            <div class="p-6 bg-transparent grid grid-cols-2 gap-4">
+                <button onclick="resetToScanner()" class="w-full bg-white border-2 border-slate-200 text-slate-600 font-bold py-4 rounded-[1.5rem] shadow-sm active:scale-95 transition-transform hover:bg-slate-50">
+                    Batal
+                </button>
+                <button onclick="takeSelfieAndSubmit()" class="w-full bg-[#10b981] text-white font-bold py-4 rounded-[1.5rem] shadow-[0_10px_20px_-5px_rgba(16,185,129,0.4)] flex items-center justify-center gap-2 active:scale-95 transition-transform">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    Konfirmasi
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- PAPARAN 3: BERJAYA (SUCCESS) -->
+        <!-- ========================================== -->
+        <div id="success-view" class="hidden min-h-screen flex flex-col bg-white fade-in relative bg-polka">
+            <div class="px-6 pt-8 pb-4 flex items-center justify-between bg-transparent">
+                <div class="flex items-center gap-3">
+                    <img src="https://rustikaconsultant.com/wp-content/uploads/2026/03/logo-rustika.png" alt="Logo" class="h-6 w-auto">
+                    <span class="text-sm font-bold text-slate-800">Rustika Consultant</span>
+                </div>
+                <div class="bg-white px-3 py-1 rounded-full text-[10px] font-bold text-slate-500 shadow-sm border border-slate-100" id="clock-success">00:00</div>
+            </div>
+
+            <div class="flex-grow flex flex-col items-center justify-center p-8 text-center -mt-10">
+                <div class="w-28 h-28 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
+                    <div class="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-emerald-200">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                </div>
+                <h2 class="text-3xl font-black text-slate-800 mb-3 tracking-tight">Berhasil!</h2>
+                <p id="success-message-text" class="text-slate-500 font-medium">Absensi Berhasil! Hati-hati di jalan.</p>
+            </div>
+
+            <div class="p-6 w-full max-w-sm mx-auto mb-4">
+                <button onclick="resetToScanner()" class="w-full bg-[#0052cc] text-white font-bold py-4 rounded-[1.5rem] shadow-xl active:scale-95 transition-transform text-lg hover:bg-[#003366]">
+                    Kembali Ke Awal
+                </button>
+            </div>
+        </div>
+
+        <!-- Kanvas Tersembunyi -->
+        <canvas id="canvas" style="display:none;"></canvas>
     </div>
 
-    <!-- Application Logic -->
     <script>
-        // ==========================================
-        // KONFIGURASI DATABASE GOOGLE SPREADSHEET
-        // ==========================================
-        // URL API Anda sudah dipasang di sini:
-        const URL_GOOGLE_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbyT1e2qXfSsZwOo3uhbWhDBFferQJ0lJ-BjfF9atJ8VuBFy1BN51u5kOckvrfChB3u4/exec"; 
+        // API URL dan KEY Anda
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw2N0zyGqj_cnis1PT1yRRC8-5fz623Op6v5hoBwtxXgBTnpdOMClbiY6LhZeX1AxpofA/exec';
+        const API_KEY = "AIzaSyCXDTjmzqVxRaS2FAfp_2jpakA7S1330Js";
+        
+        let html5QrCode = null;
+        let isProcessing = false;
+        let scannedId = "";
+        let selfieStream = null;
 
-        // State Database Real-time
-        let dbHSP = [];
-        let dbAnalisa = {};
-        let currentRAB = []; // Menyimpan item yang diinput ke RAB
+        // --- UPDATE STATUS IN/OUT (OTOMATIS BERDASARKAN WAKTU) ---
+        function updateInOutStatus() {
+            const now = new Date();
+            const timeString = now.toLocaleString('en-US', { timeZone: 'Asia/Makassar', hour12: false, hour: '2-digit' });
+            const hour = parseInt(timeString, 10);
 
-        // Fungsi Format Rupiah
-        const formatRp = (angka) => {
-            return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(angka);
-        };
+            const radioIn = document.getElementById('radio-in');
+            const radioOut = document.getElementById('radio-out');
 
-        // ==========================================
-        // LOGIKA FETCH DATA DARI SPREADSHEET
-        // ==========================================
-        window.onload = async function() {
-            if(!URL_GOOGLE_APPS_SCRIPT || URL_GOOGLE_APPS_SCRIPT === "") {
-                document.getElementById('loading-overlay').innerHTML = `
-                    <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded shadow-lg max-w-md">
-                        <h3 class="font-bold text-red-800 text-lg mb-2">Aplikasi Belum Terhubung!</h3>
-                        <p class="text-sm text-red-700">Anda belum memasukkan URL Google Apps Script ke dalam kode HTML.</p>
-                    </div>`;
+            if (radioIn && radioOut) {
+                if (hour < 15) { // Absen Masuk (Di bawah jam 15:00)
+                    radioIn.className = "w-5 h-5 rounded-full bg-white flex items-center justify-center transition-all duration-300 shadow-[0_0_8px_rgba(255,255,255,0.6)]";
+                    radioOut.className = "w-5 h-5 rounded-full border-2 border-white/40 flex items-center justify-center transition-all duration-300";
+                } else { // Absen Pulang (Jam 15:00 ke atas)
+                    radioIn.className = "w-5 h-5 rounded-full border-2 border-white/40 flex items-center justify-center transition-all duration-300";
+                    radioOut.className = "w-5 h-5 rounded-full bg-white flex items-center justify-center transition-all duration-300 shadow-[0_0_8px_rgba(255,255,255,0.6)]";
+                }
+            }
+        }
+
+        // --- UPDATE WAKTU UI ---
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { timeZone: 'Asia/Makassar', hour12: false, hour: '2-digit', minute: '2-digit' });
+            if(document.getElementById('clock-success')) document.getElementById('clock-success').textContent = timeStr;
+            updateInOutStatus(); // Perbarui indikator In/Out setiap detik
+        }
+        setInterval(updateTime, 1000);
+
+        function showView(viewId) {
+            ['scanner-view', 'selfie-view', 'success-view'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(viewId).classList.remove('hidden');
+        }
+
+        // --- KEMBALI / RESET KE SCANNER UTAMA ---
+        async function resetToScanner() {
+            if (html5QrCode && html5QrCode.isScanning) { 
+                await html5QrCode.stop(); 
+                html5QrCode.clear(); 
+            }
+            if (selfieStream) { 
+                selfieStream.getTracks().forEach(track => track.stop()); 
+                selfieStream = null; 
+            }
+            isProcessing = false;
+            document.getElementById('manual-id-input').value = ""; // Kosongkan input manual
+            openScanner(); // Nyalakan ulang kamera scan
+        }
+
+        // --- BUKA KAMERA BELAKANG UNTUK SCAN QR ---
+        async function openScanner() {
+            showView('scanner-view');
+            document.getElementById('camera-loading').classList.remove('hidden');
+
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+            
+            const config = { fps: 15, qrbox: { width: 250, height: 250 } };
+            
+            try {
+                if (html5QrCode.isScanning) {
+                    await html5QrCode.stop();
+                }
+                await html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess);
+                document.getElementById('camera-loading').classList.add('hidden');
+            } catch (err) {
+                document.getElementById('camera-loading').classList.add('hidden');
+                // Tampilkan pesan error jika di-test di Canvas atau Browser yang memblokir kamera
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Izin Kamera Dibutuhkan',
+                    text: 'Sistem membutuhkan akses kamera untuk scan QR. Pastikan Anda telah memberikan izin pada browser Anda.',
+                    confirmButtonText: 'Coba Lagi'
+                });
+            }
+        }
+
+        function onScanSuccess(decodedText) {
+            scannedId = decodedText.trim();
+            document.getElementById('display-scanned-id').textContent = scannedId;
+            startSelfieCamera();
+        }
+
+        // --- SUBMIT ID MANUAL (PENGGANTI SCAN) ---
+        function submitManualId() {
+            const inputId = document.getElementById('manual-id-input').value.trim().toUpperCase();
+            if(!inputId) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Perhatian',
+                    text: 'Harap masukkan ID Karyawan terlebih dahulu!',
+                    confirmButtonColor: '#0052cc'
+                });
                 return;
             }
+            scannedId = inputId;
+            document.getElementById('display-scanned-id').textContent = scannedId;
+            document.getElementById('manual-id-input').value = "";
+            startSelfieCamera();
+        }
+
+        // --- BUKA KAMERA DEPAN (SELFIE) ---
+        async function startSelfieCamera() {
+            showView('selfie-view');
 
             try {
-                const response = await fetch(URL_GOOGLE_APPS_SCRIPT);
-                
-                // Mencegah error jika respon tidak dalam format JSON yang valid (contoh jika API salah)
-                const text = await response.text();
-                let data;
-                try {
-                    data = JSON.parse(text);
-                } catch(e) {
-                    console.error("Bukan JSON:", text);
-                    throw new Error("Respon dari Spreadsheet tidak valid. Harap pastikan Deploy Script sebagai 'Aplikasi Web' dan di-set ke 'Siapa Saja/Anyone'.");
+                if (html5QrCode && html5QrCode.isScanning) { 
+                    await html5QrCode.stop(); 
+                    html5QrCode.clear();
                 }
-                
-                if(data.error) {
-                    alert("Error dari Spreadsheet: " + data.error);
-                    document.getElementById('loading-overlay').classList.add('hidden');
-                    return;
-                }
+            } catch(e) {
+                console.log("Ralat menghentikan QR:", e);
+            }
 
-                dbHSP = data.hsp || [];
-                dbAnalisa = data.analisa || {};
-                
-                populateDropdowns();
-                document.getElementById('loading-overlay').classList.add('hidden'); // Sembunyikan loading
-                
-                // Jika data kosong, tampilkan peringatan halus
-                if(dbHSP.length === 0) {
-                    alert("Koneksi sukses, tetapi Sheet 'REKAP_HSP' masih kosong. Silakan isi datanya di Spreadsheet!");
+            // Jeda 0.5 detik agar OS melepas kunci kamera belakang
+            setTimeout(async () => {
+                try {
+                    selfieStream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { facingMode: "user" }, 
+                        audio: false 
+                    });
+                    const videoElement = document.getElementById('selfie-video');
+                    videoElement.srcObject = selfieStream;
+                    videoElement.play();
+                } catch (err) {
+                    console.error("Ralat Kamera Depan:", err);
+                    Swal.fire('Gagal', 'Kamera depan tidak dapat diakses.', 'error');
+                    resetToScanner();
+                }
+            }, 500); 
+        }
+
+        // --- AMBIL FOTO & HANTAR DATA ---
+        async function takeSelfieAndSubmit() {
+            if (isProcessing) return;
+            isProcessing = true;
+            
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+
+            const video = document.getElementById('selfie-video');
+            const canvas = document.getElementById('canvas');
+            
+            // --- KOMPRESI FOTO (Menghindari Error Limit Drive) ---
+            const MAX_WIDTH = 480; 
+            const scaleSize = MAX_WIDTH / video.videoWidth;
+            
+            canvas.width = MAX_WIDTH;
+            canvas.height = video.videoHeight * scaleSize;
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Mirror image sebelum digambar di canvas agar tersimpan dengan orientasi benar
+            ctx.translate(canvas.width, 0); 
+            ctx.scale(-1, 1); 
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Kompresi kualitas gambar (0.4) agar menghemat ruang Google Drive & lolos Limit Apps Script
+            const photoData = canvas.toDataURL('image/jpeg', 0.4);
+            
+            const payload = { apiKey: API_KEY, id: scannedId, photo: photoData };
+
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                document.getElementById('loadingOverlay').classList.add('hidden');
+
+                if (result.status === "success") {
+                    if (selfieStream) { selfieStream.getTracks().forEach(track => track.stop()); }
+                    document.getElementById('success-message-text').textContent = result.message;
+                    showView('success-view');
+                } else {
+                    Swal.fire('Peringatan', result.message, 'warning');
+                    isProcessing = false;
                 }
             } catch (error) {
-                console.error("Gagal menarik data:", error);
-                document.getElementById('loading-overlay').innerHTML = `
-                    <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded shadow-lg max-w-md">
-                        <h3 class="font-bold text-red-800">Koneksi Gagal</h3>
-                        <p class="text-sm text-red-700">${error.message || "Gagal terhubung ke Google Spreadsheet. Pastikan URL sudah benar dan Web App di-set ke 'Anyone/Siapa saja'."}</p>
-                    </div>`;
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                Swal.fire('Koneksi Error', 'Pastikan internet lancar.', 'error');
+                isProcessing = false;
             }
+        }
+
+        // INIT: Mulai jam & Nyalakan scanner secara otomatis saat web dimuat
+        window.onload = () => {
+            updateTime();
+            openScanner();
         };
 
-        function populateDropdowns() {
-            // 1. Isi Kategori Divisi (Otomatis mendeteksi kategori unik dari data Anda)
-            const kategoriSelect = document.getElementById('input-kategori');
-            const uniqueKategori = [...new Set(dbHSP.map(item => item.kat))];
-            
-            kategoriSelect.innerHTML = '<option value="">-- Pilih Kategori --</option>';
-            uniqueKategori.forEach(kat => {
-                if(kat && kat.trim() !== "") {
-                    const opt = document.createElement('option');
-                    opt.value = kat;
-                    opt.text = kat;
-                    kategoriSelect.appendChild(opt);
-                }
-            });
-
-            // 2. Isi Dropdown Analisa (Otomatis mengisi dari semua data HSP)
-            const searchAnalisa = document.getElementById('search-analisa-item');
-            searchAnalisa.innerHTML = '<option value="">-- Pilih Pekerjaan --</option>';
-            dbHSP.forEach(item => {
-                const opt = document.createElement('option');
-                opt.value = item.id;
-                opt.text = item.ur;
-                searchAnalisa.appendChild(opt);
-            });
-        }
-
-        // ==========================================
-        // UI & EVENT LISTENERS
-        // ==========================================
-
-        // UI Logic: Sinkronisasi Header RAB (Bisa diedit -> langsung update format cetak)
-        document.getElementById('proj-name').addEventListener('input', (e) => document.getElementById('disp-proj-name').innerText = `: ${e.target.value || '-'}`);
-        document.getElementById('proj-loc').addEventListener('input', (e) => document.getElementById('disp-proj-loc').innerText = `: ${e.target.value || '-'}`);
-        document.getElementById('proj-date').addEventListener('input', (e) => {
-            const dateStr = e.target.value ? new Date(e.target.value).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year:'numeric'}) : '-';
-            document.getElementById('disp-proj-date').innerText = `: ${dateStr}`;
-        });
-
-        // UI Logic: Filter dropdown HSP berdasarkan Kategori
-        document.getElementById('input-kategori').addEventListener('change', function(e) {
-            const kat = e.target.value;
-            const hspSelect = document.getElementById('input-hsp');
-            hspSelect.innerHTML = '<option value="">-- Pilih Pekerjaan --</option>';
-            
-            if(kat) {
-                hspSelect.disabled = false;
-                const filtered = dbHSP.filter(item => item.kat === kat);
-                filtered.forEach(item => {
-                    const opt = document.createElement('option');
-                    opt.value = item.id;
-                    opt.text = `${item.ur} (${formatRp(item.harga)} / ${item.sat})`;
-                    hspSelect.appendChild(opt);
-                });
-            } else {
-                hspSelect.disabled = true;
-            }
-        });
-
-        // Core Logic: Tambah Item ke RAB
-        function addItemRAB() {
-            const hspId = document.getElementById('input-hsp').value;
-            const vol = parseFloat(document.getElementById('input-vol').value);
-            
-            if(!hspId || !vol || isNaN(vol)) {
-                alert("Mohon pilih Pekerjaan dan masukkan Volume yang valid!");
-                return;
-            }
-
-            const itemDB = dbHSP.find(i => i.id === hspId);
-            
-            // Masukkan ke state array
-            currentRAB.push({
-                id: Date.now().toString(), // unique id untuk row
-                kategori: itemDB.kat,
-                uraian: itemDB.ur,
-                sat: itemDB.sat,
-                vol: vol,
-                hargaSatuan: itemDB.harga,
-                jumlahHarga: vol * itemDB.harga
-            });
-
-            // Reset input
-            document.getElementById('input-vol').value = '';
-            
-            renderRABTable();
-        }
-
-        // Core Logic: Render Tabel RAB dengan Pengelompokan (Kategori)
-        function renderRABTable() {
-            const tbody = document.getElementById('rab-table-body');
-            tbody.innerHTML = '';
-
-            if(currentRAB.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center p-4 text-gray-500 italic">Belum ada item pekerjaan.</td></tr>`;
-                document.getElementById('grand-total').innerText = '0,00';
-                return;
-            }
-
-            // Kelompokkan data berdasarkan Kategori
-            const grouped = currentRAB.reduce((acc, curr) => {
-                if(!acc[curr.kategori]) acc[curr.kategori] = [];
-                acc[curr.kategori].push(curr);
-                return acc;
-            }, {});
-
-            let grandTotal = 0;
-            
-            for(const [kategori, items] of Object.entries(grouped)) {
-                // Baris Header Kategori
-                const trKat = document.createElement('tr');
-                trKat.className = 'bg-gray-50 font-bold';
-                trKat.innerHTML = `
-                    <td class="border border-gray-400 p-2 text-center"></td>
-                    <td colspan="6" class="border border-gray-400 p-2">${kategori}</td>
-                `;
-                tbody.appendChild(trKat);
-
-                let subTotal = 0;
-                
-                // Baris Item Pekerjaan
-                items.forEach((item, index) => {
-                    subTotal += item.jumlahHarga;
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td class="border border-gray-400 p-2 text-center">${index + 1}</td>
-                        <td class="border border-gray-400 p-2">${item.uraian}</td>
-                        <td class="border border-gray-400 p-2 text-center">${item.vol}</td>
-                        <td class="border border-gray-400 p-2 text-center">${item.sat}</td>
-                        <td class="border border-gray-400 p-2 text-right">${formatRp(item.hargaSatuan)}</td>
-                        <td class="border border-gray-400 p-2 text-right">${formatRp(item.jumlahHarga)}</td>
-                        <td class="border border-gray-400 p-2 text-center no-print">
-                            <button onclick="hapusItem('${item.id}')" class="text-red-600 hover:text-red-800" title="Hapus"><i class="fas fa-trash"></i></button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-
-                // Baris Subtotal Kategori
-                const trSub = document.createElement('tr');
-                trSub.className = 'font-semibold italic bg-blue-50/30';
-                trSub.innerHTML = `
-                    <td colspan="5" class="border border-gray-400 p-2 text-right">Subtotal ${kategori}</td>
-                    <td class="border border-gray-400 p-2 text-right">${formatRp(subTotal)}</td>
-                    <td class="border border-gray-400 no-print"></td>
-                `;
-                tbody.appendChild(trSub);
-                
-                grandTotal += subTotal;
-            }
-
-            document.getElementById('grand-total').innerText = formatRp(grandTotal);
-        }
-
-        // Core Logic: Hapus Item
-        window.hapusItem = function(id) {
-            currentRAB = currentRAB.filter(item => item.id !== id);
-            renderRABTable();
-        };
-
-        // Logic Tab Analisa
-        function lihatAnalisa() {
-            const hspId = document.getElementById('search-analisa-item').value;
-            if(!hspId) return;
-
-            const data = dbAnalisa[hspId];
-            if(!data) { 
-                alert("Rincian Analisa untuk item ini belum didukung/tidak ada di database saat ini."); 
-                return; 
-            }
-
-            document.getElementById('analisa-result').classList.remove('hidden');
-            document.getElementById('analisa-judul').innerText = data.uraian;
-            
-            const tbody = document.getElementById('analisa-tbody');
-            tbody.innerHTML = '';
-            
-            data.komponen.forEach(k => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="border border-gray-300 p-2">${k.nama}</td>
-                    <td class="border border-gray-300 p-2 text-center">${k.sat}</td>
-                    <td class="border border-gray-300 p-2 text-center">${k.koef.toFixed(3)}</td>
-                    <td class="border border-gray-300 p-2 text-right">${formatRp(k.harga)}</td>
-                    <td class="border border-gray-300 p-2 text-right">${formatRp(k.koef * k.harga)}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            document.getElementById('analisa-subtotal').innerText = formatRp(data.subtotal);
-            document.getElementById('analisa-profit').innerText = formatRp(data.overhead);
-            document.getElementById('analisa-total').innerText = formatRp(data.hsp_final);
-        }
-
-        // Tabbing System
-        function switchTab(tabId) {
-            document.getElementById('view-rab').classList.add('hidden');
-            document.getElementById('view-analisa').classList.add('hidden');
-            document.getElementById('tab-rab').classList.remove('tab-active', 'text-gray-500', 'hover:text-blue-600');
-            document.getElementById('tab-analisa').classList.remove('tab-active', 'text-gray-500', 'hover:text-blue-600');
-            
-            if(tabId === 'rab') {
-                document.getElementById('view-rab').classList.remove('hidden');
-                document.getElementById('tab-rab').classList.add('tab-active');
-                document.getElementById('tab-analisa').classList.add('text-gray-500', 'hover:text-blue-600');
-            } else {
-                document.getElementById('view-analisa').classList.remove('hidden');
-                document.getElementById('tab-analisa').classList.add('tab-active');
-                document.getElementById('tab-rab').classList.add('text-gray-500', 'hover:text-blue-600');
-            }
-        }
     </script>
 </body>
 </html>
