@@ -217,7 +217,6 @@
     </div>
 
     <script>
-        // API URL dan KEY Anda
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw2N0zyGqj_cnis1PT1yRRC8-5fz623Op6v5hoBwtxXgBTnpdOMClbiY6LhZeX1AxpofA/exec';
         const API_KEY = "AIzaSyCXDTjmzqVxRaS2FAfp_2jpakA7S1330Js";
         
@@ -277,7 +276,7 @@
             openScanner(); // Nyalakan ulang kamera scan
         }
 
-        // --- BUKA KAMERA BELAKANG UNTUK SCAN QR ---
+        // --- LANGKAH 1: BUKA KAMERA BELAKANG UNTUK SCAN QR ---
         async function openScanner() {
             showView('scanner-view');
             document.getElementById('camera-loading').classList.remove('hidden');
@@ -296,12 +295,13 @@
                 document.getElementById('camera-loading').classList.add('hidden');
             } catch (err) {
                 document.getElementById('camera-loading').classList.add('hidden');
-                // Tampilkan pesan error jika di-test di Canvas atau Browser yang memblokir kamera
                 Swal.fire({
                     icon: 'warning',
                     title: 'Izin Kamera Dibutuhkan',
                     text: 'Sistem membutuhkan akses kamera untuk scan QR. Pastikan Anda telah memberikan izin pada browser Anda.',
                     confirmButtonText: 'Coba Lagi'
+                }).then(() => {
+                    // Bisa ditambahkan fungsi reload jika diperlukan
                 });
             }
         }
@@ -330,7 +330,7 @@
             startSelfieCamera();
         }
 
-        // --- BUKA KAMERA DEPAN (SELFIE) ---
+        // --- LANGKAH 2: BUKA KAMERA DEPAN (SELFIE) ---
         async function startSelfieCamera() {
             showView('selfie-view');
 
@@ -361,7 +361,7 @@
             }, 500); 
         }
 
-        // --- AMBIL FOTO & HANTAR DATA ---
+        // --- LANGKAH 3: AMBIL FOTO & HANTAR DATA ---
         async function takeSelfieAndSubmit() {
             if (isProcessing) return;
             isProcessing = true;
@@ -371,21 +371,20 @@
             const video = document.getElementById('selfie-video');
             const canvas = document.getElementById('canvas');
             
-            // --- KOMPRESI FOTO (Menghindari Error Limit Drive) ---
-            const MAX_WIDTH = 480; 
+            // --- FITUR KOMPRESI EKSTRIM (BIAR SATSET ~1 DETIK) ---
+            const MAX_WIDTH = 480; // Diperkecil jadi 480px saja (sangat ringan)
             const scaleSize = MAX_WIDTH / video.videoWidth;
-            
             canvas.width = MAX_WIDTH;
             canvas.height = video.videoHeight * scaleSize;
             
             const ctx = canvas.getContext('2d');
             
-            // Mirror image sebelum digambar di canvas agar tersimpan dengan orientasi benar
+            // Mirror image sebelum digambar di canvas
             ctx.translate(canvas.width, 0); 
             ctx.scale(-1, 1); 
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             
-            // Kompresi kualitas gambar (0.4) agar menghemat ruang Google Drive & lolos Limit Apps Script
+            // Kompres kualitas menjadi 0.4 (ukuran file akan turun drastis ke < 40KB)
             const photoData = canvas.toDataURL('image/jpeg', 0.4);
             
             const payload = { apiKey: API_KEY, id: scannedId, photo: photoData };
